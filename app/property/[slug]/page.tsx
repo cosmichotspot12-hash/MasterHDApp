@@ -4,6 +4,31 @@ import { notFound } from 'next/navigation'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ''
 
+import type { Metadata } from 'next'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const listing = await getListing(slug)
+
+  if (!listing) {
+    return { title: 'Property Not Found | MasterHD' }
+  }
+
+  return {
+    title: listing.title + ' in ' + listing.locality + ' | MasterHD',
+    description: 'View ' + listing.title + ' in ' + listing.locality + ', Hubli-Dharwad. Price: ₹' + listing.price.toLocaleString() + (listing.listing_type === 'rent' ? '/month' : '') + '. Contact us for a visit.',
+    openGraph: {
+      title: listing.title + ' | MasterHD',
+      description: listing.locality + ', Hubli-Dharwad — ₹' + listing.price.toLocaleString(),
+      images: listing.photos && listing.photos.length > 0 ? [listing.photos[0]] : [],
+    },
+  }
+}
+
 async function getListing(slug: string) {
   try {
     const res = await fetch(APP_URL + '/api/listings/' + slug, {

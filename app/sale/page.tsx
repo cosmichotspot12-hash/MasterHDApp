@@ -18,6 +18,14 @@ type Listing = {
   negotiable: boolean
 }
 
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Properties for Sale in Hubli-Dharwad | MasterHD',
+  description: 'Buy verified properties in Hubli-Dharwad. Apartments, independent houses, plots and commercial spaces for sale with video tours.',
+  keywords: 'property for sale in hubli, house for sale in dharwad, plots in hubli, apartment sale hubli dharwad',
+}
+
 async function getListings(bhk: string, locality: string, category: string) {
   try {
     let url = APP_URL + '/api/listings?type=sale'

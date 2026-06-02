@@ -2,6 +2,22 @@ import Link from 'next/link'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'MasterHD — Properties for Rent and Sale in Hubli-Dharwad',
+  description: 'Find verified properties for rent and sale in Hubli-Dharwad. Browse apartments, independent houses, plots with video tours. Contact us on WhatsApp.',
+  keywords: 'properties in hubli, flats for rent in hubli, house for sale in dharwad, hubli dharwad real estate',
+  openGraph: {
+    title: 'MasterHD — Properties in Hubli-Dharwad',
+    description: 'Find verified properties for rent and sale in Hubli-Dharwad with video tours.',
+    url: 'https://www.masterhdapp.in',
+    siteName: 'MasterHD',
+    locale: 'en_IN',
+    type: 'website',
+  },
+}
+
 async function getStats() {
   try {
     const [listingsRes, requirementsRes] = await Promise.all([

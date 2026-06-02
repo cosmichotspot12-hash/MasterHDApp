@@ -18,6 +18,14 @@ type Listing = {
   negotiable: boolean
 }
 
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Properties for Rent in Hubli-Dharwad | MasterHD',
+  description: 'Browse verified rental properties in Hubli-Dharwad. Apartments, independent houses, 1BHK, 2BHK, 3BHK for rent with video tours and direct owner contact.',
+  keywords: 'flats for rent in hubli, house for rent in dharwad, 2bhk rent hubli, apartment rent hubli dharwad',
+}
+
 async function getListings(bhk: string, locality: string, category: string) {
   try {
     let url = APP_URL + '/api/listings?type=rent'
