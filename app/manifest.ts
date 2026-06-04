@@ -2,12 +2,12 @@ import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'MasterHD — Properties in Hubli-Dharwad',
-    short_name: 'MasterHD',
+    name: 'Hubli Dharwad App - Properties in Hubli-Dharwad',
+    short_name: 'Hubli Dharwad App',
     description: 'Find properties for rent and sale in Hubli-Dharwad',
     start_url: '/',
     display: 'standalone',
-    background_color: '#ffffff',
+    background_color: '#fff4e6',
     theme_color: '#E8501A',
     orientation: 'portrait',
     icons: [

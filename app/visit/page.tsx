@@ -43,8 +43,8 @@ function VisitForm() {
       const result = await res.json()
       if (!res.ok) throw new Error(result.error || 'Failed to submit')
       setSuccess(true)
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
     }
     setLoading(false)
   }
@@ -53,7 +53,7 @@ function VisitForm() {
     return (
       <div className="text-center py-12">
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-green-500 text-2xl">✓</span>
+          <span className="text-green-500 text-sm font-black">OK</span>
         </div>
         <h2 className="text-xl font-bold text-gray-800 mb-2">Visit Request Submitted!</h2>
         <p className="text-gray-500 text-sm mb-6">
@@ -161,15 +161,9 @@ function VisitForm() {
 
 export default function VisitPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-orange-500">MasterHD</Link>
-        </div>
-      </header>
-
-      <div className="max-w-lg mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg p-6 shadow-sm">
+    <div className="page-shell">
+      <div className="mx-auto max-w-2xl px-3 sm:px-5 py-10">
+        <div className="content-card p-6 sm:p-8">
           <h1 className="text-xl font-bold text-gray-800 mb-1">Request a Visit</h1>
           <p className="text-gray-500 text-sm mb-6">
             Fill in your details and we will coordinate the visit for you.

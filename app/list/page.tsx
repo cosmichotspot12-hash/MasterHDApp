@@ -17,7 +17,7 @@ export default function ListPage() {
   })
 
   function set(field: string, value: string) {
-    setForm(prev => ({ ...prev, [field]: value }))
+    setForm((prev) => ({ ...prev, [field]: value }))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -32,13 +32,13 @@ export default function ListPage() {
         body: JSON.stringify({
           ...form,
           expected_price: form.expected_price ? parseInt(form.expected_price) : null,
-        })
+        }),
       })
       const result = await res.json()
       if (!res.ok) throw new Error(result.error || 'Failed to submit')
       setSuccess(true)
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
     }
     setLoading(false)
   }
@@ -48,11 +48,11 @@ export default function ListPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="bg-white rounded-lg p-8 shadow-sm text-center max-w-md">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-green-500 text-2xl">✓</span>
+            <span className="text-green-500 text-sm font-black">OK</span>
           </div>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Submitted Successfully!</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Property Details Submitted</h2>
           <p className="text-gray-500 text-sm mb-6">
-            Thank you! We will contact you within 24 hours to schedule a visit and get your property listed.
+            Thank you. We will check matching demand and contact you within 24 hours.
           </p>
           <Link href="/" className="bg-orange-500 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-orange-600">
             Back to Home
@@ -63,27 +63,16 @@ export default function ListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-orange-500">MasterHD</Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/rent" className="text-gray-600 hover:text-orange-500">Rent</Link>
-            <Link href="/sale" className="text-gray-600 hover:text-orange-500">Sale</Link>
-            <Link href="/find" className="text-gray-600 hover:text-orange-500">Find Property</Link>
-          </nav>
-        </div>
-      </header>
-
-      <div className="max-w-lg mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg p-6 shadow-sm">
-          <h1 className="text-xl font-bold text-gray-800 mb-1">List Your Property</h1>
+    <div className="page-shell">
+      <div className="mx-auto max-w-2xl px-3 sm:px-5 py-10">
+        <div className="content-card p-6 sm:p-8">
+          <h1 className="text-xl font-bold text-gray-800 mb-1">Check Demand For Your Property</h1>
           <p className="text-gray-500 text-sm mb-2">
-            Fill in basic details and we will contact you within 24 hours.
+            Share basic details. If we have matching tenants or buyers, our team will contact you.
           </p>
           <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-6">
             <p className="text-xs text-orange-700">
-              We visit your property, shoot a professional video, and promote it to our 6,300+ followers on Instagram.
+              We have 350+ real property requirements, 50+ closed deals, and a 6,500+ local Instagram community.
             </p>
           </div>
 
@@ -94,7 +83,7 @@ export default function ListPage() {
               </label>
               <input
                 value={form.owner_name}
-                onChange={e => set('owner_name', e.target.value)}
+                onChange={(e) => set('owner_name', e.target.value)}
                 required
                 placeholder="Full name"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -107,7 +96,7 @@ export default function ListPage() {
               </label>
               <input
                 value={form.owner_phone}
-                onChange={e => set('owner_phone', e.target.value)}
+                onChange={(e) => set('owner_phone', e.target.value)}
                 required
                 placeholder="10-digit mobile number"
                 maxLength={10}
@@ -121,7 +110,7 @@ export default function ListPage() {
               </label>
               <select
                 value={form.listing_type}
-                onChange={e => set('listing_type', e.target.value)}
+                onChange={(e) => set('listing_type', e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
                 <option value="rent">For Rent</option>
@@ -135,7 +124,7 @@ export default function ListPage() {
               </label>
               <input
                 value={form.locality}
-                onChange={e => set('locality', e.target.value)}
+                onChange={(e) => set('locality', e.target.value)}
                 required
                 placeholder="e.g. Vidyanagar, Gokul Road"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -144,27 +133,25 @@ export default function ListPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Expected Price (₹)
+                Expected Price (Rs.)
               </label>
               <input
                 type="number"
                 value={form.expected_price}
-                onChange={e => set('expected_price', e.target.value)}
+                onChange={(e) => set('expected_price', e.target.value)}
                 placeholder="Monthly rent or sale price"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
-            {error && (
-              <p className="text-red-500 text-sm">{error}</p>
-            )}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
 
             <button
               type="submit"
               disabled={loading}
               className="w-full bg-orange-500 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-orange-600 disabled:opacity-50"
             >
-              {loading ? 'Submitting...' : 'Submit Property'}
+              {loading ? 'Submitting...' : 'Check Demand'}
             </button>
           </form>
         </div>

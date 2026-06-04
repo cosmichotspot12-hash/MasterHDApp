@@ -47,8 +47,8 @@ export default function FindPage() {
       const result = await res.json()
       if (!res.ok) throw new Error(result.error || 'Failed to submit')
       setSuccess(true)
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
     }
     setLoading(false)
   }
@@ -58,7 +58,7 @@ export default function FindPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="bg-white rounded-lg p-8 shadow-sm text-center max-w-md">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-green-500 text-2xl">✓</span>
+            <span className="text-green-500 text-sm font-black">OK</span>
           </div>
           <h2 className="text-xl font-bold text-gray-800 mb-2">Requirement Submitted!</h2>
           <p className="text-gray-500 text-sm mb-6">
@@ -73,19 +73,9 @@ export default function FindPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-orange-500">MasterHD</Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/rent" className="text-gray-600 hover:text-orange-500">Rent</Link>
-            <Link href="/sale" className="text-gray-600 hover:text-orange-500">Sale</Link>
-          </nav>
-        </div>
-      </header>
-
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg p-6 shadow-sm">
+    <div className="page-shell">
+      <div className="mx-auto max-w-3xl px-3 sm:px-5 py-10">
+        <div className="content-card p-6 sm:p-8">
           <h1 className="text-xl font-bold text-gray-800 mb-1">Find My Property</h1>
           <p className="text-gray-500 text-sm mb-6">
             Tell us what you are looking for. We will match you with the right property and contact you directly.
@@ -175,7 +165,7 @@ export default function FindPage() {
             {/* Budget */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Min Budget (₹)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Min Budget (Rs.)</label>
                 <input
                   type="number"
                   value={form.budget_min}
@@ -186,7 +176,7 @@ export default function FindPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Max Budget (₹) <span className="text-red-500">*</span>
+                  Max Budget (Rs.) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
