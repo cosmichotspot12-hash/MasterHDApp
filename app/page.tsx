@@ -103,13 +103,115 @@ export default async function HomePage() {
   return (
     <>
       <PropertyCardStyles />
+      <style>{`
+        @media (max-width: 640px) {
+          .hd-hero-section {
+            padding: 56px 14px 18px;
+          }
+
+          .hd-hero-shell {
+            overflow: visible !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+          }
+
+          .hd-hero-map,
+          .hd-hero-mobile-wash {
+            display: none !important;
+          }
+
+          .hd-hero-content {
+            padding: 0 !important;
+            text-align: center;
+          }
+
+          .hd-hero-layout {
+            display: block !important;
+          }
+
+          .hd-hero-card {
+            border-radius: 0 !important;
+            background: transparent !important;
+            padding: 0 !important;
+            backdrop-filter: none !important;
+          }
+
+          .hd-hero-kicker {
+            margin-inline: auto;
+            border-color: #D8C9BA !important;
+            background: rgba(255,255,255,0.62) !important;
+            color: #9F4A22 !important;
+          }
+
+          .hd-hero-title {
+            margin-top: 28px !important;
+            color: #070A18 !important;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 39px !important;
+            font-weight: 700 !important;
+            line-height: 1.16 !important;
+            text-align: center;
+          }
+
+          .hd-hero-title span {
+            color: #1D9E75 !important;
+          }
+
+          .hd-hero-copy {
+            margin-top: 22px !important;
+            color: #4F5F78 !important;
+            font-size: 20px !important;
+            font-weight: 500 !important;
+            line-height: 1.62 !important;
+          }
+
+          .hd-hero-stat-wrap {
+            position: static !important;
+            margin: 30px auto 0;
+            justify-content: center;
+          }
+
+          .hd-hero-stat {
+            width: 100%;
+            max-width: 438px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            border-color: #D8C9BA !important;
+            border-radius: 14px !important;
+            padding: 18px 20px !important;
+            text-align: left !important;
+            box-shadow: 0 6px 18px rgba(58,46,40,0.06);
+          }
+
+          .hd-hero-stat p:first-child {
+            font-size: 34px !important;
+          }
+
+          .hd-hero-actions {
+            margin-top: 28px !important;
+          }
+
+          .hd-hero-owner {
+            margin-top: 14px !important;
+          }
+
+          .hd-hero-chips {
+            justify-content: center;
+            margin-top: 26px !important;
+          }
+        }
+      `}</style>
       <main className="min-h-screen bg-[#FFF4E6] text-slate-950">
 
         {/* ── HERO ──────────────────────────────────────────────────── */}
-        <section className="px-2 pt-3 pb-3 sm:px-5 sm:pt-8 sm:pb-5" aria-label="Hero">
+        <section className="hd-hero-section px-2 pt-3 pb-3 sm:px-5 sm:pt-8 sm:pb-5" aria-label="Hero">
           <div className="mx-auto w-full max-w-[1520px]">
             <div
-              className="relative min-h-[620px] overflow-hidden rounded-[16px] border border-[#E2D5C8] sm:min-h-0 sm:rounded-[20px]"
+              className="hd-hero-shell relative overflow-hidden rounded-[16px] border border-[#E2D5C8] sm:min-h-0 sm:rounded-[20px]"
               style={{
                 background: 'linear-gradient(135deg, #ffffff 0%, #FFF8F0 55%, #FFF0DC 100%)',
                 boxShadow: '0 16px 48px rgba(58,46,40,0.08)',
@@ -127,7 +229,7 @@ export default async function HomePage() {
               {/* map illustration */}
               <div
                 aria-hidden
-                className="pointer-events-none absolute -bottom-16 -right-40 top-16 block w-[145%] opacity-45 sm:bottom-0 sm:right-0 sm:top-0 sm:w-[58%] sm:opacity-90 lg:w-[52%]"
+                className="hd-hero-map pointer-events-none absolute -bottom-16 -right-40 top-16 block w-[145%] opacity-45 sm:bottom-0 sm:right-0 sm:top-0 sm:w-[58%] sm:opacity-90 lg:w-[52%]"
               >
                 <Image
                   src="/hero-map.svg"
@@ -146,31 +248,31 @@ export default async function HomePage() {
               </div>
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-0 block sm:hidden"
+                className="hd-hero-mobile-wash pointer-events-none absolute inset-0 block sm:hidden"
                 style={{
                   background:
                     'linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.9) 56%, rgba(255,244,230,0.38) 100%)',
                 }}
               />
 
-              <div className="relative z-10 px-3 py-4 pb-28 sm:px-10 sm:py-11">
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-                  <div className="w-full rounded-[14px] bg-white/78 p-4 backdrop-blur-[2px] sm:max-w-[540px] sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
-                    <p className="inline-flex items-center gap-1.5 rounded-full border border-[#C8B89A] bg-[#FFF4E6] px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#6B4A28]">
+              <div className="hd-hero-content relative z-10 px-3 py-4 sm:px-10 sm:py-11">
+                <div className="hd-hero-layout flex flex-col gap-5 sm:flex-row sm:items-start">
+                  <div className="hd-hero-card w-full rounded-[14px] bg-white/78 p-4 backdrop-blur-[2px] sm:max-w-[540px] sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
+                    <p className="hd-hero-kicker inline-flex items-center gap-1.5 rounded-full border border-[#C8B89A] bg-[#FFF4E6] px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#6B4A28]">
                       <svg width="9" height="11" viewBox="0 0 10 12" fill="none" aria-hidden>
                         <path d="M5 0C2.24 0 0 2.24 0 5c0 3.75 5 7 5 7s5-3.25 5-7c0-2.76-2.24-5-5-5zm0 6.75A1.75 1.75 0 1 1 5 3.25a1.75 1.75 0 0 1 0 3.5z" fill="currentColor" />
                       </svg>
                       Hubballi · Dharwad
                     </p>
-                    <h1 className="mt-3 text-[28px] font-black leading-[1.04] tracking-tight text-slate-950 min-[420px]:text-[32px] sm:text-[50px]">
+                    <h1 className="hd-hero-title mt-3 text-[28px] font-black leading-[1.04] tracking-tight text-slate-950 min-[420px]:text-[32px] sm:text-[50px]">
                       Find Your Next<br />
                       Property in<br />
                       <span className="text-[#1D9E75]">Hubballi-Dharwad.</span>
                     </h1>
-                    <p className="mt-3 text-[14px] font-medium leading-6 text-slate-500 sm:text-[16px] sm:leading-relaxed">
+                    <p className="hd-hero-copy mt-3 text-[14px] font-medium leading-6 text-slate-500 sm:text-[16px] sm:leading-relaxed">
                       Personally verified listings — browse homes, post your requirement, or list your property with direct local support.
                     </p>
-                    <div className="mt-5 grid gap-3 min-[420px]:grid-cols-2 sm:flex sm:flex-wrap sm:items-center">
+                    <div className="hd-hero-actions mt-5 grid gap-3 min-[420px]:grid-cols-2 sm:flex sm:flex-wrap sm:items-center">
                       <Link
                         href="/properties"
                         className="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#1D9E75] px-5 text-[14px] font-semibold text-white no-underline shadow-[0_8px_20px_rgba(29,158,117,0.25)] transition hover:bg-[#168662] active:scale-[0.98]"
@@ -184,21 +286,21 @@ export default async function HomePage() {
                         Post my requirement
                       </Link>
                     </div>
-                    <p className="mt-2.5 text-[13px] text-slate-400">
+                    <p className="hd-hero-owner mt-2.5 text-[13px] text-slate-400">
                       Own a property?{' '}
                       <Link href="/list" className="font-semibold text-slate-600 no-underline hover:text-slate-900 hover:underline">
                         List it here →
                       </Link>
                     </p>
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="hd-hero-chips mt-4 flex flex-wrap gap-2">
                       <span className="rounded-full bg-[#E1F5EE] px-3 py-1 text-[12px] font-semibold text-[#085041]">✓ Personally verified</span>
                       <span className="rounded-full bg-[#EEF2FF] px-3 py-1 text-[12px] font-semibold text-[#3730A3]">✓ Visit requests</span>
                       <span className="rounded-full bg-[#FAEEDA] px-3 py-1 text-[12px] font-semibold text-[#633806]">✓ Local support</span>
                     </div>
                   </div>
 
-                  <div className="absolute bottom-4 right-4 flex shrink-0 flex-row gap-3 sm:relative sm:bottom-auto sm:right-auto sm:ml-auto sm:flex-col sm:items-end sm:pt-2">
-                    <div className="rounded-[14px] border border-[#E2D5C8] bg-white/90 px-4 py-3 text-right backdrop-blur-sm sm:px-5 sm:py-4">
+                  <div className="hd-hero-stat-wrap absolute right-4 top-4 flex shrink-0 flex-row gap-3 sm:relative sm:right-auto sm:top-auto sm:ml-auto sm:flex-col sm:items-end sm:pt-2">
+                    <div className="hd-hero-stat rounded-[14px] border border-[#E2D5C8] bg-white/90 px-3 py-2.5 text-right backdrop-blur-sm sm:px-5 sm:py-4">
                       <p className="text-[30px] font-black leading-none text-[#4F46E5] sm:text-[36px]">300+</p>
                       <p className="mt-1 text-[12px] font-medium text-slate-500 sm:text-[13px]">Open requirements</p>
                     </div>
@@ -264,7 +366,9 @@ export default async function HomePage() {
               </div>
 
               <div className="grid gap-3 md:grid-cols-3">
-                <div className="rounded-[14px] border border-[#E7DED5] bg-white p-5 shadow-[0_4px_14px_rgba(58,46,40,0.04)] transition hover:bg-[#FAFAF9]">
+                <div className="overflow-hidden rounded-[14px] border border-[#D8C9BA] bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(58,46,40,0.06)] transition hover:border-[#C9B7A5] hover:bg-[#FAFAF9]">
+                  <div className="h-1 bg-[#1D9E75]" />
+                  <div className="p-5">
                   <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#E1F5EE] text-[12px] font-black text-[#085041]">
                     01
                   </div>
@@ -274,9 +378,12 @@ export default async function HomePage() {
                   <p className="mt-2 text-[13px] leading-6 text-slate-500">
                     See active rent and sale properties with clear photos, locality, price, and visit options.
                   </p>
+                  </div>
                 </div>
 
-                <div className="rounded-[14px] border border-[#E7DED5] bg-white p-5 shadow-[0_4px_14px_rgba(58,46,40,0.04)] transition hover:bg-[#FAFAF9]">
+                <div className="overflow-hidden rounded-[14px] border border-[#D8C9BA] bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(58,46,40,0.06)] transition hover:border-[#C9B7A5] hover:bg-[#FAFAF9]">
+                  <div className="h-1 bg-[#4F46E5]" />
+                  <div className="p-5">
                   <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#EEF2FF] text-[12px] font-black text-[#3730A3]">
                     02
                   </div>
@@ -286,9 +393,12 @@ export default async function HomePage() {
                   <p className="mt-2 text-[13px] leading-6 text-slate-500">
                     Use video tours and listing details to shortlist only the properties that genuinely fit.
                   </p>
+                  </div>
                 </div>
 
-                <div className="rounded-[14px] border border-[#E7DED5] bg-white p-5 shadow-[0_4px_14px_rgba(58,46,40,0.04)] transition hover:bg-[#FAFAF9]">
+                <div className="overflow-hidden rounded-[14px] border border-[#D8C9BA] bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(58,46,40,0.06)] transition hover:border-[#C9B7A5] hover:bg-[#FAFAF9]">
+                  <div className="h-1 bg-[#D08A2D]" />
+                  <div className="p-5">
                   <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#FAEEDA] text-[12px] font-black text-[#633806]">
                     03
                   </div>
@@ -298,6 +408,7 @@ export default async function HomePage() {
                   <p className="mt-2 text-[13px] leading-6 text-slate-500">
                     Submit a visit request once. We organise the follow-up so nothing gets lost in chat.
                   </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -450,15 +561,15 @@ export default async function HomePage() {
             </div>
 
             {/* Commitment grid */}
-            <div className="mb-2 overflow-hidden rounded-[18px] border border-[#E7DED5]">
+            <div className="mb-2 overflow-hidden rounded-[18px] border border-[#D8C9BA] bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(58,46,40,0.06)]">
               <div className="grid grid-cols-2 md:grid-cols-4">
                 {OWNER_STEPS.map(({ actor, actorColor, num, unit, numColor, day, title, desc }, i) => (
                   <div
                     key={i}
                     className="cursor-default bg-white px-5 py-6 transition-colors hover:bg-[#FAFAF9]"
                     style={{
-                      borderLeft: i % 2 !== 0 ? '0.5px solid #E7DED5' : 'none',
-                      borderTop: i >= 2 ? '0.5px solid #E7DED5' : 'none',
+                      borderLeft: i % 2 !== 0 ? '1px solid #D8C9BA' : 'none',
+                      borderTop: i >= 2 ? '1px solid #D8C9BA' : 'none',
                     }}
                   >
                     <p
@@ -492,8 +603,8 @@ export default async function HomePage() {
 
             {/* Payoff band */}
             <div
-              className="overflow-hidden rounded-[18px] border border-[#E7DED5] bg-white px-7 py-7 sm:px-9"
-              style={{ boxShadow: '0 2px 12px rgba(58,46,40,0.04)' }}
+              className="overflow-hidden rounded-[18px] border border-[#D8C9BA] bg-white px-7 py-7 sm:px-9"
+              style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 18px rgba(58,46,40,0.06)' }}
             >
               <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
                 <div className="max-w-md">
