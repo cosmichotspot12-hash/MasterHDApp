@@ -1,99 +1,47 @@
 import Link from 'next/link'
+import { ListingsInventory, type AdminListing, type VisitRequest } from '@/components/admin-operations'
 import { adminApiHeaders } from '@/lib/admin-api'
-import DeleteButton from './DeleteButton'
 
-type AdminListing = {
-  id: string
-  title: string
-  listing_type: string
-  locality: string
-  price: number
-  status: string
-}
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-async function getListings() {
+async function getListingsData() {
   try {
     const headers = await adminApiHeaders()
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/listings`, {
-      cache: 'no-store',
-      headers,
-    })
-    const { data } = await res.json()
-    return data || []
+    const [listingsRes, visitsRes] = await Promise.all([
+      fetch(APP_URL + '/api/admin/listings', { cache: 'no-store', headers }),
+      fetch(APP_URL + '/api/admin/visit-req', { cache: 'no-store', headers }),
+    ])
+    const [listingsJson, visitsJson] = await Promise.all([listingsRes.json(), visitsRes.json()])
+    return {
+      listings: (listingsJson.data || []) as AdminListing[],
+      visits: (visitsJson.data || []) as VisitRequest[],
+    }
   } catch {
-    return []
+    return { listings: [] as AdminListing[], visits: [] as VisitRequest[] }
   }
 }
 
 export default async function ListingsPage() {
-  const listings: AdminListing[] = await getListings()
+  const { listings, visits } = await getListingsData()
+  const activeCount = listings.filter((listing) => listing.status === 'active').length
+  const draftCount = listings.filter((listing) => listing.status === 'draft').length
 
   return (
     <div>
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Listings</h1>
-          <p className="text-gray-500 text-sm mt-1">Manage all property listings</p>
+          <h1 className="text-2xl font-black text-slate-950">Properties</h1>
+          <p className="mt-1 text-sm text-slate-500">Manage property inventory with the same context customers see.</p>
         </div>
-        <Link
-          href="/admin/listings/new"
-          className="inline-flex w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600 sm:w-auto"
-        >
-          + Add New Listing
-        </Link>
-      </div>
-
-      {!listings || listings.length === 0 ? (
-        <div className="bg-white rounded-lg p-12 text-center">
-          <p className="text-gray-500">No listings yet. Add your first listing.</p>
-          <Link href="/admin/listings/new" className="mt-4 inline-block bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600">
-            + Add New Listing
+        <div className="flex flex-wrap gap-2">
+          <span className="rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs font-bold text-green-700">{activeCount} active</span>
+          <span className="rounded-full border border-yellow-200 bg-yellow-50 px-3 py-1 text-xs font-bold text-yellow-700">{draftCount} draft</span>
+          <Link href="/admin/listings/new" className="inline-flex min-h-8 items-center justify-center rounded-md bg-slate-900 px-3 text-xs font-bold text-white hover:bg-slate-700">
+            Add listing
           </Link>
         </div>
-      ) : (
-        <div className="admin-table-wrap">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="text-left px-4 py-3 text-gray-600 font-medium">Title</th>
-                <th className="text-left px-4 py-3 text-gray-600 font-medium">Type</th>
-                <th className="text-left px-4 py-3 text-gray-600 font-medium">Locality</th>
-                <th className="text-left px-4 py-3 text-gray-600 font-medium">Price</th>
-                <th className="text-left px-4 py-3 text-gray-600 font-medium">Status</th>
-                <th className="text-left px-4 py-3 text-gray-600 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {listings.map((listing) => (
-                <tr key={listing.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-800">{listing.title}</td>
-                  <td className="px-4 py-3 text-gray-600 capitalize">{listing.listing_type}</td>
-                  <td className="px-4 py-3 text-gray-600">{listing.locality}</td>
-                  <td className="px-4 py-3 text-gray-600">₹{listing.price.toLocaleString()}</td>
-                  <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      listing.status === 'active' ? 'bg-green-100 text-green-700' :
-                      listing.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
-                      listing.status === 'rented_sold' ? 'bg-blue-100 text-blue-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {listing.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <Link href={`/admin/listings/${listing.id}/edit`} className="text-orange-500 hover:text-orange-600 font-medium">
-                        Edit
-                      </Link>
-                      <DeleteButton id={listing.id} />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      </div>
+      <ListingsInventory listings={listings} visits={visits} />
     </div>
   )
 }

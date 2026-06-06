@@ -1,0 +1,835 @@
+'use client'
+
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
+import StatusUpdater from '@/app/admin/owner-submissions/StatusUpdater'
+import DeleteButton from '@/app/admin/listings/DeleteButton'
+
+export type AdminListing = {
+  id: string
+  title: string
+  slug?: string | null
+  listing_type: string
+  property_category?: string | null
+  locality: string
+  price: number
+  status: string
+  description?: string | null
+  youtube_url?: string | null
+  date_listed?: string | null
+  created_at?: string | null
+  bhk_count?: string | null
+  furnishing?: string | null
+  photos?: string[] | null
+  owner_name?: string | null
+  owner_phone?: string | null
+}
+
+export type VisitRequest = {
+  id: string
+  listing_id: string
+  property_title: string
+  finder_name: string
+  finder_phone: string
+  preferred_day: string
+  preferred_time: string
+  status: string
+  created_at: string
+}
+
+export type OwnerSubmission = {
+  id: string
+  status: string
+  owner_name: string
+  owner_phone: string
+  listing_type: string
+  locality: string
+  expected_price: number | null
+  created_at: string
+}
+
+export type Requirement = {
+  id: string
+  finder_name: string
+  finder_phone: string
+  listing_type: string
+  property_category: string
+  bhk_count: string
+  locality_preference: string
+  budget_min: number | null
+  budget_max: number
+  furnishing_preference: string
+  timeline: string
+  tenant_type: string
+  food_preference: string
+  facing_preference: string
+  special_requirements: string | null
+  status: string
+  created_at: string
+}
+
+const visitStatuses = ['all', 'new', 'contacted', 'visit_scheduled', 'visit_done', 'converted', 'dropped']
+const ownerStatuses = ['all', 'new', 'contacted', 'visit_scheduled', 'listed', 'rejected']
+const requirementStatuses = ['all', 'new', 'contacted', 'matched', 'fulfilled', 'no_match']
+
+function formatDate(value?: string | null) {
+  if (!value) return 'Not set'
+  return new Date(value).toLocaleDateString('en-IN')
+}
+
+function formatPrice(value?: number | null) {
+  if (!value) return 'Not set'
+  if (value >= 10000000) return 'Rs ' + trimDecimal(value / 10000000) + ' Cr'
+  if (value >= 100000) return 'Rs ' + trimDecimal(value / 100000) + ' Lakh'
+  return 'Rs ' + value.toLocaleString('en-IN')
+}
+
+function trimDecimal(value: number) {
+  return value.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')
+}
+
+function formatLabel(value?: string | null) {
+  if (!value) return 'Not set'
+  return value.replace(/_/g, ' ')
+}
+
+function statusClass(status: string) {
+  const colors: Record<string, string> = {
+    new: 'bg-red-100 text-red-700 border-red-200',
+    active: 'bg-green-100 text-green-700 border-green-200',
+    draft: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    contacted: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    visit_scheduled: 'bg-blue-100 text-blue-700 border-blue-200',
+    visit_done: 'bg-purple-100 text-purple-700 border-purple-200',
+    converted: 'bg-green-100 text-green-700 border-green-200',
+    listed: 'bg-green-100 text-green-700 border-green-200',
+    fulfilled: 'bg-green-100 text-green-700 border-green-200',
+    matched: 'bg-blue-100 text-blue-700 border-blue-200',
+    rented_sold: 'bg-blue-100 text-blue-700 border-blue-200',
+    dropped: 'bg-gray-100 text-gray-700 border-gray-200',
+    rejected: 'bg-gray-100 text-gray-700 border-gray-200',
+    no_match: 'bg-gray-100 text-gray-700 border-gray-200',
+    inactive: 'bg-gray-100 text-gray-700 border-gray-200',
+  }
+  return colors[status] || 'bg-gray-100 text-gray-700 border-gray-200'
+}
+
+function waLink(number: string, message: string) {
+  return 'https://wa.me/' + number + '?text=' + encodeURIComponent(message)
+}
+
+function ActionLink({ href, children, tone = 'neutral' }: { href: string; children: React.ReactNode; tone?: 'neutral' | 'green' | 'blue' }) {
+  const toneClass = tone === 'green'
+    ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
+    : tone === 'blue'
+      ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
+      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+
+  return (
+    <a href={href} target={href.startsWith('http') ? '_blank' : undefined} rel={href.startsWith('http') ? 'noreferrer' : undefined} className={`inline-flex min-h-9 items-center justify-center rounded-md border px-3 text-xs font-semibold ${toneClass}`}>
+      {children}
+    </a>
+  )
+}
+
+function FilterBar({
+  search,
+  onSearch,
+  status,
+  onStatus,
+  statuses,
+  type,
+  onType,
+  placeholder,
+}: {
+  search: string
+  onSearch: (value: string) => void
+  status: string
+  onStatus: (value: string) => void
+  statuses: string[]
+  type?: string
+  onType?: (value: string) => void
+  placeholder: string
+}) {
+  return (
+    <div className="mb-5 grid gap-3 rounded-md border border-slate-200 bg-white p-3 md:grid-cols-[1fr_auto_auto]">
+      <input value={search} onChange={(event) => onSearch(event.target.value)} placeholder={placeholder} className="w-full px-3 py-2 text-sm" />
+      <select value={status} onChange={(event) => onStatus(event.target.value)} className="px-3 py-2 text-sm">
+        {statuses.map((item) => <option key={item} value={item}>{item === 'all' ? 'All status' : formatLabel(item)}</option>)}
+      </select>
+      {type !== undefined && onType && (
+        <select value={type} onChange={(event) => onType(event.target.value)} className="px-3 py-2 text-sm">
+          <option value="all">Rent and sale</option>
+          <option value="rent">Rent</option>
+          <option value="sale">Sale</option>
+        </select>
+      )}
+    </div>
+  )
+}
+
+function AdminPropertyCard({
+  listing,
+  requestCount,
+  newRequestCount,
+  selected,
+  onSelect,
+  href,
+  actions,
+}: {
+  listing: AdminListing
+  requestCount?: number
+  newRequestCount?: number
+  selected?: boolean
+  onSelect?: () => void
+  href?: string
+  actions?: React.ReactNode
+}) {
+  const firstPhoto = listing.photos?.[0]
+  const isRent = listing.listing_type === 'rent'
+  const body = (
+    <>
+      <div className="relative aspect-[16/10] overflow-hidden bg-orange-50">
+        {firstPhoto ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={firstPhoto} alt={listing.title} className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full items-center justify-center text-slate-400">No photo</div>
+        )}
+        <div className="absolute left-2 top-2 flex gap-2">
+          <span className={`rounded-full px-2 py-1 text-[11px] font-bold text-white ${isRent ? 'bg-blue-700' : 'bg-green-700'}`}>{isRent ? 'Rent' : 'Sale'}</span>
+          {newRequestCount ? <span className="rounded-full bg-red-600 px-2 py-1 text-[11px] font-bold text-white">{newRequestCount} new</span> : null}
+        </div>
+        {listing.bhk_count && <span className="absolute right-2 top-2 rounded-full bg-white/95 px-2 py-1 text-[11px] font-bold text-slate-900">{listing.bhk_count} BHK</span>}
+      </div>
+      <div className="grid flex-1 gap-2 p-3">
+        <p className="text-xs font-bold text-slate-500">{listing.locality}</p>
+        <h2 className="line-clamp-2 text-sm font-extrabold leading-snug text-slate-950">{listing.title}</h2>
+        <div className="flex flex-wrap gap-1 text-[11px] font-semibold text-slate-600">
+          <span className="rounded-full bg-orange-50 px-2 py-1">{formatLabel(listing.property_category)}</span>
+          {listing.furnishing && <span className="rounded-full bg-orange-50 px-2 py-1">{formatLabel(listing.furnishing)}</span>}
+        </div>
+        <div className="mt-auto flex items-end justify-between gap-3">
+          <p className="text-lg font-black text-slate-950">{formatPrice(listing.price)}{isRent && <span className="text-xs font-semibold text-slate-500">/mo</span>}</p>
+          {requestCount !== undefined && <span className="rounded-full border border-slate-200 px-2 py-1 text-[11px] font-bold text-slate-600">{requestCount} visits</span>}
+        </div>
+      </div>
+    </>
+  )
+
+  return (
+    <article className={`flex min-w-0 flex-col overflow-hidden rounded-lg border bg-white ${selected ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200'}`}>
+      {href ? (
+        <Link href={href} className="flex flex-1 flex-col text-left hover:bg-slate-50/40">
+          {body}
+        </Link>
+      ) : onSelect ? (
+        <button type="button" onClick={onSelect} className="flex flex-1 flex-col text-left">
+          {body}
+        </button>
+      ) : (
+        <div className="flex flex-1 flex-col">{body}</div>
+      )}
+      {actions && <div className="grid gap-2 border-t border-slate-100 p-3">{actions}</div>}
+    </article>
+  )
+}
+
+export function ListingsInventory({ listings, visits }: { listings: AdminListing[]; visits: VisitRequest[] }) {
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('all')
+  const [type, setType] = useState('all')
+  const requestCounts = useMemo(() => countByListing(visits), [visits])
+
+  const filtered = listings.filter((listing) => {
+    const query = search.toLowerCase().trim()
+    const matchesSearch = !query || [listing.title, listing.locality, listing.owner_name, listing.owner_phone].some((value) => value?.toLowerCase().includes(query))
+    const matchesStatus = status === 'all' || listing.status === status
+    const matchesType = type === 'all' || listing.listing_type === type
+    return matchesSearch && matchesStatus && matchesType
+  })
+
+  return (
+    <div>
+      <FilterBar search={search} onSearch={setSearch} status={status} onStatus={setStatus} statuses={['all', 'active', 'draft', 'rented_sold', 'inactive']} type={type} onType={setType} placeholder="Search title, locality, owner, phone" />
+      {filtered.length === 0 ? <EmptyState text="No listings match these filters." /> : (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((listing) => (
+            <AdminPropertyCard
+              key={listing.id}
+              listing={listing}
+              requestCount={requestCounts[listing.id] || 0}
+              href={`/admin/listings/${listing.id}`}
+              actions={
+                <div className="flex flex-wrap gap-2">
+                  <Link href={`/admin/listings/${listing.id}`} className="inline-flex min-h-9 items-center justify-center rounded-md border border-slate-900 bg-slate-900 px-3 text-xs font-semibold text-white">Open</Link>
+                  <Link href={`/admin/listings/${listing.id}/edit`} className="inline-flex min-h-9 items-center justify-center rounded-md border border-slate-900 bg-slate-900 px-3 text-xs font-semibold text-white">Edit</Link>
+                  {listing.slug && <Link href={`/property/${listing.slug}`} className="inline-flex min-h-9 items-center justify-center rounded-md border border-slate-200 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50">View public</Link>}
+                  <DeleteButton id={listing.id} />
+                </div>
+              }
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function VisitRequestsWorkspace({ listings, requests }: { listings: AdminListing[]; requests: VisitRequest[] }) {
+  const activeListings = listings.filter((listing) => listing.status === 'active')
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('all')
+  const [type, setType] = useState('all')
+  const grouped = useMemo(() => groupVisits(requests), [requests])
+
+  const filteredListings = activeListings
+    .filter((listing) => {
+      const propertyRequests = grouped[listing.id] || []
+      if (propertyRequests.length === 0) return false
+      const query = search.toLowerCase().trim()
+      const matchesType = type === 'all' || listing.listing_type === type
+      const matchesStatus = status === 'all' || propertyRequests.some((request) => request.status === status)
+      const matchesSearch = !query || [listing.title, listing.locality].some((value) => value?.toLowerCase().includes(query)) ||
+        propertyRequests.some((request) => [request.finder_name, request.finder_phone, request.property_title].some((value) => value?.toLowerCase().includes(query)))
+      return matchesType && matchesStatus && matchesSearch
+    })
+    .sort((a, b) => {
+      const aNew = (grouped[a.id] || []).filter((request) => request.status === 'new').length
+      const bNew = (grouped[b.id] || []).filter((request) => request.status === 'new').length
+      if (bNew !== aNew) return bNew - aNew
+      return (grouped[b.id] || []).length - (grouped[a.id] || []).length
+    })
+
+  return (
+    <div>
+      <FilterBar search={search} onSearch={setSearch} status={status} onStatus={setStatus} statuses={visitStatuses} type={type} onType={setType} placeholder="Search property, locality, finder, phone" />
+      {filteredListings.length === 0 ? <EmptyState text="No active properties match these filters." /> : (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {filteredListings.map((listing) => {
+            const propertyRequests = grouped[listing.id] || []
+            return (
+              <AdminPropertyCard
+                key={listing.id}
+                listing={listing}
+                requestCount={propertyRequests.length}
+                newRequestCount={propertyRequests.filter((request) => request.status === 'new').length}
+                href={`/admin/listings/${listing.id}`}
+                actions={
+                  <Link href={`/admin/listings/${listing.id}`} className="inline-flex min-h-9 items-center justify-center rounded-md border border-slate-900 bg-slate-900 px-3 text-xs font-semibold text-white">
+                    Open workspace
+                  </Link>
+                }
+              />
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function PropertyWorkspace({
+  listing,
+  visits,
+  requirements,
+  whatsappNumber,
+}: {
+  listing: AdminListing
+  visits: VisitRequest[]
+  requirements: Requirement[]
+  whatsappNumber: string
+}) {
+  const [tab, setTab] = useState<'details' | 'visits' | 'matches'>('details')
+  const matchedRequirements = useMemo(() => matchRequirements(listing, requirements), [listing, requirements])
+  const isClosed = listing.status === 'rented_sold'
+  const firstPhoto = listing.photos?.[0]
+
+  return (
+    <div className="grid gap-5">
+      {isClosed && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-800">
+          This property is marked Rented/Sold and is hidden from public listings.
+        </div>
+      )}
+
+      <section className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+        <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="relative min-h-[230px] bg-orange-50">
+            {firstPhoto ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={firstPhoto} alt={listing.title} className="h-full min-h-[230px] w-full object-cover" />
+            ) : (
+              <div className="flex min-h-[230px] items-center justify-center text-sm font-semibold text-slate-400">No property photo</div>
+            )}
+          </div>
+          <div className="grid gap-4 p-5">
+            <div>
+              <div className="mb-3 flex flex-wrap gap-2">
+                <span className={`rounded-full border px-2 py-1 text-xs font-bold ${statusClass(listing.status)}`}>{formatLabel(listing.status)}</span>
+                <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold capitalize text-slate-700">{formatLabel(listing.listing_type)}</span>
+                <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold capitalize text-slate-700">{daysOnMarket(listing)} days active</span>
+              </div>
+              <h1 className="text-2xl font-black leading-tight text-slate-950">{listing.title}</h1>
+              <p className="mt-2 text-sm font-semibold text-slate-500">{listing.locality}</p>
+              <p className="mt-3 text-2xl font-black text-slate-950">{formatPrice(listing.price)}{listing.listing_type === 'rent' && <span className="text-sm font-semibold text-slate-500">/mo</span>}</p>
+            </div>
+
+            <div className="grid gap-2 rounded-md border border-slate-200 bg-slate-50 p-3">
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Owner details</p>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="font-bold text-slate-950">{listing.owner_name || 'Owner name not set'}</p>
+                  <p className="text-sm text-slate-600">{listing.owner_phone || 'Owner phone not set'}</p>
+                </div>
+                {listing.owner_phone && (
+                  <div className="flex flex-wrap gap-2">
+                    <ActionLink href={'tel:' + listing.owner_phone} tone="blue">Call owner</ActionLink>
+                    <ActionLink href={waLink(whatsappNumber, `Hi ${listing.owner_name || ''}, regarding your property ${listing.title} in ${listing.locality}.`)} tone="green">WhatsApp owner</ActionLink>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <PropertyStatusSelect listingId={listing.id} currentStatus={listing.status} />
+              <Link href={`/admin/listings/${listing.id}/edit`} className="inline-flex min-h-10 items-center justify-center rounded-md border border-slate-900 bg-slate-900 px-4 text-sm font-bold text-white">Edit listing</Link>
+              {listing.slug && <Link href={`/property/${listing.slug}`} className="inline-flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 hover:bg-slate-50">View public</Link>}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="flex gap-2 overflow-x-auto rounded-lg border border-slate-200 bg-white p-2" role="tablist" aria-label="Property workspace tabs">
+        <TabButton active={tab === 'details'} onClick={() => setTab('details')}>Details</TabButton>
+        <TabButton active={tab === 'visits'} onClick={() => setTab('visits')}>Visit Requests ({visits.length})</TabButton>
+        <TabButton active={tab === 'matches'} onClick={() => setTab('matches')}>Matched Requirements ({isClosed ? 0 : matchedRequirements.length})</TabButton>
+      </div>
+
+      {tab === 'details' && (
+        <section className="rounded-lg border border-slate-200 bg-white p-5">
+          <h2 className="font-bold text-slate-950">Property details</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <DetailItem label="Category" value={formatLabel(listing.property_category)} />
+            <DetailItem label="BHK" value={listing.bhk_count ? listing.bhk_count + ' BHK' : 'Not set'} />
+            <DetailItem label="Furnishing" value={formatLabel(listing.furnishing)} />
+            <DetailItem label="YouTube" value={listing.youtube_url ? 'Available' : 'Not added'} />
+          </div>
+          <div className="mt-5">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Description</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{listing.description || 'No description added.'}</p>
+          </div>
+        </section>
+      )}
+
+      {tab === 'visits' && (
+        <section className="grid gap-3">
+          {visits.length === 0 ? <EmptyState text="No visit requests for this property yet." /> : visits.map((request) => (
+            <VisitRequestCard key={request.id} request={request} whatsappNumber={whatsappNumber} />
+          ))}
+        </section>
+      )}
+
+      {tab === 'matches' && (
+        <section className="grid gap-3">
+          {isClosed ? <EmptyState text="Matched requirements are hidden because this property is closed." /> : matchedRequirements.length === 0 ? <EmptyState text="No matched seeker requirements found for this property." /> : matchedRequirements.map(({ requirement, budgetWarning }) => (
+            <MatchedRequirementCard key={requirement.id} requirement={requirement} listing={listing} budgetWarning={budgetWarning} whatsappNumber={whatsappNumber} />
+          ))}
+        </section>
+      )}
+    </div>
+  )
+}
+
+function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button type="button" onClick={onClick} className={`shrink-0 rounded-md px-4 py-2 text-sm font-bold ${active ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'}`}>
+      {children}
+    </button>
+  )
+}
+
+function DetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="mt-1 text-sm font-bold capitalize text-slate-950">{value}</p>
+    </div>
+  )
+}
+
+function MatchedRequirementCard({
+  requirement,
+  listing,
+  budgetWarning,
+  whatsappNumber,
+}: {
+  requirement: Requirement
+  listing: AdminListing
+  budgetWarning: boolean
+  whatsappNumber: string
+}) {
+  const budget = (requirement.budget_min ? formatPrice(requirement.budget_min) + ' - ' : '') + formatPrice(requirement.budget_max)
+  const message = `Hi ${requirement.finder_name}, we have a ${listing.bhk_count || ''} ${formatLabel(listing.property_category)} in ${listing.locality} for ${formatPrice(listing.price)}. Let us know if you would like details.`
+
+  return (
+    <LeadCard
+      title={requirement.finder_name}
+      phone={requirement.finder_phone}
+      status={requirement.status}
+      submitted={requirement.created_at}
+      details={[formatLabel(requirement.listing_type), requirement.bhk_count + ' BHK', requirement.locality_preference, budget, budgetWarning ? 'Above budget' : 'Budget match']}
+      note={requirement.special_requirements || undefined}
+      statusControl={<StatusUpdater id={requirement.id} currentStatus={requirement.status} type="reqs" options={requirementStatuses.filter((option) => option !== 'all')} />}
+      actions={<><ActionLink href={waLink(whatsappNumber, message)} tone="green">WhatsApp</ActionLink><ActionLink href={'tel:' + requirement.finder_phone} tone="blue">Call</ActionLink></>}
+    />
+  )
+}
+
+function PropertyStatusSelect({ listingId, currentStatus }: { listingId: string; currentStatus: string }) {
+  const [saving, setSaving] = useState(false)
+
+  async function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    setSaving(true)
+    await fetch(`/api/admin/listings/${listingId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: event.target.value }),
+    })
+    window.location.reload()
+  }
+
+  return (
+    <select defaultValue={currentStatus} onChange={handleChange} disabled={saving} className={`min-h-10 px-3 py-2 text-sm font-bold capitalize ${statusClass(currentStatus)}`}>
+      {['draft', 'active', 'rented_sold', 'inactive'].map((status) => <option key={status} value={status}>{formatLabel(status)}</option>)}
+    </select>
+  )
+}
+
+function VisitRequestCard({ request, whatsappNumber }: { request: VisitRequest; whatsappNumber: string }) {
+  const message = `Hi ${request.finder_name}, we received your visit request for ${request.property_title}. We will arrange a visit for you. What day and time works best?`
+  return (
+    <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-bold text-slate-950">{request.finder_name}</h3>
+            <span className={`rounded-full border px-2 py-1 text-[11px] font-bold ${statusClass(request.status)}`}>{formatLabel(request.status)}</span>
+          </div>
+          <p className="mt-1 text-sm text-slate-600">{request.finder_phone}</p>
+          <p className="mt-2 text-xs font-semibold text-slate-500">
+            Preferred {formatDate(request.preferred_day)} · {formatLabel(request.preferred_time)} · Submitted {formatDate(request.created_at)}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <StatusUpdater id={request.id} currentStatus={request.status} type="visit-req" options={visitStatuses.filter((item) => item !== 'all')} />
+          <ActionLink href={waLink(whatsappNumber, message)} tone="green">WhatsApp</ActionLink>
+          <ActionLink href={'tel:' + request.finder_phone} tone="blue">Call</ActionLink>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function OwnerQueue({ submissions, whatsappNumber }: { submissions: OwnerSubmission[]; whatsappNumber: string }) {
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('all')
+  const filtered = submissions.filter((item) => {
+    const query = search.toLowerCase().trim()
+    const matchesSearch = !query || [item.owner_name, item.owner_phone, item.locality, item.listing_type].some((value) => value?.toLowerCase().includes(query))
+    return matchesSearch && (status === 'all' || item.status === status)
+  })
+
+  return (
+    <LeadQueueLayout search={search} setSearch={setSearch} status={status} setStatus={setStatus} statuses={ownerStatuses} placeholder="Search owner, phone, locality">
+      {filtered.length === 0 ? <EmptyState text="No owner leads match these filters." /> : filtered.map((item) => {
+        const message = `Hi ${item.owner_name}, we received your property listing request. We would like to schedule a visit. When are you available?`
+        return (
+          <LeadCard
+            key={item.id}
+            title={item.owner_name}
+            phone={item.owner_phone}
+            status={item.status}
+            submitted={item.created_at}
+            details={[formatLabel(item.listing_type), item.locality, formatPrice(item.expected_price)]}
+            statusControl={<StatusUpdater id={item.id} currentStatus={item.status} type="owner-sub" options={ownerStatuses.filter((option) => option !== 'all')} />}
+            actions={<><ActionLink href={waLink(whatsappNumber, message)} tone="green">WhatsApp</ActionLink><ActionLink href={'tel:' + item.owner_phone} tone="blue">Call</ActionLink></>}
+          />
+        )
+      })}
+    </LeadQueueLayout>
+  )
+}
+
+export function RequirementsQueue({ requirements }: { requirements: Requirement[] }) {
+  const localitySummaries = useMemo(() => {
+    const grouped = requirements.reduce<Record<string, Requirement[]>>((acc, item) => {
+      const group = item.locality_preference || 'Locality not set'
+      acc[group] = acc[group] || []
+      acc[group].push(item)
+      return acc
+    }, {})
+
+    return Object.entries(grouped)
+      .map(([locality, items]) => ({
+        locality,
+        href: '/admin/requirements/locality/' + encodeURIComponent(locality),
+        total: items.length,
+        fresh: items.filter((item) => item.status === 'new').length,
+        rent: items.filter((item) => item.listing_type === 'rent').length,
+        sale: items.filter((item) => item.listing_type === 'sale').length,
+        topBhk: mostCommon(items.map((item) => item.bhk_count).filter(Boolean)),
+      }))
+      .sort((a, b) => b.fresh - a.fresh || b.total - a.total || a.locality.localeCompare(b.locality))
+  }, [requirements])
+
+  if (localitySummaries.length === 0) return <EmptyState text="No requirements yet." />
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {localitySummaries.map((summary) => (
+        <Link key={summary.locality} href={summary.href} className="rounded-lg border border-slate-200 bg-white p-4 hover:border-slate-300 hover:bg-slate-50">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-black text-slate-950">{summary.locality}</h2>
+              <p className="mt-1 text-sm font-semibold text-slate-500">{summary.total} seeker requirement{summary.total === 1 ? '' : 's'}</p>
+            </div>
+            {summary.fresh > 0 && <span className="rounded-full bg-red-600 px-2 py-1 text-xs font-bold text-white">{summary.fresh} new</span>}
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            <LocalityMetric label="Rent" value={summary.rent} />
+            <LocalityMetric label="Sale" value={summary.sale} />
+            <LocalityMetric label="Top BHK" value={summary.topBhk || '-'} />
+          </div>
+          <p className="mt-4 text-xs font-bold text-slate-500">Open locality -&gt;</p>
+        </Link>
+      ))}
+    </div>
+  )
+}
+
+export function RequirementsLocalityWorkspace({ locality, requirements, whatsappNumber }: { locality: string; requirements: Requirement[]; whatsappNumber: string }) {
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('all')
+  const [type, setType] = useState('all')
+  const [bhk, setBhk] = useState('all')
+
+  const bhkOptions = useMemo(() => {
+    return Array.from(new Set(requirements.map((item) => item.bhk_count).filter(Boolean))).sort((a, b) => a.localeCompare(b))
+  }, [requirements])
+
+  const filtered = requirements.filter((item) => {
+    const query = search.toLowerCase().trim()
+    const matchesSearch = !query || [item.finder_name, item.finder_phone, item.locality_preference, item.bhk_count, item.listing_type].some((value) => value?.toLowerCase().includes(query))
+    const matchesStatus = status === 'all' || item.status === status
+    const matchesType = type === 'all' || item.listing_type === type
+    const matchesBhk = bhk === 'all' || item.bhk_count === bhk
+    return matchesSearch && matchesStatus && matchesType && matchesBhk
+  })
+
+  return (
+    <div>
+      <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {requirementStatuses.filter((item) => item !== 'all').map((item) => (
+          <button
+            key={item}
+            type="button"
+            onClick={() => setStatus(item)}
+            className={`rounded-lg border p-3 text-left ${status === item ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}
+          >
+            <p className="text-xs font-bold uppercase tracking-wide opacity-70">{formatLabel(item)}</p>
+            <p className="mt-1 text-2xl font-black">{requirements.filter((requirement) => requirement.status === item).length}</p>
+          </button>
+        ))}
+      </div>
+
+      <div className="mb-5 grid gap-3 rounded-md border border-slate-200 bg-white p-3 lg:grid-cols-[1fr_auto_auto_auto_auto]">
+        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search finder, phone, locality, BHK" className="w-full px-3 py-2 text-sm" />
+        <select value={status} onChange={(event) => setStatus(event.target.value)} className="px-3 py-2 text-sm">
+          {requirementStatuses.map((item) => <option key={item} value={item}>{item === 'all' ? 'All status' : formatLabel(item)}</option>)}
+        </select>
+        <select value={type} onChange={(event) => setType(event.target.value)} className="px-3 py-2 text-sm">
+          <option value="all">Rent and sale</option>
+          <option value="rent">Rent</option>
+          <option value="sale">Sale</option>
+        </select>
+        <select value={bhk} onChange={(event) => setBhk(event.target.value)} className="px-3 py-2 text-sm">
+          <option value="all">All BHK</option>
+          {bhkOptions.map((item) => <option key={item} value={item}>{item} BHK</option>)}
+        </select>
+        <div className="inline-flex min-h-[42px] items-center rounded-md border border-slate-200 bg-slate-50 px-3 text-sm font-bold text-slate-600">{locality}</div>
+      </div>
+
+      {filtered.length === 0 ? <EmptyState text="No requirements match these filters." /> : (
+        <div className="grid gap-3">
+          {filtered.map((item) => {
+            const message = 'Hi ' + item.finder_name + ', we found a property matching your requirement. Let us know if you are interested.'
+            const budget = (item.budget_min ? formatPrice(item.budget_min) + ' - ' : '') + formatPrice(item.budget_max)
+            return (
+              <LeadCard
+                key={item.id}
+                title={item.finder_name}
+                phone={item.finder_phone}
+                status={item.status}
+                submitted={item.created_at}
+                details={[formatLabel(item.listing_type), item.bhk_count + ' BHK', budget, formatLabel(item.tenant_type), formatLabel(item.timeline)]}
+                note={item.special_requirements || undefined}
+                statusControl={<StatusUpdater id={item.id} currentStatus={item.status} type="reqs" options={requirementStatuses.filter((option) => option !== 'all')} />}
+                actions={<><ActionLink href={waLink(whatsappNumber, message)} tone="green">WhatsApp</ActionLink><ActionLink href={'tel:' + item.finder_phone} tone="blue">Call</ActionLink></>}
+              />
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function LocalityMetric({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-md border border-slate-200 bg-slate-50 p-2">
+      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="mt-1 text-sm font-black text-slate-950">{value}</p>
+    </div>
+  )
+}
+
+function LeadQueueLayout({
+  children,
+  search,
+  setSearch,
+  status,
+  setStatus,
+  statuses,
+  placeholder,
+}: {
+  children: React.ReactNode
+  search: string
+  setSearch: (value: string) => void
+  status: string
+  setStatus: (value: string) => void
+  statuses: string[]
+  placeholder: string
+}) {
+  return (
+    <div>
+      <FilterBar search={search} onSearch={setSearch} status={status} onStatus={setStatus} statuses={statuses} placeholder={placeholder} />
+      <div className="grid gap-3">{children}</div>
+    </div>
+  )
+}
+
+function LeadCard({
+  title,
+  phone,
+  status,
+  submitted,
+  details,
+  note,
+  statusControl,
+  actions,
+}: {
+  title: string
+  phone: string
+  status: string
+  submitted: string
+  details: string[]
+  note?: string
+  statusControl: React.ReactNode
+  actions: React.ReactNode
+}) {
+  return (
+    <article className="rounded-lg border border-slate-200 bg-white p-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-bold text-slate-950">{title}</h2>
+            <span className={`rounded-full border px-2 py-1 text-[11px] font-bold ${statusClass(status)}`}>{formatLabel(status)}</span>
+          </div>
+          <p className="mt-1 text-sm text-slate-600">{phone}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {details.filter(Boolean).map((detail) => <span key={detail} className="rounded-full bg-orange-50 px-2 py-1 text-xs font-semibold capitalize text-slate-700">{detail}</span>)}
+          </div>
+          {note && <p className="mt-3 text-sm text-slate-600">{note}</p>}
+          <p className="mt-3 text-xs font-semibold text-slate-400">Submitted {formatDate(submitted)}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {statusControl}
+          {actions}
+        </div>
+      </div>
+    </article>
+  )
+}
+
+function EmptyState({ text, compact = false }: { text: string; compact?: boolean }) {
+  return (
+    <div className={`rounded-md border border-dashed border-slate-300 bg-white text-center text-sm font-semibold text-slate-500 ${compact ? 'p-4' : 'p-8'}`}>
+      {text}
+    </div>
+  )
+}
+
+function groupVisits(requests: VisitRequest[]) {
+  return requests.reduce<Record<string, VisitRequest[]>>((acc, request) => {
+    acc[request.listing_id] = acc[request.listing_id] || []
+    acc[request.listing_id].push(request)
+    return acc
+  }, {})
+}
+
+function countByListing(requests: VisitRequest[]) {
+  return requests.reduce<Record<string, number>>((acc, request) => {
+    acc[request.listing_id] = (acc[request.listing_id] || 0) + 1
+    return acc
+  }, {})
+}
+
+function daysOnMarket(listing: AdminListing) {
+  const source = listing.date_listed || listing.created_at
+  if (!source) return 0
+
+  const start = new Date(source).getTime()
+  if (!Number.isFinite(start)) return 0
+
+  const diff = Date.now() - start
+  return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)))
+}
+
+function matchRequirements(listing: AdminListing, requirements: Requirement[]) {
+  const listingLocality = listing.locality.toLowerCase().trim()
+  const listingBhk = normalizeBhk(listing.bhk_count)
+
+  return requirements
+    .filter((requirement) => {
+      if (requirement.listing_type !== listing.listing_type) return false
+
+      const requirementLocality = requirement.locality_preference.toLowerCase().trim()
+      const localityMatch = listingLocality.includes(requirementLocality) || requirementLocality.includes(listingLocality)
+      if (!localityMatch) return false
+
+      const requirementBhk = normalizeBhk(requirement.bhk_count)
+      if (listingBhk && requirementBhk && listingBhk !== requirementBhk) return false
+
+      return true
+    })
+    .map((requirement) => ({
+      requirement,
+      budgetWarning: Number(listing.price) > Number(requirement.budget_max || 0),
+    }))
+}
+
+function normalizeBhk(value?: string | null) {
+  if (!value) return ''
+  const match = value.match(/\d/)
+  return match ? match[0] : value.toLowerCase().trim()
+}
+
+function mostCommon(values: string[]) {
+  const counts = values.reduce<Record<string, number>>((acc, value) => {
+    acc[value] = (acc[value] || 0) + 1
+    return acc
+  }, {})
+
+  return Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] || ''
+}

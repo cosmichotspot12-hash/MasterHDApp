@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import SiteFooter from "@/components/site-footer";
-import SiteHeader from "@/components/site-header";
+import SiteChrome from "@/components/site-chrome";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,9 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <SiteHeader />
-        <div className="min-h-[calc(100vh-64px)]">{children}</div>
-        <SiteFooter />
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );
