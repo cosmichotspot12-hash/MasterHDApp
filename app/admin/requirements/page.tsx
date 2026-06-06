@@ -1,4 +1,5 @@
 import StatusUpdater from '../owner-submissions/StatusUpdater'
+import { adminApiHeaders } from '@/lib/admin-api'
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ''
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
@@ -25,8 +26,10 @@ type Requirement = {
 
 async function getRequirements() {
   try {
+    const headers = await adminApiHeaders()
     const res = await fetch(APP_URL + '/api/admin/reqs', {
-      cache: 'no-store'
+      cache: 'no-store',
+      headers,
     })
     const { data } = await res.json()
     return data || []
@@ -63,7 +66,7 @@ export default async function RequirementsPage() {
           <p className="text-gray-500">No requirements yet.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="admin-table-wrap">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b">
               <tr>

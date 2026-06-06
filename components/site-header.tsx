@@ -6,15 +6,26 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 const navLinks = [
-  { href: '/rent', label: 'Rentals' },
-  { href: '/sale', label: 'Buy' },
+  { href: '/properties?type=rent', label: 'Rentals' },
+  { href: '/properties?type=sale', label: 'Buy' },
   { href: '/find', label: 'Find my home' },
 ]
 
 export default function SiteHeader() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [currentType, setCurrentType] = useState<string | null>(null)
   const close = () => setOpen(false)
+
+  function isActive(href: string) {
+    const [path, query] = href.split('?')
+    if (pathname !== path) return false
+    if (!query) return true
+
+    const params = new URLSearchParams(query)
+    const targetType = params.get('type')
+    return targetType ? currentType === targetType : true
+  }
 
   useEffect(() => {
     if (!open) return
@@ -32,6 +43,10 @@ export default function SiteHeader() {
     }
   }, [open])
 
+  useEffect(() => {
+    setCurrentType(new URLSearchParams(window.location.search).get('type'))
+  })
+
   return (
     <>
       <style>{`
@@ -43,7 +58,7 @@ export default function SiteHeader() {
           position: sticky;
           top: 0;
           z-index: 100;
-          border-bottom: 1px solid #EAD4C8;
+          border-bottom: 1px solid #E3E8EF;
           background: #FFF4E6;
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
@@ -51,7 +66,7 @@ export default function SiteHeader() {
         }
 
         .sh-inner {
-          max-width: 1320px;
+          max-width: 1520px;
           min-height: var(--sh-height);
           margin: 0 auto;
           padding: 0 20px;
@@ -80,8 +95,8 @@ export default function SiteHeader() {
         }
 
         .sh-brand-name {
-          color: #18120E;
-          font-size: 23px;
+          color: #111827;
+          font-size: 24px;
           font-weight: 900;
           line-height: 1;
           letter-spacing: 0;
@@ -89,7 +104,7 @@ export default function SiteHeader() {
         }
 
         .sh-brand-name span {
-          color: #C2440E;
+          color: #111827;
         }
 
         .sh-brand-sub {
@@ -112,22 +127,23 @@ export default function SiteHeader() {
         .sh-nav-link {
           border-radius: 10px;
           padding: 12px 17px;
-          color: #7A6E68;
+          color: #334155;
           font-size: 16px;
-          font-weight: 750;
+          font-weight: 800;
           text-decoration: none;
           transition: color 0.12s, background 0.12s;
           white-space: nowrap;
         }
 
         .sh-nav-link:hover {
-          background: #FFF9F1;
-          color: #18120E;
+          background: rgba(255,255,255,0.62);
+          color: #111827;
         }
 
         .sh-nav-link-active {
-          background: #FFF0E2 !important;
-          color: #C2440E !important;
+          background: #FFFFFF !important;
+          color: #111827 !important;
+          box-shadow: inset 0 0 0 1px #D7DDE5;
         }
 
         .sh-actions {
@@ -153,26 +169,31 @@ export default function SiteHeader() {
         }
 
         .sh-btn-ghost {
-          border: 1.5px solid #DCC8B6;
+          border: 1.5px solid #CBD5E1;
           background: rgba(255,255,255,0.42);
-          color: #3A2E28;
+          color: #1F2937;
         }
 
         .sh-btn-ghost:hover {
-          border-color: #C2440E;
-          background: #FFF0E2;
-          color: #C2440E;
+          border-color: #94A3B8;
+          background: #fff;
+          color: #111827;
         }
 
         .sh-btn-primary {
-          border: 1.5px solid #7A3A18;
-          background: #7A3A18;
-          color: #fff;
+          min-height: 34px;
+          border: 1px solid #1D9E75;
+          border-radius: 20px;
+          background: transparent;
+          padding: 5px 14px;
+          color: #085041;
+          font-size: 13px;
         }
 
         .sh-btn-primary:hover {
-          border-color: #C2440E;
-          background: #C2440E;
+          border-color: #168662;
+          background: #F2FBF7;
+          color: #064338;
         }
 
         .sh-hamburger {
@@ -183,7 +204,7 @@ export default function SiteHeader() {
           align-items: center;
           justify-content: center;
           margin-left: auto;
-          border: 1.5px solid #DCC8B6;
+          border: 1.5px solid #CBD5E1;
           border-radius: 12px;
           background: rgba(255,255,255,0.5);
           color: #18120E;
@@ -192,9 +213,9 @@ export default function SiteHeader() {
         }
 
         .sh-hamburger:hover {
-          border-color: #C2440E;
-          background: #FFF0E2;
-          color: #C2440E;
+          border-color: #94A3B8;
+          background: #fff;
+          color: #111827;
         }
 
         .sh-drawer {
@@ -207,7 +228,7 @@ export default function SiteHeader() {
           display: flex;
           flex-direction: column;
           overflow-y: auto;
-          border-top: 1px solid #EAD4C8;
+          border-top: 1px solid #E3E8EF;
           background: #FFF4E6;
           padding: 18px 28px 32px;
           animation: sh-slide-in 0.2s ease;
@@ -238,7 +259,7 @@ export default function SiteHeader() {
 
         .sh-drawer-link:hover,
         .sh-drawer-link-active {
-          color: #C2440E;
+          color: #111827;
         }
 
         .sh-drawer-link-arrow {
@@ -270,24 +291,28 @@ export default function SiteHeader() {
 
         .sh-drawer-btn-ghost {
           border: 1.5px solid #D4CEC8;
-          color: #3A2E28;
+          color: #1F2937;
           transition: border-color 0.12s, background 0.12s, color 0.12s;
         }
 
         .sh-drawer-btn-ghost:hover {
-          border-color: #C2440E;
-          background: #FFF0E2;
-          color: #C2440E;
+          border-color: #94A3B8;
+          background: #fff;
+          color: #111827;
         }
 
         .sh-drawer-btn-primary {
-          background: #7A3A18;
-          color: #fff;
-          transition: background 0.12s;
+          border: 1px solid #1D9E75;
+          border-radius: 20px;
+          background: transparent;
+          color: #085041;
+          transition: border-color 0.12s, background 0.12s, color 0.12s;
         }
 
         .sh-drawer-btn-primary:hover {
-          background: #C2440E;
+          border-color: #168662;
+          background: #F2FBF7;
+          color: #064338;
         }
 
         @media (max-width: 980px) {
@@ -303,29 +328,39 @@ export default function SiteHeader() {
 
         @media (max-width: 640px) {
           :root {
-            --sh-height: 76px;
+            --sh-height: 70px;
           }
 
           .sh-inner {
-            padding: 0 14px;
-            gap: 14px;
+            padding: 0 10px;
+            gap: 10px;
+            justify-content: space-between;
           }
 
           .sh-brand {
-            gap: 10px;
+            gap: 8px;
+            position: absolute;
+            left: 50%;
+            max-width: calc(100% - 96px);
+            transform: translateX(-50%);
+            justify-content: center;
           }
 
           .sh-brand-mark {
-            width: 46px;
-            height: 46px;
-            border-radius: 11px;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
           }
 
           .sh-brand-name {
-            font-size: 18px;
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 16px;
           }
 
           .sh-brand-sub {
+            display: none;
             max-width: 180px;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -333,8 +368,11 @@ export default function SiteHeader() {
           }
 
           .sh-hamburger {
-            width: 46px;
-            height: 46px;
+            width: 42px;
+            height: 42px;
+            margin-left: auto;
+            border-radius: 10px;
+            background: #fff;
           }
 
           .sh-drawer {
@@ -357,7 +395,7 @@ export default function SiteHeader() {
               <span className="sh-brand-name">
                 Hubli<span>Dharwad</span>.app
               </span>
-              <span className="sh-brand-sub">Verified homes · Zero brokerage</span>
+              <span className="sh-brand-sub">Verified homes - zero brokerage</span>
             </div>
           </Link>
 
@@ -366,7 +404,7 @@ export default function SiteHeader() {
               <Link
                 key={href}
                 href={href}
-                className={`sh-nav-link ${pathname === href ? 'sh-nav-link-active' : ''}`}
+                className={`sh-nav-link ${isActive(href) ? 'sh-nav-link-active' : ''}`}
               >
                 {label}
               </Link>
@@ -378,7 +416,7 @@ export default function SiteHeader() {
               Share my need
             </Link>
             <Link href="/list" className="sh-btn-primary">
-              List a property
+              List property
             </Link>
           </div>
 
@@ -411,10 +449,10 @@ export default function SiteHeader() {
                 key={href}
                 href={href}
                 onClick={close}
-                className={`sh-drawer-link ${pathname === href ? 'sh-drawer-link-active' : ''}`}
+                className={`sh-drawer-link ${isActive(href) ? 'sh-drawer-link-active' : ''}`}
               >
                 {label}
-                <span className="sh-drawer-link-arrow" aria-hidden="true">›</span>
+                <span className="sh-drawer-link-arrow" aria-hidden="true">&gt;</span>
               </Link>
             ))}
           </nav>
@@ -424,7 +462,7 @@ export default function SiteHeader() {
               Share my need
             </Link>
             <Link href="/list" onClick={close} className="sh-drawer-btn-primary">
-              List a property
+              List property
             </Link>
           </div>
         </div>

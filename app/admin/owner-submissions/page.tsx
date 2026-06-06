@@ -1,4 +1,5 @@
 import StatusUpdater from './StatusUpdater'
+import { adminApiHeaders } from '@/lib/admin-api'
 
 type OwnerSubmission = {
   id: string
@@ -13,8 +14,10 @@ type OwnerSubmission = {
 
 async function getSubmissions() {
   try {
+    const headers = await adminApiHeaders()
     const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/owner-sub`, {
-      cache: 'no-store'
+      cache: 'no-store',
+      headers,
     })
     const { data } = await res.json()
     return data || []
@@ -53,7 +56,7 @@ export default async function OwnerSubmissionsPage() {
           <p className="text-gray-500">No submissions yet.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="admin-table-wrap">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b">
               <tr>

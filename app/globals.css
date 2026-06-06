@@ -698,6 +698,36 @@ tbody tr:hover {
     grid-column: span 1 / span 1;
   }
 
+  .admin-workspace {
+    min-width: 0;
+  }
+
+  .admin-workspace .content-card,
+  .page-shell .content-card {
+    padding: 1rem;
+  }
+
+  .admin-table-wrap {
+    width: 100%;
+    max-width: calc(100vw - 1rem);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-table-wrap table {
+    min-width: 680px;
+  }
+
+  .admin-table-wrap th,
+  .admin-table-wrap td {
+    padding-left: .75rem;
+    padding-right: .75rem;
+  }
+
+  .page-shell .min-h-screen {
+    min-height: 100svh;
+    padding: 1rem;
+  }
+
   .page-shell form[method="GET"] > * {
     width: 100%;
   }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { adminUnauthorized, isAdminRequest } from '@/lib/admin-auth'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,6 +11,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isAdminRequest(request)) return adminUnauthorized()
+
   try {
     const { id } = await params
     const { data, error } = await supabaseAdmin
@@ -29,6 +32,8 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isAdminRequest(request)) return adminUnauthorized()
+
   try {
     const { id } = await params
     const body = await request.json()
@@ -48,6 +53,8 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isAdminRequest(request)) return adminUnauthorized()
+
   try {
     const { id } = await params
     const { error } = await supabaseAdmin

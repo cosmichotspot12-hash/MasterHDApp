@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { ADMIN_AUTH_COOKIE, isValidAdminSession } from '@/lib/admin-auth'
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  if (pathname === '/admin/login' || pathname.startsWith('/api/')) {
+  if (pathname === '/admin/login' || pathname === '/api/admin/login' || pathname === '/api/admin/logout') {
     return NextResponse.next()
   }
 
-  if (pathname.startsWith('/admin')) {
-    const authCookie = request.cookies.get('admin_auth')
+  if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
+    const authCookie = request.cookies.get(ADMIN_AUTH_COOKIE)
     
-    if (!authCookie || authCookie.value !== 'authenticated') {
+    if (!isValidAdminSession(authCookie?.value)) {
+      if (pathname.startsWith('/api/admin')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
   }
@@ -19,5 +23,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*']
+  matcher: ['/admin/:path*', '/api/admin/:path*']
 }

@@ -29,10 +29,10 @@ export default function AdminLogin() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
+    <main className="page-shell flex min-h-[70vh] items-center justify-center px-4 py-10">
+      <div className="content-card w-full max-w-sm p-8">
         <h1 className="text-2xl font-bold text-gray-800 mb-2">Admin Login</h1>
-        <p className="text-gray-500 text-sm mb-6">MasterHD Property Platform</p>
+        <p className="text-gray-500 text-sm mb-6">Hubli Dharwad App Property Platform</p>
         
         <form onSubmit={handleLogin} className="space-y-4">
           <div>

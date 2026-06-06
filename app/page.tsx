@@ -1,649 +1,656 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
+import PropertyCard, { PropertyCardStyles, type PropertyCardListing } from '@/components/property-card'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210'
+const HOME_PREVIEW_COUNT = 4
 
-type Listing = {
-  id: string
-  title: string
-  slug: string
-  listing_type: 'rent' | 'sale'
-  property_category: string
-  locality: string
-  price: number
-  bhk_count: string
-  photos: string[]
-  is_featured: boolean
-}
-
-const DEMAND_SIGNALS = [
-  { segment: '2 BHK Rent', area: 'Vidyanagar', seekers: 38, budget: '₹8K–12K/mo', urgency: 'high' as const },
-  { segment: 'Family Home Sale', area: 'Keshwapur / Gokul Rd', seekers: 21, budget: '₹40–65L', urgency: 'high' as const },
-  { segment: 'Budget 1 BHK Rent', area: 'Hubli-Dharwad', seekers: 54, budget: '₹5K–8K/mo', urgency: 'medium' as const },
-  { segment: 'Plot / Land', area: 'Growth localities', seekers: 17, budget: '₹15–40L', urgency: 'medium' as const },
-]
-
-const WA_ICON = (
-  <svg style={{ width: 16, height: 16, flexShrink: 0 }} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-  </svg>
-)
-
-function whatsappLink(message: string) {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
-}
-
-async function getHomeData() {
+async function fetchListings(url: string) {
   try {
-    const res = await fetch(APP_URL + '/api/listings', { cache: 'no-store' })
+    const res = await fetch(url, { cache: 'no-store' })
     const json = await res.json()
-    const listings: Listing[] = json.data || []
-    return {
-      all: listings,
-      rent: listings.filter((l) => l.listing_type === 'rent'),
-      sale: listings.filter((l) => l.listing_type === 'sale'),
-    }
+    return (json.data || []) as PropertyCardListing[]
   } catch {
-    return { all: [] as Listing[], rent: [] as Listing[], sale: [] as Listing[] }
+    return [] as PropertyCardListing[]
   }
 }
 
-function formatPrice(listing: Listing) {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(listing.price)
+async function getHomeData() {
+  const [previewListings, allListings] = await Promise.all([
+    fetchListings(APP_URL + `/api/listings?sort=recent&limit=${HOME_PREVIEW_COUNT}`),
+    fetchListings(APP_URL + '/api/listings?sort=recent'),
+  ])
+  return {
+    previewListings,
+    totalListings: allListings.length || previewListings.length,
+  }
 }
 
-function ListingCard({ listing }: { listing: Listing }) {
-  const isRent = listing.listing_type === 'rent'
+function PreviewSkeleton() {
   return (
-    <article className="lc">
-      <Link href={'/property/' + listing.slug} className="lc-link">
-        <div className="lc-photo">
-          {listing.photos?.length > 0 ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={listing.photos[0]}
-              alt={listing.title}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            />
-          ) : (
-            <div className="lc-photo-empty">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21" />
-              </svg>
-            </div>
-          )}
-
-          {/* Gradient overlay */}
-          <div className="lc-overlay" />
-
-          {/* Top badges */}
-          <div className="lc-top-left">
-            <span className={`lc-badge lc-badge-${isRent ? 'rent' : 'sale'}`}>
-              {isRent ? 'Rent' : 'Sale'}
-            </span>
-            {listing.is_featured && <span className="lc-badge lc-badge-featured">Featured</span>}
-          </div>
-
-          {listing.bhk_count && (
-            <span className="lc-bhk">{listing.bhk_count} BHK</span>
-          )}
-
-          {/* Locality on photo */}
-          <div className="lc-locality">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-            </svg>
-            {listing.locality}
-          </div>
-        </div>
-
-        <div className="lc-body">
-          <p className="lc-title">{listing.title}</p>
-          <p className="lc-price">
-            {formatPrice(listing)}
-            {isRent && <span className="lc-price-unit">/mo</span>}
-          </p>
-        </div>
-      </Link>
-
-      {/* WhatsApp CTA — separate from the link */}
-      <div className="lc-footer">
-        <a
-          href={whatsappLink(`Hi, I'm interested in: ${listing.title} in ${listing.locality}.`)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="lc-wa-btn"
-        >
-          {WA_ICON}
-          Enquire on WhatsApp
-        </a>
-      </div>
-    </article>
-  )
-}
-
-function SkeletonCard() {
-  return (
-    <div className="lc lc-skeleton">
-      <div className="lc-photo sk-block" />
-      <div className="lc-body">
-        <div className="sk-line" style={{ width: '70%', height: 14, marginBottom: 10 }} />
-        <div className="sk-line" style={{ width: '40%', height: 18 }} />
-      </div>
-      <div className="lc-footer">
-        <div className="sk-line" style={{ width: '60%', height: 32, borderRadius: 8 }} />
+    <div className="overflow-hidden rounded-[10px] border border-[#E7DED5] bg-white">
+      <div className="h-[130px] animate-pulse bg-[#E7DED5] sm:h-[160px]" />
+      <div className="grid gap-2 p-3">
+        <span className="h-3 w-4/5 rounded bg-[#E7DED5]" />
+        <span className="h-5 w-1/2 rounded bg-[#E7DED5]" />
+        <span className="mt-1 h-8 rounded bg-[#E7DED5]" />
       </div>
     </div>
   )
 }
 
 export const metadata: Metadata = {
-  title: 'Hubli Dharwad App — Verified Properties in Hubballi',
-  description: 'Find verified flats, houses and plots in Hubballi. Matched with real local demand, video tours, and WhatsApp support.',
+  title: 'MasterHD – Verified Properties in Hubballi-Dharwad',
+  description: 'Find verified flats, houses and plots in Hubballi-Dharwad. Browse listings, post your requirement, or list your property — personally verified, locally trusted.',
   keywords: 'properties in hubli, flats for rent in hubli, house for sale in dharwad, hubli dharwad real estate',
   openGraph: {
-    title: 'Hubli Dharwad App — Verified Properties in Hubballi',
-    description: 'Verified property matching for Hubli-Dharwad.',
+    title: 'MasterHD – Verified Properties in Hubballi-Dharwad',
+    description: 'Personally verified property listings for Hubballi-Dharwad.',
     url: 'https://www.masterhdapp.in',
-    siteName: 'Hubli Dharwad App',
+    siteName: 'MasterHD',
     locale: 'en_IN',
     type: 'website',
   },
 }
 
+const OWNER_STEPS = [
+  {
+    actor: 'You',
+    actorColor: '#1D9E75',
+    num: '3',
+    unit: 'min',
+    numColor: '#1D9E75',
+    day: 'Day 0',
+    title: 'Share your details',
+    desc: 'Location, type, expected rent or price. A short form — nothing more.',
+  },
+  {
+    actor: 'Us',
+    actorColor: '#4F46E5',
+    num: '24',
+    unit: 'hrs',
+    numColor: '#4F46E5',
+    day: 'Day 1',
+    title: 'We call you',
+    desc: 'Confirm details, answer your questions, schedule the property visit.',
+  },
+  {
+    actor: 'Us',
+    actorColor: '#4F46E5',
+    num: '48',
+    unit: 'hrs',
+    numColor: '#4F46E5',
+    day: 'Day 2',
+    title: 'We visit & shoot',
+    desc: 'We come to your property, verify every detail, create a full video tour. No cost.',
+  },
+  {
+    actor: 'Us',
+    actorColor: '#4F46E5',
+    num: '72',
+    unit: 'hrs',
+    numColor: '#4F46E5',
+    day: 'Day 3',
+    title: 'Live to 300+ seekers',
+    desc: 'Your listing goes live and is broadcast to every active seeker instantly.',
+  },
+]
+
 export default async function HomePage() {
-  const { all, rent, sale } = await getHomeData()
+  const { previewListings, totalListings } = await getHomeData()
 
   return (
     <>
-      <style>{`
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      <PropertyCardStyles />
+      <main className="min-h-screen bg-[#FFF4E6] text-slate-950">
 
-        :root {
-          --brand:       #C2440E;
-          --brand-mid:   #D85A30;
-          --brand-bg:    #FEF3EC;
-          --ink:         #18120E;
-          --ink-2:       #3A2E28;
-          --ink-3:       #7A6E68;
-          --ink-4:       #B0A89F;
-          --surface:     #FFF4E6;
-          --card-bg:     #FFFFFF;
-          --line:        #EAE4DE;
-          --line-dark:   #D4CEC8;
-          --wa-green:    #25D366;
-          --radius-md:   10px;
-          --radius-lg:   16px;
-          --container:   1320px;
-          --gutter:      20px;
-          font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
-        }
+        {/* ── HERO ──────────────────────────────────────────────────── */}
+        <section className="px-2 pt-3 pb-3 sm:px-5 sm:pt-8 sm:pb-5" aria-label="Hero">
+          <div className="mx-auto w-full max-w-[1520px]">
+            <div
+              className="relative min-h-[620px] overflow-hidden rounded-[16px] border border-[#E2D5C8] sm:min-h-0 sm:rounded-[20px]"
+              style={{
+                background: 'linear-gradient(135deg, #ffffff 0%, #FFF8F0 55%, #FFF0DC 100%)',
+                boxShadow: '0 16px 48px rgba(58,46,40,0.08)',
+              }}
+            >
+              {/* dot texture */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-[0.03]"
+                style={{
+                  backgroundImage: 'radial-gradient(circle, #5a3a1a 1px, transparent 1px)',
+                  backgroundSize: '22px 22px',
+                }}
+              />
+              {/* map illustration */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -bottom-16 -right-40 top-16 block w-[145%] opacity-45 sm:bottom-0 sm:right-0 sm:top-0 sm:w-[58%] sm:opacity-90 lg:w-[52%]"
+              >
+                <Image
+                  src="/hero-map.svg"
+                  alt=""
+                  fill
+                  priority
+                  className="object-contain object-right"
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      'linear-gradient(to right, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.72) 34%, rgba(255,255,255,0.12) 68%, transparent 100%)',
+                  }}
+                />
+              </div>
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 block sm:hidden"
+                style={{
+                  background:
+                    'linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.9) 56%, rgba(255,244,230,0.38) 100%)',
+                }}
+              />
 
-        .wrap { max-width: var(--container); margin: 0 auto; padding: 0 var(--gutter); }
+              <div className="relative z-10 px-3 py-4 pb-28 sm:px-10 sm:py-11">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+                  <div className="w-full rounded-[14px] bg-white/78 p-4 backdrop-blur-[2px] sm:max-w-[540px] sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
+                    <p className="inline-flex items-center gap-1.5 rounded-full border border-[#C8B89A] bg-[#FFF4E6] px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#6B4A28]">
+                      <svg width="9" height="11" viewBox="0 0 10 12" fill="none" aria-hidden>
+                        <path d="M5 0C2.24 0 0 2.24 0 5c0 3.75 5 7 5 7s5-3.25 5-7c0-2.76-2.24-5-5-5zm0 6.75A1.75 1.75 0 1 1 5 3.25a1.75 1.75 0 0 1 0 3.5z" fill="currentColor" />
+                      </svg>
+                      Hubballi · Dharwad
+                    </p>
+                    <h1 className="mt-3 text-[28px] font-black leading-[1.04] tracking-tight text-slate-950 min-[420px]:text-[32px] sm:text-[50px]">
+                      Find Your Next<br />
+                      Property in<br />
+                      <span className="text-[#1D9E75]">Hubballi-Dharwad.</span>
+                    </h1>
+                    <p className="mt-3 text-[14px] font-medium leading-6 text-slate-500 sm:text-[16px] sm:leading-relaxed">
+                      Personally verified listings — browse homes, post your requirement, or list your property with direct local support.
+                    </p>
+                    <div className="mt-5 grid gap-3 min-[420px]:grid-cols-2 sm:flex sm:flex-wrap sm:items-center">
+                      <Link
+                        href="/properties"
+                        className="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#1D9E75] px-5 text-[14px] font-semibold text-white no-underline shadow-[0_8px_20px_rgba(29,158,117,0.25)] transition hover:bg-[#168662] active:scale-[0.98]"
+                      >
+                        Browse listings →
+                      </Link>
+                      <Link
+                        href="/find"
+                        className="inline-flex h-11 items-center justify-center rounded-[10px] border-2 border-[#4F46E5] bg-white/65 px-5 text-[14px] font-semibold text-[#4F46E5] no-underline transition hover:bg-[#4F46E5] hover:text-white active:scale-[0.98] sm:bg-transparent"
+                      >
+                        Post my requirement
+                      </Link>
+                    </div>
+                    <p className="mt-2.5 text-[13px] text-slate-400">
+                      Own a property?{' '}
+                      <Link href="/list" className="font-semibold text-slate-600 no-underline hover:text-slate-900 hover:underline">
+                        List it here →
+                      </Link>
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <span className="rounded-full bg-[#E1F5EE] px-3 py-1 text-[12px] font-semibold text-[#085041]">✓ Personally verified</span>
+                      <span className="rounded-full bg-[#EEF2FF] px-3 py-1 text-[12px] font-semibold text-[#3730A3]">✓ Visit requests</span>
+                      <span className="rounded-full bg-[#FAEEDA] px-3 py-1 text-[12px] font-semibold text-[#633806]">✓ Local support</span>
+                    </div>
+                  </div>
 
-        /* ══ TOP BAR ══════════════════════════════════ */
-        .top-bar {
-          background: var(--surface);
-          border-bottom: 1px solid var(--line);
-          padding: 18px var(--gutter);
-          max-width: 100%;
-        }
-        .top-bar-inner {
-          max-width: var(--container); margin: 0 auto;
-          display: flex; align-items: center;
-          justify-content: space-between; gap: 16px;
-          flex-wrap: wrap;
-        }
-        .top-tagline {
-          font-size: 14px; font-weight: 600; color: #5A5550;
-        }
-        .top-tagline strong { color: #7A3A18; font-weight: 850; }
-
-        /* Filter tabs */
-        .filter-tabs {
-          display: flex; gap: 6px; align-items: center;
-        }
-        .filter-tab {
-          font-size: 13px; font-weight: 600;
-          padding: 7px 18px; border-radius: 20px;
-          border: 1.5px solid #D4B79D;
-          text-decoration: none; color: #5A5550;
-          transition: all 0.12s; white-space: nowrap;
-          background: rgba(255,255,255,0.34);
-        }
-        .filter-tab:hover { border-color: #7A3A18; color: #7A3A18; background: #fff; }
-        .filter-tab-active {
-          background: #7A3A18; color: #fff;
-          border-color: #7A3A18;
-        }
-        .filter-tab-rent-active {
-          background: #1A4FCC; color: #fff; border-color: #1A4FCC;
-        }
-        .filter-tab-sale-active {
-          background: #148040; color: #fff; border-color: #148040;
-        }
-
-        /* ══ LISTINGS GRID ════════════════════════════ */
-        .listings-section {
-          padding: 32px 0 48px;
-          background: var(--surface);
-        }
-        .listings-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
-        }
-
-        /* ══ LISTING CARD ═════════════════════════════ */
-        .lc {
-          background: var(--card-bg);
-          border: 1.5px solid var(--line);
-          border-radius: var(--radius-lg);
-          overflow: hidden;
-          display: flex; flex-direction: column;
-          box-shadow: 0 1px 3px rgba(24,18,14,0.06);
-          transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s;
-        }
-        .lc:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 10px 32px rgba(24,18,14,0.11);
-          border-color: var(--line-dark);
-        }
-        .lc-link { text-decoration: none; display: flex; flex-direction: column; flex: 1; }
-
-        .lc-photo {
-          position: relative; aspect-ratio: 4/3;
-          background: var(--surface); overflow: hidden; flex-shrink: 0;
-        }
-        .lc-photo img { transition: transform 0.35s ease; }
-        .lc:hover .lc-photo img { transform: scale(1.05); }
-
-        .lc-overlay {
-          position: absolute; inset: 0;
-          background: linear-gradient(to top, rgba(24,18,14,0.65) 0%, transparent 55%);
-          pointer-events: none;
-        }
-        .lc-photo-empty {
-          display: flex; align-items: center; justify-content: center;
-          height: 100%; color: var(--ink-4);
-        }
-
-        .lc-top-left {
-          position: absolute; top: 10px; left: 10px;
-          display: flex; gap: 5px;
-        }
-        .lc-badge {
-          font-size: 10px; font-weight: 700;
-          padding: 3px 9px; border-radius: 5px;
-          text-transform: uppercase; letter-spacing: 0.05em;
-        }
-        .lc-badge-rent     { background: #1A4FCC; color: #fff; }
-        .lc-badge-sale     { background: #148040; color: #fff; }
-        .lc-badge-featured { background: var(--brand); color: #fff; }
-
-        .lc-bhk {
-          position: absolute; top: 10px; right: 10px;
-          font-size: 11px; font-weight: 700; color: #fff;
-          background: rgba(0,0,0,0.42); padding: 3px 9px;
-          border-radius: 5px; backdrop-filter: blur(4px);
-        }
-        .lc-locality {
-          position: absolute; bottom: 10px; left: 10px;
-          display: flex; align-items: center; gap: 4px;
-          font-size: 12px; font-weight: 600; color: #fff;
-          text-shadow: 0 1px 4px rgba(0,0,0,0.5);
-        }
-
-        .lc-body {
-          padding: 14px 16px 12px;
-          display: flex; flex-direction: column; gap: 6px; flex: 1;
-        }
-        .lc-title {
-          font-size: 14px; font-weight: 500; color: var(--ink-2);
-          line-height: 1.45;
-          display: -webkit-box; -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical; overflow: hidden;
-        }
-        .lc-price {
-          font-size: 20px; font-weight: 700; color: var(--ink);
-          letter-spacing: -0.03em;
-        }
-        .lc-price-unit {
-          font-size: 13px; font-weight: 400;
-          color: var(--ink-3); margin-left: 2px;
-        }
-
-        .lc-footer {
-          padding: 0 12px 12px;
-        }
-        .lc-wa-btn {
-          display: flex; align-items: center; justify-content: center; gap: 7px;
-          width: 100%; padding: 9px 0;
-          background: var(--wa-green); color: #fff;
-          font-size: 13px; font-weight: 700;
-          border-radius: var(--radius-md);
-          text-decoration: none;
-          transition: background 0.12s;
-        }
-        .lc-wa-btn:hover { background: #1EB85A; }
-
-        /* ══ SKELETON ══════════════════════════════════ */
-        .lc-skeleton { pointer-events: none; }
-        .sk-block, .sk-line {
-          background: linear-gradient(90deg, var(--line) 25%, var(--surface) 50%, var(--line) 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.4s infinite;
-          border-radius: 4px;
-        }
-        .sk-block { aspect-ratio: 4/3; border-radius: 0; }
-        @keyframes shimmer {
-          0%   { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-
-        /* ══ EMPTY STATE ══════════════════════════════ */
-        .empty-state {
-          grid-column: 1 / -1;
-          text-align: center; padding: 72px 24px;
-          border: 2px dashed var(--line); border-radius: var(--radius-lg);
-        }
-        .empty-state h3 { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
-        .empty-state p  { font-size: 14px; color: var(--ink-3); margin-bottom: 24px; }
-        .btn-wa {
-          display: inline-flex; align-items: center; gap: 8px;
-          padding: 11px 20px; border-radius: var(--radius-md);
-          background: var(--wa-green); color: #fff;
-          font-size: 14px; font-weight: 700;
-          text-decoration: none; transition: background 0.12s;
-        }
-        .btn-wa:hover { background: #1EB85A; }
-
-        /* ══ DEMAND SECTION ═══════════════════════════ */
-        .demand-section {
-          background: var(--surface);
-          padding: 64px 0;
-          border-top: 1px solid var(--line);
-        }
-        .demand-header {
-          display: flex; align-items: flex-end; justify-content: space-between;
-          gap: 24px; flex-wrap: wrap; margin-bottom: 36px;
-        }
-        .demand-eyebrow {
-          font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
-          text-transform: uppercase; color: var(--brand);
-          display: flex; align-items: center; gap: 7px; margin-bottom: 10px;
-        }
-        .demand-eyebrow-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-        .demand-title {
-          font-size: clamp(22px, 3vw, 32px); font-weight: 700;
-          color: var(--ink); letter-spacing: -0.02em; line-height: 1.2;
-          margin-bottom: 8px;
-        }
-        .demand-sub { font-size: 14px; color: var(--ink-3); max-width: 440px; line-height: 1.65; }
-        .demand-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-        .btn-white {
-          display: inline-flex; align-items: center; gap: 7px;
-          padding: 10px 18px; border-radius: var(--radius-md);
-          background: var(--brand); color: #fff;
-          font-size: 13px; font-weight: 700;
-          text-decoration: none; border: 1.5px solid var(--brand);
-          transition: background 0.12s, border-color 0.12s;
-        }
-        .btn-white:hover { background: var(--brand-mid); border-color: var(--brand-mid); }
-        .btn-wa-sm {
-          display: inline-flex; align-items: center; gap: 7px;
-          padding: 10px 18px; border-radius: var(--radius-md);
-          background: var(--wa-green); color: #fff;
-          font-size: 13px; font-weight: 700;
-          text-decoration: none; transition: background 0.12s;
-        }
-        .btn-wa-sm:hover { background: #1EB85A; }
-
-        .demand-grid {
-          display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-        }
-        .demand-card {
-          background: var(--card-bg);
-          border: 1.5px solid var(--line);
-          border-radius: var(--radius-lg); padding: 22px;
-          display: flex; flex-direction: column;
-          box-shadow: 0 1px 3px rgba(24,18,14,0.04);
-          transition: border-color 0.15s, transform 0.15s;
-        }
-        .demand-card:hover {
-          border-color: var(--line-dark);
-          transform: translateY(-2px);
-        }
-        .demand-urgency {
-          display: flex; align-items: center; gap: 7px; margin-bottom: 14px;
-        }
-        .demand-dot {
-          width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
-          animation: blink 2s ease-in-out infinite;
-        }
-        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-        .demand-dot-high   { background: #F87171; }
-        .demand-dot-medium { background: #FBBF24; }
-        .demand-urgency-label {
-          font-size: 10px; font-weight: 700;
-          text-transform: uppercase; letter-spacing: 0.07em;
-        }
-        .demand-urgency-label.high   { color: #B91C1C; }
-        .demand-urgency-label.medium { color: #B45309; }
-        .demand-segment {
-          font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 3px;
-        }
-        .demand-area { font-size: 12px; color: var(--ink-3); margin-bottom: 18px; }
-        .demand-bottom {
-          display: flex; align-items: flex-end; justify-content: space-between;
-          border-top: 1px solid var(--line);
-          padding-top: 14px; margin-top: auto;
-        }
-        .demand-count {
-          font-size: 40px; font-weight: 800; color: var(--brand);
-          line-height: 1; letter-spacing: -0.04em;
-        }
-        .demand-count-label { font-size: 11px; color: var(--ink-3); margin-top: 3px; }
-        .demand-budget { font-size: 13px; font-weight: 700; color: var(--ink); }
-        .demand-budget-label { font-size: 10px; color: var(--ink-3); margin-top: 3px; text-align: right; }
-
-        /* ══ DUAL CTA ══════════════════════════════════ */
-        .cta-section {
-          background: var(--surface);
-          padding: 12px 0 72px;
-        }
-        .cta-grid {
-          display: grid; grid-template-columns: 1fr 1fr;
-          gap: 18px;
-        }
-        .cta-panel {
-          padding: 36px;
-          border: 1.5px solid var(--line);
-          border-radius: var(--radius-lg);
-          background: var(--card-bg);
-          box-shadow: 0 1px 3px rgba(24,18,14,0.04);
-        }
-        .cta-panel:first-child { border-right: 1.5px solid var(--line); }
-        .cta-panel-label {
-          font-size: 11px; font-weight: 700; text-transform: uppercase;
-          letter-spacing: 0.1em; color: var(--brand); margin-bottom: 12px;
-        }
-        .cta-panel-title {
-          font-size: 22px; font-weight: 800; color: var(--ink);
-          line-height: 1.25; margin-bottom: 10px; letter-spacing: -0.02em;
-        }
-        .cta-panel-body {
-          font-size: 14px; color: var(--ink-3); line-height: 1.7; margin-bottom: 26px;
-        }
-        .cta-btns { display: flex; gap: 10px; flex-wrap: wrap; }
-
-        /* ══ RESPONSIVE ════════════════════════════════ */
-        @media (max-width: 900px) {
-          .listings-grid  { grid-template-columns: repeat(2, 1fr); }
-          .demand-grid    { grid-template-columns: repeat(2, 1fr); }
-          .cta-grid       { grid-template-columns: 1fr; }
-          .cta-panel:first-child { border-right: 1.5px solid var(--line); }
-        }
-        @media (max-width: 560px) {
-          .listings-grid  { grid-template-columns: 1fr; }
-          .demand-grid    { grid-template-columns: 1fr; }
-          .top-bar-inner  { flex-direction: column; align-items: flex-start; }
-          :root { --gutter: 12px; }
-        }
-      `}</style>
-
-      <main style={{ background: 'var(--surface)' }}>
-
-        {/* Listings toolbar */}
-        <div className="top-bar">
-          <div className="top-bar-inner">
-            <p className="top-tagline">
-              <strong>Verified properties</strong> in Hubballi-Dharwad &mdash; direct from owners, zero brokerage.
-            </p>
-            <div className="filter-tabs">
-              <Link href="/" className="filter-tab filter-tab-active">All ({all.length})</Link>
-              {rent.length > 0 && (
-                <Link href="/rent" className="filter-tab">
-                  Rent ({rent.length})
-                </Link>
-              )}
-              {sale.length > 0 && (
-                <Link href="/sale" className="filter-tab">
-                  Buy ({sale.length})
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ══ LISTINGS ══════════════════════════════════ */}
-        <section className="listings-section" aria-label="Property listings">
-          <div className="wrap">
-            <div className="listings-grid">
-              {all.length > 0
-                ? all.map((l) => <ListingCard key={l.id} listing={l} />)
-                : Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-              }
-
-              {all.length === 0 && (
-                <div className="empty-state">
-                  <h3>Listings coming soon</h3>
-                  <p>We&apos;re verifying properties right now. Share your need and we&apos;ll match you directly.</p>
-                  <a
-                    href={whatsappLink('Hi, I am looking for a property in Hubballi.')}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-wa"
-                  >
-                    {WA_ICON} Chat on WhatsApp
-                  </a>
+                  <div className="absolute bottom-4 right-4 flex shrink-0 flex-row gap-3 sm:relative sm:bottom-auto sm:right-auto sm:ml-auto sm:flex-col sm:items-end sm:pt-2">
+                    <div className="rounded-[14px] border border-[#E2D5C8] bg-white/90 px-4 py-3 text-right backdrop-blur-sm sm:px-5 sm:py-4">
+                      <p className="text-[30px] font-black leading-none text-[#4F46E5] sm:text-[36px]">300+</p>
+                      <p className="mt-1 text-[12px] font-medium text-slate-500 sm:text-[13px]">Open requirements</p>
+                    </div>
+                    {totalListings >= 10 && (
+                      <div className="rounded-[14px] border border-[#E2D5C8] bg-white/85 px-5 py-4 text-right backdrop-blur-sm">
+                        <p className="text-[36px] font-black leading-none text-slate-950">{totalListings}</p>
+                        <p className="mt-1 text-[13px] font-medium text-slate-500">Active listings</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ══ DEMAND SIGNALS ════════════════════════════ */}
-        <section className="demand-section" aria-label="Active property demand">
-          <div className="wrap">
-            <div className="demand-header">
+        {/* ── LISTINGS GRID ─────────────────────────────────────────── */}
+        <section className="px-3 pb-5 sm:px-5 sm:pb-7" aria-label="Recent listings">
+          <div className="mx-auto w-full max-w-[1520px]">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                Recently verified
+              </p>
+              <Link href="/properties" className="text-[13px] font-semibold text-[#1D9E75] no-underline hover:underline">
+                View all →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4 md:gap-4">
+              {previewListings.length > 0
+                ? previewListings.map((listing) => (
+                    <PropertyCard key={listing.id} listing={listing} />
+                  ))
+                : Array.from({ length: HOME_PREVIEW_COUNT }).map((_, i) => (
+                    <PreviewSkeleton key={i} />
+                  ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── HOW IT WORKS ──────────────────────────────────────────── */}
+        <section className="px-3 py-8 sm:px-5 sm:py-12" aria-label="How it works">
+          <div className="mx-auto w-full max-w-[1520px]">
+            <div className="mb-10">
+              <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div className="max-w-2xl">
+                  <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#BFE9DC] bg-[#E1F5EE] px-3 py-1.5 text-[12px] font-black uppercase tracking-[0.12em] text-[#085041]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#1D9E75]" />
+                    How it works
+                  </p>
+                  <h2 className="text-[26px] font-black leading-tight tracking-[-0.02em] text-slate-950 sm:text-[34px]">
+                    A simpler way to find your next property.
+                  </h2>
+                  <p className="mt-2 max-w-xl text-[14px] leading-6 text-slate-500">
+                    Verified listings, video tours, and organised visit requests without brokerage confusion.
+                  </p>
+                </div>
+                <Link
+                  href="/properties"
+                  className="inline-flex h-10 shrink-0 items-center justify-center rounded-[10px] bg-[#1D9E75] px-5 text-[13px] font-bold text-white no-underline transition hover:bg-[#168662] active:scale-[0.98]"
+                >
+                  Browse properties &rarr;
+                </Link>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="rounded-[14px] border border-[#E7DED5] bg-white p-5 shadow-[0_4px_14px_rgba(58,46,40,0.04)] transition hover:bg-[#FAFAF9]">
+                  <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#E1F5EE] text-[12px] font-black text-[#085041]">
+                    01
+                  </div>
+                  <h3 className="text-[18px] font-black leading-snug text-slate-950">
+                    Browse verified listings
+                  </h3>
+                  <p className="mt-2 text-[13px] leading-6 text-slate-500">
+                    See active rent and sale properties with clear photos, locality, price, and visit options.
+                  </p>
+                </div>
+
+                <div className="rounded-[14px] border border-[#E7DED5] bg-white p-5 shadow-[0_4px_14px_rgba(58,46,40,0.04)] transition hover:bg-[#FAFAF9]">
+                  <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#EEF2FF] text-[12px] font-black text-[#3730A3]">
+                    02
+                  </div>
+                  <h3 className="text-[18px] font-black leading-snug text-slate-950">
+                    Watch before visiting
+                  </h3>
+                  <p className="mt-2 text-[13px] leading-6 text-slate-500">
+                    Use video tours and listing details to shortlist only the properties that genuinely fit.
+                  </p>
+                </div>
+
+                <div className="rounded-[14px] border border-[#E7DED5] bg-white p-5 shadow-[0_4px_14px_rgba(58,46,40,0.04)] transition hover:bg-[#FAFAF9]">
+                  <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#FAEEDA] text-[12px] font-black text-[#633806]">
+                    03
+                  </div>
+                  <h3 className="text-[18px] font-black leading-snug text-slate-950">
+                    Request a visit
+                  </h3>
+                  <p className="mt-2 text-[13px] leading-6 text-slate-500">
+                    Submit a visit request once. We organise the follow-up so nothing gets lost in chat.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Header */}
+            <div className="hidden">
+              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[#1D9E75]">
+                How it works
+              </p>
+              <h2 className="text-[36px] font-black leading-[1.06] tracking-[-0.02em] text-slate-950 sm:text-[48px]">
+                Property the{' '}
+                <span className="text-slate-300">right</span>{' '}
+                way.<br />
+                <span className="text-[#1D9E75]">Finally.</span>
+              </h2>
+              <p className="mt-3 max-w-[460px] text-[16px] leading-relaxed text-slate-500">
+                Verified listings. Real visits. One person you can call. No brokers, no runaround.
+              </p>
+            </div>
+
+            {/* ── SEEKERS ── */}
+            <p className="hidden">
+              For property seekers
+            </p>
+
+            {/* Bento — desktop: left tall + right 2 stacked, mobile: single col */}
+            <div className="hidden">
+              {/* Card 1 tall */}
+              <div
+                className="cursor-default border-b border-[#E7DED5] bg-white p-7 transition-colors hover:bg-[#FAFAF9] sm:border-b-0 sm:p-9"
+                style={{ gridRow: '1 / 3' }}
+              >
+                <p className="mb-5 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                  Step 01 · You
+                </p>
+                <p className="text-[26px] font-black leading-[1.12] tracking-[-0.02em] text-slate-950 sm:text-[32px]">
+                  Browse{' '}
+                  <span className="text-[#1D9E75]">verified</span>{' '}
+                  listings —{' '}not guesses.
+                </p>
+                <p className="mt-5 text-[14px] leading-relaxed text-slate-500">
+                  Every flat on this platform has been physically visited by us before it went live. No stock photos. No ghost listings. No surprises.
+                </p>
+                <span
+                  className="mt-5 inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em]"
+                  style={{ background: '#E1F5EE', color: '#085041' }}
+                >
+                  You browse
+                </span>
+              </div>
+
+              {/* Card 2 */}
+              <div className="cursor-default border-b border-[#E7DED5] bg-white p-7 transition-colors hover:bg-[#FAFAF9] sm:border-l">
+                <p className="mb-4 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                  Step 02 · You
+                </p>
+                <p className="mb-2 text-[18px] font-black leading-[1.2] tracking-[-0.01em] text-slate-950">
+                  Watch the video tour from your phone.
+                </p>
+                <p className="text-[13px] leading-relaxed text-slate-500">
+                  We shoot a proper walkthrough of every property. See the rooms, the view, the building — before you leave home.
+                </p>
+                <span
+                  className="mt-4 inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em]"
+                  style={{ background: '#E1F5EE', color: '#085041' }}
+                >
+                  You decide
+                </span>
+              </div>
+
+              {/* Card 3 */}
+              <div className="cursor-default bg-white p-7 transition-colors hover:bg-[#FAFAF9] sm:border-l sm:border-t sm:border-[#E7DED5]">
+                <p className="mb-4 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                  Step 03 · Us
+                </p>
+                <p className="mb-2 text-[18px] font-black leading-[1.2] tracking-[-0.01em] text-slate-950">
+                  Tap &ldquo;Visit.&rdquo; We confirm within the hour.
+                </p>
+                <p className="text-[13px] leading-relaxed text-slate-500">
+                  We coordinate with the owner so you never have to make an awkward cold call to a stranger.
+                </p>
+                <span
+                  className="mt-4 inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em]"
+                  style={{ background: '#EEF2FF', color: '#3730A3' }}
+                >
+                  We coordinate
+                </span>
+              </div>
+            </div>
+
+            {/* Result card */}
+            <div className="hidden">
+              <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                <div>
+                  <p className="mb-2 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                    The result · You
+                  </p>
+                  <p className="mb-1.5 text-[20px] font-black leading-[1.2] tracking-[-0.01em] text-slate-950">
+                    You walk in. It looks exactly like the video.
+                  </p>
+                  <p className="text-[13px] leading-relaxed text-slate-500">
+                    No surprises. No negotiating with strangers. Just you and a flat that works — in Vidyanagar, Navanagar, Gokul Road, wherever you need.
+                  </p>
+                </div>
+                <div className="shrink-0 sm:text-right">
+                  <p className="text-[48px] font-black leading-none tracking-[-0.03em] text-[#1D9E75]">
+                    300+
+                  </p>
+                  <p className="mt-0.5 text-[12px] text-slate-400">
+                    found their property<br />this way already
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Seeker CTAs */}
+            <div className="hidden">
+              <Link
+                href="/properties"
+                className="inline-flex h-11 items-center justify-center rounded-full bg-[#1D9E75] px-7 text-[14px] font-bold text-white no-underline transition hover:bg-[#168662] active:scale-[0.98]"
+                style={{ boxShadow: '0 6px 18px rgba(29,158,117,0.22)' }}
+              >
+                Browse listings →
+              </Link>
+              <Link
+                href="/find"
+                className="inline-flex h-11 items-center justify-center rounded-full border border-[#E2D5C8] bg-white px-7 text-[14px] font-bold text-slate-600 no-underline transition hover:bg-[#FFF4E6] active:scale-[0.98]"
+              >
+                Post my requirement
+              </Link>
+            </div>
+
+            {/* ── OWNERS ── */}
+            <div className="mb-4 h-px w-full bg-[#E7DED5]" />
+
+            <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="demand-eyebrow">
-                  <span className="demand-eyebrow-dot" />
+                <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#D8D4FF] bg-[#EEF2FF] px-3 py-1.5 text-[12px] font-black uppercase tracking-[0.12em] text-[#3730A3]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#4F46E5]" />
                   For property owners
                 </p>
-                <h2 className="demand-title">Real seekers. Right now.</h2>
-                <p className="demand-sub">
-                  These are active requirements from people who reached out this month.
-                  If your property fits, we connect you directly.
-                </p>
+                <h3 className="text-[28px] font-black leading-[1.1] tracking-[-0.02em] text-slate-950 sm:text-[36px]">
+                  You tell us once.<br />
+                  We do everything else.
+                </h3>
               </div>
-              <div className="demand-actions">
-                <Link href="/list" className="btn-white">Submit my property</Link>
-                <a
-                  href={whatsappLink('Hi, I want to list my property in Hubballi.')}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-wa-sm"
-                >
-                  {WA_ICON} WhatsApp us
-                </a>
+              <p className="max-w-[300px] text-[14px] leading-relaxed text-slate-500 sm:text-right">
+                From your first message to your first confirmed visit — here&apos;s exactly what we commit to.
+              </p>
+            </div>
+
+            {/* Commitment grid */}
+            <div className="mb-2 overflow-hidden rounded-[18px] border border-[#E7DED5]">
+              <div className="grid grid-cols-2 md:grid-cols-4">
+                {OWNER_STEPS.map(({ actor, actorColor, num, unit, numColor, day, title, desc }, i) => (
+                  <div
+                    key={i}
+                    className="cursor-default bg-white px-5 py-6 transition-colors hover:bg-[#FAFAF9]"
+                    style={{
+                      borderLeft: i % 2 !== 0 ? '0.5px solid #E7DED5' : 'none',
+                      borderTop: i >= 2 ? '0.5px solid #E7DED5' : 'none',
+                    }}
+                  >
+                    <p
+                      className="mb-3 text-[11px] font-bold uppercase tracking-[0.1em]"
+                      style={{ color: actorColor }}
+                    >
+                      {actor}
+                    </p>
+                    <p
+                      className="mb-0.5 text-[40px] font-black leading-none tracking-[-0.03em] sm:text-[44px]"
+                      style={{ color: numColor }}
+                    >
+                      {num}
+                      <span className="text-[16px] font-black text-slate-300">
+                        {' '}{unit}
+                      </span>
+                    </p>
+                    <p className="mb-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.06em] text-slate-400">
+                      {day}
+                    </p>
+                    <p className="mb-1 text-[14px] font-black leading-[1.3] text-slate-950">
+                      {title}
+                    </p>
+                    <p className="text-[12px] leading-relaxed text-slate-500">
+                      {desc}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="demand-grid">
-              {DEMAND_SIGNALS.map((d) => (
-                <div key={d.segment} className="demand-card">
-                  <div className="demand-urgency">
-                    <span className={`demand-dot demand-dot-${d.urgency}`} />
-                    <span className={`demand-urgency-label ${d.urgency}`}>
-                      {d.urgency === 'high' ? 'High demand' : 'Active demand'}
-                    </span>
-                  </div>
-                  <p className="demand-segment">{d.segment}</p>
-                  <p className="demand-area">{d.area}</p>
-                  <div className="demand-bottom">
-                    <div>
-                      <p className="demand-count">{d.seekers}</p>
-                      <p className="demand-count-label">seekers waiting</p>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <p className="demand-budget">{d.budget}</p>
-                      <p className="demand-budget-label">budget range</p>
-                    </div>
-                  </div>
+            {/* Payoff band */}
+            <div
+              className="overflow-hidden rounded-[18px] border border-[#E7DED5] bg-white px-7 py-7 sm:px-9"
+              style={{ boxShadow: '0 2px 12px rgba(58,46,40,0.04)' }}
+            >
+              <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+                <div className="max-w-md">
+                  <p className="mb-2 text-[22px] font-black leading-[1.2] tracking-[-0.02em] text-slate-950 sm:text-[28px]">
+                    First enquiry arrives.<br />
+                    <span style={{ color: '#4F46E5' }}>You just show up.</span>
+                  </p>
+                  <p className="text-[14px] leading-relaxed text-slate-500">
+                    We screen every enquiry, coordinate all visits, and notify you when a serious buyer or tenant is ready to meet. You don&apos;t chase anyone.
+                  </p>
                 </div>
-              ))}
+                <Link
+                  href="/list"
+                  className="inline-flex h-11 shrink-0 items-center justify-center rounded-full px-7 text-[14px] font-bold text-white no-underline transition hover:opacity-90 active:scale-[0.98]"
+                  style={{
+                    background: '#4F46E5',
+                    boxShadow: '0 6px 18px rgba(79,70,229,0.22)',
+                  }}
+                >
+                  List my property →
+                </Link>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ── POST YOUR REQUIREMENT — CTA BAND ─────────────────────── */}
+        <section className="px-3 pb-5 sm:px-5 sm:pb-7" aria-label="Post requirement">
+          <div className="mx-auto w-full max-w-[1520px]">
+            <div
+              className="relative overflow-hidden rounded-[20px] px-7 py-9 sm:px-12 sm:py-10"
+              style={{
+                background: 'linear-gradient(135deg, #3730A3 0%, #4F46E5 60%, #6366F1 100%)',
+                boxShadow: '0 16px 48px rgba(79,70,229,0.22)',
+              }}
+            >
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-[0.06]"
+                style={{
+                  backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)',
+                  backgroundSize: '20px 20px',
+                }}
+              />
+              <div className="relative z-10 flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="max-w-xl">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-indigo-200">
+                    Can&apos;t find what you need?
+                  </p>
+                  <h2 className="mt-2 text-[24px] font-black leading-tight text-white sm:text-[32px]">
+                    Tell us what you&apos;re looking for.<br />
+                    We&apos;ll find it for you.
+                  </h2>
+                  <p className="mt-2 text-[14px] leading-relaxed text-indigo-200">
+                    Share your requirement once — budget, location, type — and we&apos;ll match it against our listings and incoming properties. Join 300+ people who&apos;ve already shared their need.
+                  </p>
+                </div>
+                <Link
+                  href="/find"
+                  className="inline-flex shrink-0 items-center justify-center rounded-[12px] bg-white px-7 py-3 text-[14px] font-bold text-[#4F46E5] no-underline shadow-[0_8px_24px_rgba(0,0,0,0.15)] transition hover:bg-indigo-50 active:scale-[0.98]"
+                >
+                  Post my requirement →
+                </Link>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ══ DUAL CTA ══════════════════════════════════ */}
-        <section className="cta-section" aria-label="Get started">
-          <div className="wrap">
-            <div className="cta-grid">
-              <div className="cta-panel">
-                <p className="cta-panel-label">I own a property</p>
-                <h3 className="cta-panel-title">List it. We&apos;ll find your tenant or buyer.</h3>
-                <p className="cta-panel-body">
-                  We verify, shoot a video tour, and match with seekers already in our pipeline.
-                  Free to list — zero brokerage cut.
-                </p>
-                <div className="cta-btns">
-                  <Link href="/list" className="btn-white">Submit property</Link>
-                  <a
-                    href={whatsappLink('Hi, I want to list my property in Hubballi.')}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-wa-sm"
-                  >
-                    {WA_ICON} WhatsApp
-                  </a>
+        {/* ── INSTAGRAM ─────────────────────────────────────────────── */}
+        <section className="px-3 pb-10 sm:px-5 sm:pb-14" aria-label="Follow on Instagram">
+          <div className="mx-auto w-full max-w-[1520px]">
+            <div
+              className="overflow-hidden rounded-[20px] border border-[#E2D5C8] bg-white"
+              style={{ boxShadow: '0 4px 20px rgba(58,46,40,0.05)' }}
+            >
+              <div className="flex flex-col items-stretch sm:flex-row">
+
+                {/* Left — text */}
+                <div className="flex flex-col justify-center px-7 py-8 sm:px-10 sm:py-9 sm:flex-1">
+                  <div className="mb-3 flex items-center gap-2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                      <rect x="2" y="2" width="20" height="20" rx="5" stroke="url(#ig2)" strokeWidth="1.8"/>
+                      <circle cx="12" cy="12" r="4.5" stroke="url(#ig2)" strokeWidth="1.8"/>
+                      <circle cx="17.5" cy="6.5" r="1" fill="#C8541A"/>
+                      <defs>
+                        <linearGradient id="ig2" x1="2" y1="22" x2="22" y2="2" gradientUnits="userSpaceOnUse">
+                          <stop offset="0%" stopColor="#F9A825"/>
+                          <stop offset="50%" stopColor="#E91E8C"/>
+                          <stop offset="100%" stopColor="#9C27B0"/>
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                    <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Instagram</span>
+                  </div>
+                  <h2 className="mb-2 text-[22px] font-black tracking-tight text-slate-950 sm:text-[26px]">
+                    See properties before you visit.
+                  </h2>
+                  <p className="mb-5 text-[14px] leading-relaxed text-slate-500">
+                    We shoot video tours of every property we verify. Daily walkthroughs across Hubballi-Dharwad — see the flat before you take the auto.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <a
+                      href="https://www.instagram.com/hublidharwad.app/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-10 items-center justify-center rounded-[10px] px-5 text-[13px] font-bold text-white no-underline transition hover:opacity-90 active:scale-[0.98]"
+                      style={{
+                        background: 'linear-gradient(135deg, #F9A825 0%, #E91E8C 50%, #9C27B0 100%)',
+                        boxShadow: '0 5px 16px rgba(233,30,140,0.22)',
+                      }}
+                    >
+                      Follow @hublidharwad.app
+                    </a>
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className="inline-block h-2 w-2 rounded-full"
+                        style={{ background: 'linear-gradient(135deg, #F9A825, #E91E8C)' }}
+                      />
+                      <span className="text-[13px] font-semibold text-slate-500">6,800+ followers</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="cta-panel">
-                <p className="cta-panel-label">I&apos;m looking for a property</p>
-                <h3 className="cta-panel-title">Tell us what you need. We&apos;ll match you.</h3>
-                <p className="cta-panel-body">
-                  Share your locality, budget, and BHK once.
-                  We do the legwork and connect you directly with verified owners.
-                </p>
-                <div className="cta-btns">
-                  <Link href="/find" className="btn-white">Share my need</Link>
-                  <a
-                    href={whatsappLink('Hi, I am looking for a property in Hubballi. Can you help me find one?')}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-wa-sm"
-                  >
-                    {WA_ICON} WhatsApp
-                  </a>
+
+                {/* Right — video thumbnail grid */}
+                <div className="grid grid-cols-3 gap-0 sm:w-[280px] sm:shrink-0">
+                  {[
+                    { label: 'Navanagar' },
+                    { label: 'Vidyanagar' },
+                    { label: 'Gokul Road' },
+                  ].map(({ label }, n) => (
+                    <a
+                      key={n}
+                      href="https://www.instagram.com/hublidharwad.app/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative aspect-square overflow-hidden bg-[#F0E8DC] no-underline"
+                      style={{
+                        borderLeft: n > 0 ? '1px solid #E7DED5' : 'none',
+                      }}
+                    >
+                      {/* play button */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/80 transition group-hover:bg-white group-hover:scale-105">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5 text-slate-700" aria-hidden>
+                            <polygon points="5 3 19 12 5 21 5 3" />
+                          </svg>
+                        </div>
+                      </div>
+                      {/* label */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent px-2 py-1.5">
+                        <p className="text-[9px] font-bold text-white">{label}</p>
+                      </div>
+                    </a>
+                  ))}
                 </div>
+
               </div>
             </div>
           </div>

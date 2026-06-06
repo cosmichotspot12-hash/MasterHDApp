@@ -4,10 +4,10 @@ import Link from 'next/link'
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210'
 
 const footerLinks = [
-  { href: '/rent', label: 'Rentals' },
-  { href: '/sale', label: 'Buy' },
-  { href: '/find', label: 'Find my home' },
-  { href: '/list', label: 'List property' },
+  { href: '/properties?type=rent', label: 'Rent' },
+  { href: '/properties?type=sale', label: 'Buy' },
+  { href: '/find', label: 'Find' },
+  { href: '/list', label: 'List' },
 ]
 
 const WA_ICON = (
@@ -31,17 +31,17 @@ export default function SiteFooter() {
         }
 
         .sf-inner {
-          max-width: 1320px;
+          max-width: 1520px;
           margin: 0 auto;
-          padding: 28px 20px;
+          padding: 22px 20px;
         }
 
         .sf-main {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 24px;
-          padding-bottom: 18px;
+          gap: 18px;
+          padding-bottom: 14px;
           border-bottom: 1px solid #EAE4DE;
         }
 
@@ -55,8 +55,8 @@ export default function SiteFooter() {
         }
 
         .sf-brand-mark {
-          width: 36px;
-          height: 36px;
+          width: 34px;
+          height: 34px;
           flex-shrink: 0;
           overflow: hidden;
           border: 1px solid rgba(24,18,14,0.08);
@@ -65,22 +65,22 @@ export default function SiteFooter() {
 
         .sf-brand-name {
           display: block;
-          color: #18120E;
-          font-size: 16px;
+          color: #111827;
+          font-size: 15px;
           font-weight: 800;
           line-height: 1;
           white-space: nowrap;
         }
 
         .sf-brand-name span {
-          color: #C2440E;
+          color: #111827;
         }
 
         .sf-brand-sub {
           display: block;
           margin-top: 4px;
           color: #7A6E68;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 500;
           white-space: nowrap;
         }
@@ -95,10 +95,10 @@ export default function SiteFooter() {
 
         .sf-link {
           border-radius: 8px;
-          padding: 8px 10px;
-          color: #3A2E28;
+          padding: 7px 9px;
+          color: #1F2937;
           font-size: 13px;
-          font-weight: 700;
+          font-weight: 800;
           text-decoration: none;
           transition: background 0.12s, color 0.12s;
           white-space: nowrap;
@@ -106,7 +106,7 @@ export default function SiteFooter() {
 
         .sf-link:hover {
           background: #FFF9F1;
-          color: #C2440E;
+          color: #111827;
         }
 
         .sf-action {
@@ -114,11 +114,11 @@ export default function SiteFooter() {
           align-items: center;
           justify-content: center;
           gap: 7px;
-          min-height: 40px;
+          min-height: 36px;
           border: 1.5px solid #DCEBDD;
           border-radius: 8px;
           background: #fff;
-          padding: 9px 13px;
+          padding: 8px 12px;
           color: #148040;
           font-size: 13px;
           font-weight: 800;
@@ -137,7 +137,7 @@ export default function SiteFooter() {
           align-items: center;
           justify-content: space-between;
           gap: 16px;
-          padding-top: 14px;
+          padding-top: 12px;
           color: #7A6E68;
           font-size: 12px;
         }
@@ -149,7 +149,7 @@ export default function SiteFooter() {
         }
 
         .sf-admin:hover {
-          color: #C2440E;
+          color: #111827;
         }
 
         @media (max-width: 860px) {
@@ -166,7 +166,7 @@ export default function SiteFooter() {
 
         @media (max-width: 560px) {
           .sf-inner {
-            padding: 24px 12px;
+            padding: 20px 12px;
           }
 
           .sf-nav {
@@ -197,11 +197,11 @@ export default function SiteFooter() {
           <div className="sf-main">
             <Link href="/" className="sf-brand" aria-label="Hubli Dharwad App home">
               <div className="sf-brand-mark">
-                <Image src="/icons/icon-192.png" alt="" width={36} height={36} />
+                <Image src="/icons/icon-192.png" alt="" width={34} height={34} />
               </div>
               <div>
                 <span className="sf-brand-name">Hubli<span>Dharwad</span>.app</span>
-                <span className="sf-brand-sub">Verified homes · Zero brokerage</span>
+                <span className="sf-brand-sub">Verified homes - zero brokerage</span>
               </div>
             </Link>
 

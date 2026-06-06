@@ -1,4 +1,5 @@
 import StatusUpdater from '../owner-submissions/StatusUpdater'
+import { adminApiHeaders } from '@/lib/admin-api'
 
 type VisitRequest = {
   id: string
@@ -14,8 +15,10 @@ type VisitRequest = {
 
 async function getVisitRequests(propertyFilter: string): Promise<VisitRequest[]> {
   try {
+    const headers = await adminApiHeaders()
     const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/visit-req`, {
-      cache: 'no-store'
+      cache: 'no-store',
+      headers,
     })
     const { data } = await res.json()
     if (propertyFilter) {
@@ -57,7 +60,7 @@ export default async function VisitRequestsPage() {
           <p className="text-gray-500">No visit requests yet.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="admin-table-wrap">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b">
               <tr>

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Request a Property Visit | MasterHD',
+  title: 'Request a Property Visit | Hubli Dharwad App',
   description: 'Schedule a property visit in Hubli-Dharwad. We coordinate the visit for you.',
 }
 

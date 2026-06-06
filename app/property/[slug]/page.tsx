@@ -1,10 +1,9 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ''
-
-import type { Metadata } from 'next'
 
 export async function generateMetadata({
   params,
@@ -15,15 +14,25 @@ export async function generateMetadata({
   const listing = await getListing(slug)
 
   if (!listing) {
-    return { title: 'Property Not Found | MasterHD' }
+    return { title: 'Property Not Found | Hubli Dharwad App' }
   }
 
+  const price = formatDisplayPrice(listing.listing_type, listing.price)
+
   return {
-    title: listing.title + ' in ' + listing.locality + ' | MasterHD',
-    description: 'View ' + listing.title + ' in ' + listing.locality + ', Hubli-Dharwad. Price: ₹' + listing.price.toLocaleString() + (listing.listing_type === 'rent' ? '/month' : '') + '. Contact us for a visit.',
+    title: listing.title + ' in ' + listing.locality + ' | Hubli Dharwad App',
+    description:
+      'View ' +
+      listing.title +
+      ' in ' +
+      listing.locality +
+      ', Hubli-Dharwad. Price: ' +
+      price +
+      (listing.listing_type === 'rent' ? '/month' : '') +
+      '. Contact us for a visit.',
     openGraph: {
-      title: listing.title + ' | MasterHD',
-      description: listing.locality + ', Hubli-Dharwad — ₹' + listing.price.toLocaleString(),
+      title: listing.title + ' | Hubli Dharwad App',
+      description: listing.locality + ', Hubli-Dharwad - ' + price,
       images: listing.photos && listing.photos.length > 0 ? [listing.photos[0]] : [],
     },
   }
@@ -32,7 +41,7 @@ export async function generateMetadata({
 async function getListing(slug: string) {
   try {
     const res = await fetch(APP_URL + '/api/listings/' + slug, {
-      cache: 'no-store'
+      cache: 'no-store',
     })
     const { data } = await res.json()
     return data
@@ -51,6 +60,39 @@ function getYouTubeEmbedUrl(url: string) {
 function getWhatsAppLink(title: string) {
   const msg = 'Hi, I am interested in ' + title + '. Please share more details.'
   return 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg)
+}
+
+function formatINR(amount: number) {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(amount)
+}
+
+function formatDisplayPrice(listingType: string, amount: number) {
+  if (listingType === 'sale') return formatReadableSalePrice(amount)
+  return formatINR(amount)
+}
+
+function formatReadableSalePrice(amount: number) {
+  const price = Number(amount)
+  const lakhValue = price / 100000
+  const displayLakhValue = Number(trimDecimal(lakhValue))
+
+  if (displayLakhValue >= 100) return '\u20B9' + trimDecimal(price / 10000000) + ' Cr'
+  if (lakhValue >= 1) return '\u20B9' + trimDecimal(lakhValue) + ' Lakh'
+  return formatINR(price)
+}
+
+function formatSalePrice(amount: number) {
+  if (amount >= 10000000) return '₹' + trimDecimal(amount / 10000000) + ' Cr'
+  if (amount >= 100000) return '₹' + trimDecimal(amount / 100000) + ' Lakh'
+  return formatINR(amount)
+}
+
+function trimDecimal(value: number) {
+  return value.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')
 }
 
 export default async function PropertyDetailPage({
@@ -76,304 +118,255 @@ export default async function PropertyDetailPage({
     listing.gym && 'Gym',
     listing.garden && 'Garden',
     listing.swimming_pool && 'Swimming Pool',
-  ].filter(Boolean)
+  ].filter(Boolean) as string[]
+
+  const detailItems = [
+    listing.property_category && { label: 'Type', value: listing.property_category.replace(/_/g, ' ') },
+    listing.bhk_count && { label: 'BHK', value: listing.bhk_count + ' BHK' },
+    listing.bathrooms && { label: 'Bathrooms', value: listing.bathrooms },
+    listing.furnishing && { label: 'Furnishing', value: listing.furnishing.replace(/_/g, ' ') },
+    listing.facing && { label: 'Facing', value: listing.facing },
+    listing.water_supply && { label: 'Water Supply', value: listing.water_supply },
+    listing.property_floor && {
+      label: 'Floor',
+      value: listing.property_floor + (listing.total_floors ? ' of ' + listing.total_floors : ''),
+    },
+    listing.age_of_property && { label: 'Age', value: listing.age_of_property.replace(/_/g, ' ') },
+    listing.available_from && { label: 'Available From', value: listing.available_from },
+    listing.maintenance_charges && { label: 'Maintenance', value: listing.maintenance_charges.replace(/_/g, ' ') },
+  ].filter(Boolean) as { label: string; value: string | number }[]
+
+  const preferenceItems = [
+    listing.preferred_tenants && { label: 'Preferred Tenants', value: listing.preferred_tenants },
+    listing.food_preference && { label: 'Food', value: listing.food_preference.replace(/_/g, ' ') },
+    { label: 'Pets', value: listing.pets_allowed ? 'Allowed' : 'Not Allowed' },
+    { label: 'Female Bachelors', value: listing.female_bachelors_allowed ? 'Allowed' : 'Not Allowed' },
+  ].filter(Boolean) as { label: string; value: string }[]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-orange-500">MasterHD</Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/rent" className="text-gray-600 hover:text-orange-500">Rent</Link>
-            <Link href="/sale" className="text-gray-600 hover:text-orange-500">Sale</Link>
-            <Link href="/find" className="text-gray-600 hover:text-orange-500">Find Property</Link>
-            <Link href="/list" className="bg-orange-500 text-white px-3 py-1.5 rounded-lg hover:bg-orange-600">List Property</Link>
-          </nav>
-        </div>
-      </header>
-
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex gap-8">
-
-          {/* Left Column — Main Content */}
-          <div className="flex-1 min-w-0">
-
-            {/* Photos */}
+    <div className="page-shell pb-28 md:pb-12">
+      <div className="site-container py-4 sm:py-6 lg:py-8">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-6">
+          <main className="min-w-0 space-y-5">
             {listing.photos && listing.photos.length > 0 && (
-              <div className="bg-white rounded-lg overflow-hidden shadow-sm mb-6">
-                <img
-                  src={listing.photos[0]}
-                  alt={listing.title}
-                  className="w-full h-72 object-cover"
-                />
+              <section className="overflow-hidden rounded-lg border border-[#dedbd2] bg-white">
+                <div className="flex min-h-[260px] items-center justify-center bg-[#fbf1e4] sm:min-h-[420px] lg:min-h-[560px]">
+                  <img
+                    src={listing.photos[0]}
+                    alt={listing.title}
+                    className="max-h-[72vh] w-full object-contain"
+                  />
+                </div>
                 {listing.photos.length > 1 && (
-                  <div className="flex gap-2 p-3 overflow-x-auto">
+                  <div className="flex gap-2 overflow-x-auto border-t border-[#dedbd2] bg-white p-2 sm:p-3">
                     {listing.photos.slice(1).map((photo: string, i: number) => (
                       <img
                         key={i}
                         src={photo}
-                        alt={'Photo ' + (i + 2)}
-                        className="h-16 w-24 object-cover rounded flex-shrink-0 cursor-pointer"
+                        alt={'Property photo ' + (i + 2)}
+                        className="h-16 w-24 flex-shrink-0 rounded-md border border-[#dedbd2] object-cover sm:h-20 sm:w-28"
                       />
                     ))}
                   </div>
                 )}
-              </div>
+              </section>
             )}
 
-            {/* YouTube Video */}
-            {embedUrl && (
-              <div className="bg-white rounded-lg overflow-hidden shadow-sm mb-6">
-                <div className="relative" style={{ paddingBottom: '56.25%' }}>
-                  <iframe
-                    src={embedUrl}
-                    className="absolute inset-0 w-full h-full"
-                    allowFullScreen
-                    title={listing.title}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Title and Basic Info */}
-            <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h1 className="text-xl font-bold text-gray-800">{listing.title}</h1>
-                  <p className="text-gray-500 text-sm mt-1">{listing.locality}, {listing.city}</p>
-                  {listing.landmark && (
-                    <p className="text-gray-400 text-xs mt-0.5">Near {listing.landmark}</p>
-                  )}
-                </div>
-                {listing.is_featured && (
-                  <span className="bg-orange-100 text-orange-600 text-xs px-2 py-1 rounded-full font-medium">
-                    Featured
-                  </span>
-                )}
-              </div>
-              <div className="mt-4">
-                <span className="text-2xl font-bold text-orange-500">
-                  {'₹' + listing.price.toLocaleString()}
-                </span>
-                {listing.listing_type === 'rent' && (
-                  <span className="text-gray-400 text-sm">/month</span>
-                )}
-                {listing.negotiable && (
-                  <span className="ml-2 text-green-600 text-sm font-medium">Negotiable</span>
-                )}
-              </div>
-              {listing.listing_type === 'rent' && listing.deposit_amount && (
-                <p className="text-gray-500 text-sm mt-1">
-                  Deposit: {'₹' + listing.deposit_amount.toLocaleString()}
-                </p>
-              )}
-            </div>
-
-            {/* Property Details */}
-            <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-              <h2 className="font-bold text-gray-800 mb-4">Property Details</h2>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                {listing.property_category && (
-                  <div>
-                    <p className="text-gray-400">Type</p>
-                    <p className="font-medium text-gray-700 capitalize">{listing.property_category.replace(/_/g, ' ')}</p>
-                  </div>
-                )}
-                {listing.bhk_count && (
-                  <div>
-                    <p className="text-gray-400">BHK</p>
-                    <p className="font-medium text-gray-700">{listing.bhk_count} BHK</p>
-                  </div>
-                )}
-                {listing.bathrooms && (
-                  <div>
-                    <p className="text-gray-400">Bathrooms</p>
-                    <p className="font-medium text-gray-700">{listing.bathrooms}</p>
-                  </div>
-                )}
-                {listing.furnishing && (
-                  <div>
-                    <p className="text-gray-400">Furnishing</p>
-                    <p className="font-medium text-gray-700 capitalize">{listing.furnishing.replace(/_/g, ' ')}</p>
-                  </div>
-                )}
-                {listing.facing && (
-                  <div>
-                    <p className="text-gray-400">Facing</p>
-                    <p className="font-medium text-gray-700 capitalize">{listing.facing}</p>
-                  </div>
-                )}
-                {listing.water_supply && (
-                  <div>
-                    <p className="text-gray-400">Water Supply</p>
-                    <p className="font-medium text-gray-700 capitalize">{listing.water_supply}</p>
-                  </div>
-                )}
-                {listing.property_floor && (
-                  <div>
-                    <p className="text-gray-400">Floor</p>
-                    <p className="font-medium text-gray-700">
-                      {listing.property_floor}
-                      {listing.total_floors ? ' of ' + listing.total_floors : ''}
-                    </p>
-                  </div>
-                )}
-                {listing.age_of_property && (
-                  <div>
-                    <p className="text-gray-400">Age</p>
-                    <p className="font-medium text-gray-700 capitalize">{listing.age_of_property.replace(/_/g, ' ')}</p>
-                  </div>
-                )}
-                {listing.available_from && (
-                  <div>
-                    <p className="text-gray-400">Available From</p>
-                    <p className="font-medium text-gray-700">{listing.available_from}</p>
-                  </div>
-                )}
-                {listing.maintenance_charges && (
-                  <div>
-                    <p className="text-gray-400">Maintenance</p>
-                    <p className="font-medium text-gray-700 capitalize">{listing.maintenance_charges.replace(/_/g, ' ')}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Rental Preferences */}
-            {listing.listing_type === 'rent' && (
-              <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-                <h2 className="font-bold text-gray-800 mb-4">Preferences</h2>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  {listing.preferred_tenants && (
-                    <div>
-                      <p className="text-gray-400">Preferred Tenants</p>
-                      <p className="font-medium text-gray-700 capitalize">{listing.preferred_tenants}</p>
-                    </div>
-                  )}
-                  {listing.food_preference && (
-                    <div>
-                      <p className="text-gray-400">Food</p>
-                      <p className="font-medium text-gray-700 capitalize">{listing.food_preference.replace(/_/g, ' ')}</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-gray-400">Pets</p>
-                    <p className="font-medium text-gray-700">{listing.pets_allowed ? 'Allowed' : 'Not Allowed'}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400">Female Bachelors</p>
-                    <p className="font-medium text-gray-700">{listing.female_bachelors_allowed ? 'Allowed' : 'Not Allowed'}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Amenities */}
-            {amenities.length > 0 && (
-              <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-                <h2 className="font-bold text-gray-800 mb-4">Amenities</h2>
-                <div className="flex flex-wrap gap-2">
-                  {amenities.map((a) => (
-                    <span key={a as string} className="bg-green-50 text-green-700 text-xs px-3 py-1 rounded-full border border-green-200">
-                      {a as string}
+            <section className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    <span className="rounded-full bg-[#fff0e2] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#9f4a22]">
+                      {listing.listing_type === 'rent' ? 'For Rent' : 'For Sale'}
                     </span>
-                  ))}
+                    {listing.negotiable && (
+                      <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-blue-700">
+                        Negotiable
+                      </span>
+                    )}
+                  </div>
+                  <h1 className="text-2xl font-black leading-tight text-[#20201d] sm:text-3xl lg:text-4xl">
+                    {listing.title}
+                  </h1>
+                  <p className="mt-2 text-sm font-medium text-gray-600 sm:text-base">
+                    {listing.locality}
+                    {listing.city ? ', ' + listing.city : ''}
+                  </p>
+                  {listing.landmark && (
+                    <p className="mt-1 text-sm text-gray-500">Near {listing.landmark}</p>
+                  )}
+                </div>
+                <div className="shrink-0 rounded-lg bg-[#fff9f1] p-4 sm:min-w-48 sm:text-right">
+                  <p className="text-2xl font-black text-[#9f4a22] sm:text-3xl">
+                    {formatDisplayPrice(listing.listing_type, listing.price)}
+                    {listing.listing_type === 'rent' && (
+                      <span className="ml-1 text-sm font-semibold text-gray-500">/month</span>
+                    )}
+                  </p>
+                  {listing.listing_type === 'rent' && listing.deposit_amount && (
+                    <p className="mt-1 text-sm font-medium text-gray-600">
+                      Deposit: {formatINR(listing.deposit_amount)}
+                    </p>
+                  )}
                 </div>
               </div>
+            </section>
+
+            <section className="grid gap-5 xl:grid-cols-[.95fr_1.05fr]">
+              {detailItems.length > 0 && (
+                <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
+                  <h2 className="mb-4 text-lg font-black text-[#20201d]">Property Details</h2>
+                  <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                    {detailItems.map((item) => (
+                      <div key={item.label} className="rounded-md bg-[#fffaf4] p-3">
+                        <p className="text-xs font-bold uppercase tracking-wide text-gray-400">{item.label}</p>
+                        <p className="mt-1 font-bold capitalize text-gray-800">{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {listing.description && (
+                <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
+                  <h2 className="mb-3 text-lg font-black text-[#20201d]">Description</h2>
+                  <p className="text-sm leading-7 text-gray-700 sm:text-base">{listing.description}</p>
+                </div>
+              )}
+            </section>
+
+            {embedUrl && (
+              <section className="rounded-lg border border-[#dedbd2] bg-white p-3 sm:p-4">
+                <div className="mb-3 flex items-center justify-between gap-3 px-1">
+                  <h2 className="text-lg font-black text-[#20201d]">Video Tour</h2>
+                  <span className="text-xs font-bold uppercase tracking-wide text-[#9f4a22]">Watch before visiting</span>
+                </div>
+                <div className="overflow-hidden rounded-md bg-black">
+                  <div className="relative aspect-video">
+                    <iframe
+                      src={embedUrl}
+                      className="absolute inset-0 h-full w-full"
+                      allowFullScreen
+                      title={listing.title}
+                    />
+                  </div>
+                </div>
+              </section>
             )}
 
-            {/* Description */}
-            {listing.description && (
-              <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-                <h2 className="font-bold text-gray-800 mb-3">Description</h2>
-                <p className="text-gray-600 text-sm leading-relaxed">{listing.description}</p>
-              </div>
+            <section className="grid gap-5 lg:grid-cols-2">
+              {listing.listing_type === 'rent' && preferenceItems.length > 0 && (
+                <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
+                  <h2 className="mb-4 text-lg font-black text-[#20201d]">Preferences</h2>
+                  <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                    {preferenceItems.map((item) => (
+                      <div key={item.label} className="rounded-md bg-[#fffaf4] p-3">
+                        <p className="text-xs font-bold uppercase tracking-wide text-gray-400">{item.label}</p>
+                        <p className="mt-1 font-bold capitalize text-gray-800">{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {amenities.length > 0 && (
+                <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
+                  <h2 className="mb-4 text-lg font-black text-[#20201d]">Amenities</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {amenities.map((a) => (
+                      <span key={a} className="rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs font-bold text-green-700">
+                        {a}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {(listing.nearby_places || listing.google_maps_url) && (
+              <section className="grid gap-5 lg:grid-cols-2">
+                {listing.nearby_places && (
+                  <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
+                    <h2 className="mb-3 text-lg font-black text-[#20201d]">Nearby Places</h2>
+                    <p className="text-sm leading-7 text-gray-700">{listing.nearby_places}</p>
+                  </div>
+                )}
+
+                {listing.google_maps_url && (
+                  <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
+                    <h2 className="mb-3 text-lg font-black text-[#20201d]">Location</h2>
+                    <a
+                      href={listing.google_maps_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#9f4a22] px-4 text-sm font-bold text-white hover:bg-[#c95f2c]"
+                    >
+                      View on Google Maps
+                    </a>
+                  </div>
+                )}
+              </section>
             )}
+          </main>
 
-            {/* Nearby Places */}
-            {listing.nearby_places && (
-              <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-                <h2 className="font-bold text-gray-800 mb-3">Nearby Places</h2>
-                <p className="text-gray-600 text-sm leading-relaxed">{listing.nearby_places}</p>
-              </div>
-            )}
+          <aside className="hidden lg:block">
+            <div className="sticky top-28 rounded-lg border border-[#dedbd2] bg-white p-5">
+              <h3 className="text-lg font-black text-[#20201d]">Interested in this property?</h3>
+              <p className="mt-1 text-sm text-gray-500">Request a visit or contact us directly.</p>
 
-            {/* Google Maps */}
-            {listing.google_maps_url && (
-              <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-                <h2 className="font-bold text-gray-800 mb-3">Location</h2>
-                
-                <a  href={listing.google_maps_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-orange-500 text-sm hover:underline"
-                >
-                  View on Google Maps
-                </a>
-              </div>
-            )}
-          </div>
-
-          {/* Right Column — Contact Sticky */}
-          <div className="w-72 flex-shrink-0">
-            <div className="bg-white rounded-lg p-6 shadow-sm sticky top-24">
-              <h3 className="font-bold text-gray-800 mb-1">Interested in this property?</h3>
-              <p className="text-gray-400 text-xs mb-4">Contact us to schedule a visit</p>
-
-              <div className="space-y-3">
+              <div className="mt-5 grid gap-3">
                 <Link
                   href={'/visit?listing_id=' + listing.id + '&title=' + encodeURIComponent(listing.title)}
-                  className="block w-full bg-orange-500 text-white text-center py-2.5 rounded-lg text-sm font-medium hover:bg-orange-600"
+                  className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#9f4a22] px-4 text-sm font-bold text-white hover:bg-[#c95f2c]"
                 >
                   Request Visit
                 </Link>
-                
-                <a  href={getWhatsAppLink(listing.title)}
+
+                <a
+                  href={getWhatsAppLink(listing.title)}
                   target="_blank"
                   rel="noreferrer"
-                  className="block w-full bg-green-500 text-white text-center py-2.5 rounded-lg text-sm font-medium hover:bg-green-600"
+                  className="inline-flex min-h-11 items-center justify-center rounded-md bg-green-600 px-4 text-sm font-bold text-white hover:bg-green-700"
                 >
                   WhatsApp Us
                 </a>
-                
-                <a  href={'tel:' + WHATSAPP_NUMBER.replace('91', '')}
-                  className="block w-full bg-blue-500 text-white text-center py-2.5 rounded-lg text-sm font-medium hover:bg-blue-600"
+
+                <a
+                  href={'tel:' + WHATSAPP_NUMBER.replace('91', '')}
+                  className="inline-flex min-h-11 items-center justify-center rounded-md border border-[#dedbd2] bg-white px-4 text-sm font-bold text-[#20201d] hover:bg-[#fffaf4]"
                 >
                   Call Us
                 </a>
               </div>
 
-              <div className="mt-4 pt-4 border-t">
-                <p className="text-xs text-gray-400 text-center">
-                  Owner details shared after visit confirmation
-                </p>
-              </div>
+              <p className="mt-5 border-t border-[#dedbd2] pt-4 text-center text-xs leading-5 text-gray-400">
+                Owner details shared after visit confirmation.
+              </p>
             </div>
-          </div>
-
+          </aside>
         </div>
       </div>
 
-      {/* Mobile Sticky CTA */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 flex gap-2 md:hidden z-20">
+      <div className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-3 gap-2 border-t border-[#dedbd2] bg-white/95 p-2 shadow-lg backdrop-blur lg:hidden">
         <Link
           href={'/visit?listing_id=' + listing.id + '&title=' + encodeURIComponent(listing.title)}
-          className="flex-1 bg-orange-500 text-white text-center py-2.5 rounded-lg text-sm font-medium"
+          className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#9f4a22] px-2 text-center text-xs font-bold text-white"
         >
           Request Visit
         </Link>
-        
-        <a  href={getWhatsAppLink(listing.title)}
+
+        <a
+          href={getWhatsAppLink(listing.title)}
           target="_blank"
           rel="noreferrer"
-          className="flex-1 bg-green-500 text-white text-center py-2.5 rounded-lg text-sm font-medium"
+          className="inline-flex min-h-11 items-center justify-center rounded-md bg-green-600 px-2 text-center text-xs font-bold text-white"
         >
           WhatsApp
         </a>
-        
-        <a  href={'tel:' + WHATSAPP_NUMBER.replace('91', '')}
-          className="flex-1 bg-blue-500 text-white text-center py-2.5 rounded-lg text-sm font-medium"
+
+        <a
+          href={'tel:' + WHATSAPP_NUMBER.replace('91', '')}
+          className="inline-flex min-h-11 items-center justify-center rounded-md border border-[#dedbd2] bg-white px-2 text-center text-xs font-bold text-[#20201d]"
         >
           Call
         </a>
