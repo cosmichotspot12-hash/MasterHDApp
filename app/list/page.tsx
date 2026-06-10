@@ -45,16 +45,14 @@ export default function ListPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg p-8 shadow-sm text-center max-w-md">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-green-500 text-sm font-black">OK</span>
-          </div>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Property Details Submitted</h2>
-          <p className="text-gray-500 text-sm mb-6">
+      <div className="pf-success-page">
+        <div className="pf-success-card">
+          <div className="pf-success-mark">OK</div>
+          <h2 data-i18n="success_owner_title">Property Details Submitted</h2>
+          <p data-i18n="success_owner_copy">
             Thank you. We will check matching demand and contact you within 24 hours.
           </p>
-          <Link href="/" className="bg-orange-500 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-orange-600">
+          <Link href="/" className="pf-back" data-i18n="action_back_home">
             Back to Home
           </Link>
         </div>
@@ -63,97 +61,110 @@ export default function ListPage() {
   }
 
   return (
-    <div className="page-shell">
-      <div className="mx-auto max-w-2xl px-3 sm:px-5 py-10">
-        <div className="content-card p-6 sm:p-8">
-          <h1 className="text-xl font-bold text-gray-800 mb-1">Check Demand For Your Property</h1>
-          <p className="text-gray-500 text-sm mb-2">
-            Share basic details. If we have matching tenants or buyers, our team will contact you.
-          </p>
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-6">
-            <p className="text-xs text-orange-700">
-              We have 350+ real property requirements, 50+ closed deals, and a 6,500+ local Instagram community.
+    <div className="pf-page">
+      <div className="pf-wrap">
+        <div className="pf-card">
+          <div className="pf-head">
+            <span className="pf-kicker" data-i18n="form_owner_kicker">For owners and brokers</span>
+            <h1 className="pf-title" data-i18n="form_owner_title">Check Demand For Your Property</h1>
+            <p className="pf-subtitle" data-i18n="form_owner_subtitle">
+              Share the basics. If we have matching tenants or buyers, our team will contact you with the next step.
             </p>
+            <div className="pf-note" data-i18n="form_owner_note">
+              350+ local requirements, closed deal learnings, and an active Hubballi-Dharwad audience help us understand demand faster.
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Your Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                value={form.owner_name}
-                onChange={(e) => set('owner_name', e.target.value)}
-                required
-                placeholder="Full name"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-            </div>
+          <div className="pf-body">
+            <form onSubmit={handleSubmit} className="pf-form">
+              <div className="pf-section">
+                <p className="pf-section-title" data-i18n="form_owner_contact">Owner contact</p>
+                <div className="pf-grid-2">
+                  <div className="pf-field">
+                    <label className="pf-label">
+                      <span data-i18n="form_name">Your Name</span> <span className="pf-required">*</span>
+                    </label>
+                    <input
+                      value={form.owner_name}
+                      onChange={(e) => set('owner_name', e.target.value)}
+                      required
+                      placeholder="Full name"
+                      className="pf-input"
+                    />
+                  </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number <span className="text-red-500">*</span>
-              </label>
-              <input
-                value={form.owner_phone}
-                onChange={(e) => set('owner_phone', e.target.value)}
-                required
-                placeholder="10-digit mobile number"
-                maxLength={10}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-            </div>
+                  <div className="pf-field">
+                    <label className="pf-label">
+                      <span data-i18n="form_phone">Phone Number</span> <span className="pf-required">*</span>
+                    </label>
+                    <input
+                      value={form.owner_phone}
+                      onChange={(e) => set('owner_phone', e.target.value)}
+                      required
+                      placeholder="10-digit mobile number"
+                      maxLength={10}
+                      className="pf-input"
+                    />
+                  </div>
+                </div>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Listing Type <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={form.listing_type}
-                onChange={(e) => set('listing_type', e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+              <div className="pf-section">
+                <p className="pf-section-title" data-i18n="form_property_basics">Property basics</p>
+                <div className="pf-grid-2">
+                  <div className="pf-field">
+                    <label className="pf-label">
+                      <span data-i18n="form_listing_type">Listing Type</span> <span className="pf-required">*</span>
+                    </label>
+                    <select
+                      value={form.listing_type}
+                      onChange={(e) => set('listing_type', e.target.value)}
+                      className="pf-input"
+                    >
+                      <option value="rent">For Rent</option>
+                      <option value="sale">For Sale</option>
+                    </select>
+                  </div>
+
+                  <div className="pf-field">
+                    <label className="pf-label">
+                      <span data-i18n="form_locality">Locality</span> <span className="pf-required">*</span>
+                    </label>
+                    <input
+                      value={form.locality}
+                      onChange={(e) => set('locality', e.target.value)}
+                      required
+                      placeholder="e.g. Vidyanagar, Gokul Road"
+                      className="pf-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="pf-field">
+                  <label className="pf-label">
+                    <span data-i18n="form_expected_price">Expected Price (Rs.)</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={form.expected_price}
+                    onChange={(e) => set('expected_price', e.target.value)}
+                    placeholder="Monthly rent or sale price"
+                    className="pf-input"
+                  />
+                </div>
+              </div>
+
+              {error && <p className="pf-error">{error}</p>}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="pf-submit"
               >
-                <option value="rent">For Rent</option>
-                <option value="sale">For Sale</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Locality <span className="text-red-500">*</span>
-              </label>
-              <input
-                value={form.locality}
-                onChange={(e) => set('locality', e.target.value)}
-                required
-                placeholder="e.g. Vidyanagar, Gokul Road"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Expected Price (Rs.)
-              </label>
-              <input
-                type="number"
-                value={form.expected_price}
-                onChange={(e) => set('expected_price', e.target.value)}
-                placeholder="Monthly rent or sale price"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-            </div>
-
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-orange-500 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-orange-600 disabled:opacity-50"
-            >
-              {loading ? 'Submitting...' : 'Check Demand'}
-            </button>
-          </form>
+                {loading ? 'Submitting...' : <span data-i18n="action_check_demand">Check Demand</span>}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

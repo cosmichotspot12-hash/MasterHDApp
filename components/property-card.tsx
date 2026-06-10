@@ -83,9 +83,9 @@ export function PropertyCardStyles() {
           min-width: 0;
           overflow: hidden;
           border: 1px solid #E7DED5;
-          border-radius: 12px;
+          border-radius: 8px;
           background: #fff;
-          box-shadow: 0 6px 18px rgba(58,46,40,0.05);
+          box-shadow: 0 8px 20px rgba(58,46,40,0.05);
           transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
         }
 
@@ -185,8 +185,8 @@ export function PropertyCardStyles() {
           display: flex;
           flex: 1;
           flex-direction: column;
-          gap: 8px;
-          padding: 13px 14px 12px;
+          gap: 9px;
+          padding: 14px 14px 12px;
         }
 
         .pc-locality {
@@ -206,8 +206,8 @@ export function PropertyCardStyles() {
           margin: 0;
           overflow: hidden;
           color: #111827;
-          font-size: 14.5px;
-          font-weight: 850;
+          font-size: 15px;
+          font-weight: 900;
           line-height: 1.32;
           -webkit-box-orient: vertical;
           -webkit-line-clamp: 2;
@@ -225,15 +225,15 @@ export function PropertyCardStyles() {
 
         .pc-info-row span {
           border-radius: 999px;
-          background: #FFF9F1;
-          padding: 4px 7px;
+          background: #F8FAFC;
+          padding: 5px 8px;
         }
 
         .pc-price {
           margin: auto 0 0;
           color: #111827;
-          font-size: 20px;
-          font-weight: 900;
+          font-size: 21px;
+          font-weight: 950;
           line-height: 1.05;
         }
 
@@ -245,39 +245,131 @@ export function PropertyCardStyles() {
         }
 
         .pc-footer {
-          padding: 0 12px 12px;
+          display: flex;
+          justify-content: flex-start;
+          padding: 0 14px 14px;
         }
 
         .pc-visit-btn {
+          width: auto;
+          min-width: 132px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 100%;
-          min-height: 38px;
-          border: 1px solid #0F766E;
-          border-radius: 9px;
-          background: #0F766E;
+          min-height: 40px;
+          border: 1px solid #111827;
+          border-radius: 8px;
+          background: #111827;
           color: #fff;
           padding: 8px 12px;
           font-size: 13px;
-          font-weight: 850;
+          font-weight: 900;
           text-decoration: none;
           transition: background 0.14s, transform 0.14s, border-color 0.14s;
         }
 
         .pc-visit-btn:hover {
-          border-color: #0D625A;
-          background: #0D625A;
+          border-color: #334155;
+          background: #334155;
           transform: translateY(-1px);
         }
 
         @media (max-width: 620px) {
+          .pc {
+            display: grid;
+            grid-template-columns: minmax(138px, 43%) minmax(0, 1fr);
+            grid-template-rows: minmax(0, 1fr) auto;
+            align-items: stretch;
+          }
+
+          .pc-link {
+            display: contents;
+          }
+
           .pc-photo {
-            aspect-ratio: 16 / 10.8;
+            grid-column: 1;
+            grid-row: 1 / 3;
+            min-height: 198px;
+            height: 100%;
+            aspect-ratio: auto;
+          }
+
+          .pc-photo img {
+            object-fit: cover;
+            object-position: center;
           }
 
           .pc-badge-row {
-            right: 80px;
+            right: 10px;
+          }
+
+          .pc-bhk {
+            top: auto;
+            right: 8px;
+            bottom: 8px;
+          }
+
+          .pc-body {
+            grid-column: 2;
+            grid-row: 1;
+            padding: 12px;
+            gap: 8px;
+          }
+
+          .pc-title {
+            font-size: 14px;
+          }
+
+          .pc-info-row {
+            gap: 5px;
+          }
+
+          .pc-info-row span {
+            padding: 4px 6px;
+            font-size: 11px;
+          }
+
+          .pc-price {
+            margin-top: auto;
+            font-size: 18px;
+          }
+
+          .pc-footer {
+            grid-column: 2;
+            grid-row: 2;
+            margin-top: 0;
+            padding: 0 12px 12px;
+          }
+
+          .pc-visit-btn {
+            min-height: 34px;
+            min-width: 122px;
+            padding: 7px 12px;
+            font-size: 12px;
+          }
+        }
+
+        @media (max-width: 390px) {
+          .pc {
+            grid-template-columns: 1fr;
+          }
+
+          .pc-link {
+            display: flex;
+          }
+
+          .pc-photo {
+            grid-column: auto;
+            grid-row: auto;
+            min-height: 0;
+            height: auto;
+            aspect-ratio: 16 / 10.8;
+          }
+
+          .pc-footer {
+            grid-column: auto;
+            grid-row: auto;
+            margin-top: 0;
           }
         }
       `}</style>
@@ -305,7 +397,7 @@ export default function PropertyCard({ listing }: { listing: PropertyCardListing
           )}
 
           <div className="pc-badge-row">
-            <span className={`pc-type pc-type-${isRent ? 'rent' : 'sale'}`}>
+            <span className={`pc-type pc-type-${isRent ? 'rent' : 'sale'}`} data-i18n={isRent ? 'nav_rent' : 'nav_sale'}>
               {isRent ? 'Rent' : 'Sale'}
             </span>
           </div>
@@ -334,7 +426,7 @@ export default function PropertyCard({ listing }: { listing: PropertyCardListing
       </Link>
 
       <div className="pc-footer">
-        <Link href={visitHref(listing)} className="pc-visit-btn">
+        <Link href={visitHref(listing)} className="pc-visit-btn" data-i18n="action_request_visit">
           Request Visit
         </Link>
       </div>

@@ -55,16 +55,14 @@ export default function FindPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg p-8 shadow-sm text-center max-w-md">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-green-500 text-sm font-black">OK</span>
-          </div>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Requirement Submitted!</h2>
-          <p className="text-gray-500 text-sm mb-6">
+      <div className="pf-success-page">
+        <div className="pf-success-card">
+          <div className="pf-success-mark">OK</div>
+          <h2 data-i18n="success_requirement_title">Requirement Submitted</h2>
+          <p data-i18n="success_requirement_copy">
             We will match your requirement with available properties and contact you within 24 hours.
           </p>
-          <Link href="/" className="bg-orange-500 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-orange-600">
+          <Link href="/" className="pf-back" data-i18n="action_back_home">
             Back to Home
           </Link>
         </div>
@@ -73,59 +71,68 @@ export default function FindPage() {
   }
 
   return (
-    <div className="page-shell">
-      <div className="mx-auto max-w-3xl px-3 sm:px-5 py-10">
-        <div className="content-card p-6 sm:p-8">
-          <h1 className="text-xl font-bold text-gray-800 mb-1">Find My Property</h1>
-          <p className="text-gray-500 text-sm mb-6">
-            Tell us what you are looking for. We will match you with the right property and contact you directly.
-          </p>
+    <div className="pf-page">
+      <div className="pf-wrap pf-wrap-wide">
+        <div className="pf-card">
+          <div className="pf-head">
+            <span className="pf-kicker" data-i18n="form_requirement_kicker">Requirement matching</span>
+            <h1 className="pf-title" data-i18n="form_requirement_title">Find My Property</h1>
+            <p className="pf-subtitle" data-i18n="form_requirement_subtitle">
+              Tell us what you are looking for. We will match your requirement with relevant properties and contact you directly.
+            </p>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="pf-body">
+            <form onSubmit={handleSubmit} className="pf-form">
 
             {/* Contact */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Your Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  value={form.finder_name}
-                  onChange={e => set('finder_name', e.target.value)}
-                  required
-                  placeholder="Full name"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  value={form.finder_phone}
-                  onChange={e => set('finder_phone', e.target.value)}
-                  required
-                  placeholder="10-digit number"
-                  maxLength={10}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
+            <div className="pf-section">
+              <p className="pf-section-title" data-i18n="form_contact_details">Contact details</p>
+              <div className="pf-grid-2">
+                <div className="pf-field">
+                  <label className="pf-label">
+                    <span data-i18n="form_name">Your Name</span> <span className="pf-required">*</span>
+                  </label>
+                  <input
+                    value={form.finder_name}
+                    onChange={e => set('finder_name', e.target.value)}
+                    required
+                    placeholder="Full name"
+                    className="pf-input"
+                  />
+                </div>
+                <div className="pf-field">
+                  <label className="pf-label">
+                    <span data-i18n="form_phone">Phone Number</span> <span className="pf-required">*</span>
+                  </label>
+                  <input
+                    value={form.finder_phone}
+                    onChange={e => set('finder_phone', e.target.value)}
+                    required
+                    placeholder="10-digit number"
+                    maxLength={10}
+                    className="pf-input"
+                  />
+                </div>
               </div>
             </div>
 
             {/* Looking For */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Looking To</label>
+            <div className="pf-section">
+              <p className="pf-section-title" data-i18n="form_search_brief">Search brief</p>
+              <div className="pf-grid-2">
+              <div className="pf-field">
+                <label className="pf-label" data-i18n="form_looking_to">Looking To</label>
                 <select value={form.listing_type} onChange={e => set('listing_type', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                  className="pf-input">
                   <option value="rent">Rent</option>
                   <option value="sale">Buy</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
+              <div className="pf-field">
+                <label className="pf-label" data-i18n="form_property_type">Property Type</label>
                 <select value={form.property_category} onChange={e => set('property_category', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                  className="pf-input">
                   <option value="apartment">Apartment</option>
                   <option value="independent_house">Independent House</option>
                   <option value="house_in_layout">House in Layout</option>
@@ -133,14 +140,12 @@ export default function FindPage() {
                   <option value="plot">Plot</option>
                 </select>
               </div>
-            </div>
 
             {/* BHK and Locality */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">BHK</label>
+              <div className="pf-field">
+                <label className="pf-label" data-i18n="form_bhk">BHK</label>
                 <select value={form.bhk_count} onChange={e => set('bhk_count', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                  className="pf-input">
                   <option value="any">Any</option>
                   <option value="1">1 BHK</option>
                   <option value="2">2 BHK</option>
@@ -148,35 +153,38 @@ export default function FindPage() {
                   <option value="4+">4+ BHK</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Preferred Locality <span className="text-red-500">*</span>
+              <div className="pf-field">
+                <label className="pf-label">
+                  <span data-i18n="form_preferred_locality">Preferred Locality</span> <span className="pf-required">*</span>
                 </label>
                 <input
                   value={form.locality_preference}
                   onChange={e => set('locality_preference', e.target.value)}
                   required
                   placeholder="e.g. Vidyanagar, Gokul Road"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="pf-input"
                 />
+              </div>
               </div>
             </div>
 
             {/* Budget */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Min Budget (Rs.)</label>
+            <div className="pf-section">
+              <p className="pf-section-title" data-i18n="form_budget">Budget</p>
+              <div className="pf-grid-2">
+              <div className="pf-field">
+                <label className="pf-label" data-i18n="form_min_budget">Min Budget (Rs.)</label>
                 <input
                   type="number"
                   value={form.budget_min}
                   onChange={e => set('budget_min', e.target.value)}
                   placeholder="Optional"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="pf-input"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Max Budget (Rs.) <span className="text-red-500">*</span>
+              <div className="pf-field">
+                <label className="pf-label">
+                  <span data-i18n="form_max_budget">Max Budget (Rs.)</span> <span className="pf-required">*</span>
                 </label>
                 <input
                   type="number"
@@ -184,58 +192,61 @@ export default function FindPage() {
                   onChange={e => set('budget_max', e.target.value)}
                   required
                   placeholder="Maximum budget"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="pf-input"
                 />
+              </div>
               </div>
             </div>
 
             {/* Furnishing and Timeline */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Furnishing</label>
+            <div className="pf-section">
+              <p className="pf-section-title" data-i18n="form_preferences">Preferences</p>
+              <div className="pf-grid-2">
+              <div className="pf-field">
+                <label className="pf-label" data-i18n="form_furnishing">Furnishing</label>
                 <select value={form.furnishing_preference} onChange={e => set('furnishing_preference', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                  className="pf-input">
                   <option value="any">Any</option>
                   <option value="furnished">Furnished</option>
                   <option value="semi_furnished">Semi-Furnished</option>
                   <option value="unfurnished">Unfurnished</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">When Do You Need It</label>
+              <div className="pf-field">
+                <label className="pf-label" data-i18n="form_timeline">When Do You Need It</label>
                 <select value={form.timeline} onChange={e => set('timeline', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                  className="pf-input">
                   <option value="immediately">Immediately</option>
                   <option value="within_1_month">Within 1 Month</option>
                   <option value="within_3_months">Within 3 Months</option>
                   <option value="just_exploring">Just Exploring</option>
                 </select>
               </div>
-            </div>
 
             {/* Tenant Profile */}
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">I Am</label>
+              </div>
+              <div className="pf-grid-3">
+              <div className="pf-field">
+                <label className="pf-label" data-i18n="form_tenant_type">I Am</label>
                 <select value={form.tenant_type} onChange={e => set('tenant_type', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                  className="pf-input">
                   <option value="family">Family</option>
                   <option value="bachelor">Bachelor</option>
                   <option value="student">Student</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Food</label>
+              <div className="pf-field">
+                <label className="pf-label" data-i18n="form_food">Food</label>
                 <select value={form.food_preference} onChange={e => set('food_preference', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                  className="pf-input">
                   <option value="veg">Veg</option>
                   <option value="non_veg">Non-Veg</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Facing</label>
+              <div className="pf-field">
+                <label className="pf-label" data-i18n="form_facing">Facing</label>
                 <select value={form.facing_preference} onChange={e => set('facing_preference', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                  className="pf-input">
                   <option value="any">Any</option>
                   <option value="east">East</option>
                   <option value="west">West</option>
@@ -243,34 +254,38 @@ export default function FindPage() {
                   <option value="south">South</option>
                 </select>
               </div>
+              </div>
             </div>
 
             {/* Special Requirements */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Special Requirements (Optional)
+            <div className="pf-section">
+              <div className="pf-field">
+              <label className="pf-label">
+                <span data-i18n="form_special_requirements">Special Requirements (Optional)</span>
               </label>
               <textarea
                 value={form.special_requirements}
                 onChange={e => set('special_requirements', e.target.value)}
                 rows={3}
                 placeholder="e.g. Ground floor needed, pet friendly, near specific college..."
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="pf-input"
               />
+              </div>
             </div>
 
             {error && (
-              <p className="text-red-500 text-sm">{error}</p>
+              <p className="pf-error">{error}</p>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-orange-500 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-orange-600 disabled:opacity-50"
+              className="pf-submit"
             >
-              {loading ? 'Submitting...' : 'Submit My Requirement'}
+              {loading ? 'Submitting...' : <span data-i18n="action_submit_requirement">Submit My Requirement</span>}
             </button>
           </form>
+          </div>
         </div>
       </div>
     </div>

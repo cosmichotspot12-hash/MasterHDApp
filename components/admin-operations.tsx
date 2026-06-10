@@ -253,7 +253,7 @@ export function ListingsInventory({ listings, visits }: { listings: AdminListing
     <div>
       <FilterBar search={search} onSearch={setSearch} status={status} onStatus={setStatus} statuses={['all', 'active', 'draft', 'rented_sold', 'inactive']} type={type} onType={setType} placeholder="Search title, locality, owner, phone" />
       {filtered.length === 0 ? <EmptyState text="No listings match these filters." /> : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
           {filtered.map((listing) => (
             <AdminPropertyCard
               key={listing.id}
@@ -305,7 +305,7 @@ export function VisitRequestsWorkspace({ listings, requests }: { listings: Admin
     <div>
       <FilterBar search={search} onSearch={setSearch} status={status} onStatus={setStatus} statuses={visitStatuses} type={type} onType={setType} placeholder="Search property, locality, finder, phone" />
       {filteredListings.length === 0 ? <EmptyState text="No active properties match these filters." /> : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
           {filteredListings.map((listing) => {
             const propertyRequests = grouped[listing.id] || []
             return (
@@ -409,7 +409,7 @@ export function PropertyWorkspace({
       {tab === 'details' && (
         <section className="rounded-lg border border-slate-200 bg-white p-5">
           <h2 className="font-bold text-slate-950">Property details</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             <DetailItem label="Category" value={formatLabel(listing.property_category)} />
             <DetailItem label="BHK" value={listing.bhk_count ? listing.bhk_count + ' BHK' : 'Not set'} />
             <DetailItem label="Furnishing" value={formatLabel(listing.furnishing)} />
@@ -573,7 +573,7 @@ export function RequirementsQueue({ requirements }: { requirements: Requirement[
     return Object.entries(grouped)
       .map(([locality, items]) => ({
         locality,
-        href: '/admin/requirements/locality/' + encodeURIComponent(locality),
+        href: '/admin/requirements/locality?name=' + encodeURIComponent(locality),
         total: items.length,
         fresh: items.filter((item) => item.status === 'new').length,
         rent: items.filter((item) => item.listing_type === 'rent').length,
@@ -629,7 +629,7 @@ export function RequirementsLocalityWorkspace({ locality, requirements, whatsapp
 
   return (
     <div>
-      <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mb-4 grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {requirementStatuses.filter((item) => item !== 'all').map((item) => (
           <button
             key={item}

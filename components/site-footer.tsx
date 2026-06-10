@@ -6,8 +6,15 @@ const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210
 const footerLinks = [
   { href: '/properties?type=rent', label: 'Rent' },
   { href: '/properties?type=sale', label: 'Buy' },
+  { href: '/services', label: 'Services' },
   { href: '/find', label: 'Find' },
   { href: '/list', label: 'List' },
+]
+
+const serviceLinks = [
+  { href: '/services', label: 'Agreements' },
+  { href: '/list', label: 'List property' },
+  { href: '/find', label: 'Post requirement' },
 ]
 
 const WA_ICON = (
@@ -33,15 +40,15 @@ export default function SiteFooter() {
         .sf-inner {
           max-width: 1520px;
           margin: 0 auto;
-          padding: 22px 20px;
+          padding: 22px 20px 14px;
         }
 
         .sf-main {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 18px;
-          padding-bottom: 14px;
+          display: grid;
+          grid-template-columns: minmax(260px, 1fr) minmax(360px, 0.95fr) minmax(220px, auto);
+          gap: 22px;
+          align-items: start;
+          padding-bottom: 16px;
           border-bottom: 1px solid #EAE4DE;
         }
 
@@ -85,26 +92,52 @@ export default function SiteFooter() {
           white-space: nowrap;
         }
 
+        .sf-copy {
+          max-width: 430px;
+          margin: 10px 0 0;
+          color: #6B5F58;
+          font-size: 12.5px;
+          font-weight: 600;
+          line-height: 1.55;
+        }
+
+        .sf-link-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 18px;
+        }
+
+        .sf-col-title {
+          margin: 0 0 8px;
+          color: #111827;
+          font-size: 12px;
+          font-weight: 950;
+        }
+
         .sf-nav {
           display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 4px;
           flex-wrap: wrap;
+          gap: 6px;
         }
 
         .sf-link {
+          display: inline-flex;
+          align-items: center;
+          min-height: 30px;
+          border: 1px solid #EFE6DC;
           border-radius: 8px;
-          padding: 7px 9px;
+          background: rgba(255,255,255,0.58);
+          padding: 6px 10px;
           color: #1F2937;
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 800;
           text-decoration: none;
-          transition: background 0.12s, color 0.12s;
+          transition: border-color 0.12s, background 0.12s, color 0.12s;
           white-space: nowrap;
         }
 
         .sf-link:hover {
+          border-color: #D8C9BA;
           background: #FFF9F1;
           color: #111827;
         }
@@ -132,14 +165,30 @@ export default function SiteFooter() {
           background: #F4FBF5;
         }
 
+        .sf-contact {
+          display: grid;
+          justify-items: end;
+          gap: 8px;
+        }
+
+        .sf-contact-note {
+          max-width: 220px;
+          margin: 0;
+          color: #6B5F58;
+          font-size: 11.5px;
+          font-weight: 650;
+          line-height: 1.45;
+          text-align: right;
+        }
+
         .sf-bottom {
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 16px;
-          padding-top: 12px;
+          padding-top: 10px;
           color: #7A6E68;
-          font-size: 12px;
+          font-size: 11.5px;
         }
 
         .sf-admin {
@@ -154,40 +203,84 @@ export default function SiteFooter() {
 
         @media (max-width: 860px) {
           .sf-main {
-            align-items: flex-start;
-            flex-direction: column;
+            grid-template-columns: 1fr;
             gap: 16px;
           }
 
-          .sf-nav {
-            justify-content: flex-start;
+          .sf-link-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+          }
+
+          .sf-contact {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+          }
+
+          .sf-contact-note {
+            max-width: none;
+            text-align: left;
           }
         }
 
         @media (max-width: 560px) {
           .sf-inner {
-            padding: 20px 12px;
+            padding: 16px 12px 12px;
+          }
+
+          .sf-main {
+            gap: 14px;
+            padding-bottom: 14px;
+          }
+
+          .sf-brand-mark {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+          }
+
+          .sf-copy {
+            margin-top: 8px;
+            font-size: 12px;
+            line-height: 1.5;
+          }
+
+          .sf-link-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
           }
 
           .sf-nav {
-            width: 100%;
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 6px;
           }
 
           .sf-link {
-            background: #FFF9F1;
+            min-height: 30px;
+            background: rgba(255,255,255,0.7);
+            padding: 6px 9px;
+            font-size: 12px;
           }
 
           .sf-action {
-            width: 100%;
+            width: auto;
+            min-height: 34px;
+            padding: 7px 11px;
+          }
+
+          .sf-contact {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 8px;
           }
 
           .sf-bottom {
             align-items: flex-start;
-            flex-direction: column;
+            flex-direction: row;
+            justify-content: space-between;
             gap: 8px;
+            font-size: 11px;
           }
         }
       `}</style>
@@ -195,37 +288,62 @@ export default function SiteFooter() {
       <footer className="sf-root" role="contentinfo">
         <div className="sf-inner">
           <div className="sf-main">
-            <Link href="/" className="sf-brand" aria-label="Hubli Dharwad App home">
-              <div className="sf-brand-mark">
-                <Image src="/icons/icon-192.png" alt="" width={34} height={34} />
-              </div>
+            <div>
+              <Link href="/" className="sf-brand" aria-label="Hubli Dharwad App home">
+                <div className="sf-brand-mark">
+                  <Image src="/icons/icon-192.png" alt="" width={34} height={34} />
+                </div>
+                <div>
+                  <span className="sf-brand-name">Hubli<span>Dharwad</span>.app</span>
+                  <span className="sf-brand-sub" data-i18n="footer_verified">Verified Properties</span>
+                </div>
+              </Link>
+              <p className="sf-copy" data-i18n="footer_copy">
+                Verified listings, agreement help, visit coordination, and local support for Hubballi-Dharwad.
+              </p>
+            </div>
+
+            <div className="sf-link-grid">
               <div>
-                <span className="sf-brand-name">Hubli<span>Dharwad</span>.app</span>
-                <span className="sf-brand-sub">Verified homes - zero brokerage</span>
+                <p className="sf-col-title" data-i18n="footer_browse">Browse</p>
+                <nav className="sf-nav" aria-label="Footer navigation">
+                  {footerLinks.map(({ href, label }) => (
+                    <Link key={href} href={href} className="sf-link" data-i18n={label === 'Rent' ? 'nav_rent' : label === 'Buy' ? 'nav_buy' : label === 'Services' ? 'nav_services' : label === 'Find' ? 'form_requirement_title' : 'nav_list_property'}>
+                      {label}
+                    </Link>
+                  ))}
+                </nav>
               </div>
-            </Link>
 
-            <nav className="sf-nav" aria-label="Footer navigation">
-              {footerLinks.map(({ href, label }) => (
-                <Link key={href} href={href} className="sf-link">
-                  {label}
-                </Link>
-              ))}
-            </nav>
+              <div>
+                <p className="sf-col-title" data-i18n="nav_services">Services</p>
+                <nav className="sf-nav" aria-label="Footer services">
+                  {serviceLinks.map(({ href, label }) => (
+                    <Link key={label} href={href} className="sf-link" data-i18n={label === 'Agreements' ? 'footer_agreements' : label === 'List property' ? 'nav_list_property' : 'nav_post_requirement'}>
+                      {label}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+            </div>
 
-            <a
-              href={waLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="sf-action"
-              aria-label="Chat on WhatsApp"
-            >
-              {WA_ICON} WhatsApp
-            </a>
+            <div className="sf-contact">
+              <p className="sf-col-title" data-i18n="footer_contact">Contact</p>
+              <p className="sf-contact-note" data-i18n="footer_contact_note">Need help with a property, agreement, listing, or visit?</p>
+              <a
+                href={waLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="sf-action"
+                aria-label="Chat on WhatsApp"
+              >
+                {WA_ICON} WhatsApp
+              </a>
+            </div>
           </div>
 
           <div className="sf-bottom">
-            <span>&copy; {currentYear} HubliDharwad.app. All rights reserved.</span>
+            <span>&copy; {currentYear} <span data-i18n="footer_rights">HubliDharwad.app. All rights reserved.</span></span>
             <Link href="/admin/login" className="sf-admin">
               Admin login
             </Link>

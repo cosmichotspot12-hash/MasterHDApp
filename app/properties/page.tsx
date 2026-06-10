@@ -85,6 +85,15 @@ function titleForType(type: PropertyType) {
   return 'All verified properties'
 }
 
+function labelForCategory(value: string) {
+  if (!value) return ''
+  return value
+    .split('_')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
+}
+
 export default async function PropertiesPage({
   searchParams,
 }: {
@@ -100,6 +109,12 @@ export default async function PropertiesPage({
   const visibleListings = listings.slice(0, page * PAGE_SIZE)
   const hasMore = listings.length > visibleListings.length
   const hasFilters = type !== 'all' || Boolean(bhk || category || locality)
+  const activeFilters = [
+    type !== 'all' ? (type === 'rent' ? 'Rent' : 'Buy') : '',
+    bhk ? bhk + ' BHK' : '',
+    category ? labelForCategory(category) : '',
+    locality,
+  ].filter(Boolean)
 
   return (
     <>
@@ -119,61 +134,94 @@ export default async function PropertiesPage({
           padding: 0 20px;
         }
 
-        .properties-header {
-          border-bottom: 1px solid #E7DED5;
-          padding: 26px 0 22px;
+        .properties-browse {
+          padding: 22px 0 18px;
         }
 
-        .properties-header-inner {
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
-          gap: 22px;
+        .properties-panel {
+          border: 1px solid #E4DED6;
+          border-radius: 8px;
+          background: #fff;
+          padding: 16px;
+        }
+
+        .properties-panel-top {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 18px;
+          align-items: end;
+          margin-bottom: 14px;
         }
 
         .properties-kicker {
-          margin: 0 0 10px;
-          color: #475569;
+          display: inline-flex;
+          width: fit-content;
+          border: 1px solid #DCEBDD;
+          border-radius: 999px;
+          background: #F4FBF5;
+          padding: 6px 10px;
+          color: #14724B;
           font-size: 11px;
           font-weight: 900;
-          letter-spacing: 0.09em;
-          text-transform: uppercase;
         }
 
         .properties-title {
-          margin: 0;
+          margin: 10px 0 0;
           color: #111827;
-          font-size: clamp(25px, 3vw, 38px);
-          font-weight: 900;
-          line-height: 1.12;
+          font-size: clamp(24px, 3vw, 40px);
+          font-weight: 950;
+          line-height: 1.08;
         }
 
         .properties-sub {
-          margin: 10px 0 0;
+          margin: 7px 0 0;
           max-width: 680px;
-          color: #64748B;
-          font-size: 15px;
+          color: #5B6472;
+          font-size: 14px;
           font-weight: 600;
-          line-height: 1.65;
+          line-height: 1.55;
         }
 
-        .properties-count {
-          margin: 0;
-          color: #475569;
-          font-size: 13px;
-          font-weight: 800;
-          white-space: nowrap;
+        .properties-count-card {
+          min-width: 156px;
+          border: 1px solid #E4DED6;
+          border-radius: 8px;
+          background: #FFF9F1;
+          padding: 12px 14px;
+          text-align: right;
         }
 
-        .properties-controls {
-          padding: 24px 0 18px;
+        .properties-count-num {
+          color: #111827;
+          font-size: 27px;
+          font-weight: 950;
+          line-height: 1;
+        }
+
+        .properties-count-label {
+          margin-top: 4px;
+          color: #7A6E68;
+          font-size: 12px;
+          font-weight: 850;
+        }
+
+        .properties-toolbar {
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr);
+          gap: 12px;
+          align-items: center;
+          border-top: 1px solid #F0EBE5;
+          padding-top: 14px;
         }
 
         .properties-tabs {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          margin-bottom: 14px;
+          display: inline-grid;
+          grid-template-columns: repeat(3, minmax(70px, 1fr));
+          gap: 4px;
+          border: 1px solid #E4DED6;
+          border-radius: 8px;
+          background: #FFF9F1;
+          padding: 4px;
         }
 
         .properties-tab {
@@ -181,60 +229,61 @@ export default async function PropertiesPage({
           align-items: center;
           justify-content: center;
           min-height: 38px;
-          border: 1.5px solid #D8C8BA;
-          border-radius: 999px;
-          background: rgba(255,255,255,0.5);
-          padding: 8px 17px;
-          color: #1F2937;
+          border-radius: 6px;
+          padding: 8px 14px;
+          color: #5B6472;
           font-size: 13px;
-          font-weight: 850;
+          font-weight: 900;
           text-decoration: none;
           white-space: nowrap;
         }
 
         .properties-tab:hover {
-          border-color: #94A3B8;
           background: #fff;
           color: #111827;
         }
 
         .properties-tab-active {
-          border-color: #94A3B8;
-          background: #fff;
-          color: #111827;
-          box-shadow: 0 8px 20px rgba(15,23,42,0.08);
-        }
-
-        .properties-filter-card {
-          border: 1px solid #E7DED5;
-          border-radius: 16px;
-          background: #fff;
-          padding: 14px;
+          background: #111827;
+          color: #fff;
         }
 
         .properties-form {
           display: grid;
-          grid-template-columns: 150px 190px minmax(180px, 1fr) auto auto;
-          gap: 10px;
+          grid-template-columns: 1fr;
+          gap: 8px;
           align-items: center;
+        }
+
+        @media (min-width: 640px) {
+          .properties-form {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .properties-form {
+            grid-template-columns: 130px 170px minmax(150px, 1fr) auto auto;
+          }
         }
 
         .properties-form input,
         .properties-form select {
           width: 100%;
-          min-height: 42px;
+          min-height: 40px;
           border: 1px solid #D1D5DB;
-          border-radius: 10px;
+          border-radius: 8px;
           background: #fff;
           padding: 8px 10px;
           color: #374151;
-          font-size: 14px;
+          font-size: 13px;
+          font-weight: 700;
         }
 
         .properties-form input:focus,
         .properties-form select:focus {
-          border-color: #94A3B8;
-          box-shadow: 0 0 0 3px rgba(148,163,184,0.18);
+          border-color: #1D9E75;
+          box-shadow: 0 0 0 3px rgba(29,158,117,0.14);
           outline: none;
         }
 
@@ -243,24 +292,24 @@ export default async function PropertiesPage({
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          min-height: 42px;
-          border-radius: 10px;
-          padding: 9px 16px;
-          font-size: 14px;
-          font-weight: 850;
+          min-height: 40px;
+          border-radius: 8px;
+          padding: 9px 14px;
+          font-size: 13px;
+          font-weight: 900;
           text-decoration: none;
           white-space: nowrap;
         }
 
         .properties-btn {
-          border: 1px solid #334155;
-          background: #334155;
+          border: 1px solid #1D9E75;
+          background: #1D9E75;
           color: #fff;
         }
 
         .properties-btn:hover {
-          border-color: #1F2937;
-          background: #1F2937;
+          border-color: #168662;
+          background: #168662;
         }
 
         .properties-clear {
@@ -274,21 +323,75 @@ export default async function PropertiesPage({
           color: #111827;
         }
 
+        .properties-active {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+          margin-top: 12px;
+        }
+
+        .properties-chip {
+          display: inline-flex;
+          align-items: center;
+          min-height: 28px;
+          border: 1px solid #E4DED6;
+          border-radius: 999px;
+          background: #FFF9F1;
+          padding: 5px 9px;
+          color: #5B6472;
+          font-size: 12px;
+          font-weight: 850;
+        }
+
         .properties-results {
-          padding: 8px 0 66px;
+          padding: 2px 0 66px;
+        }
+
+        .properties-results-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+          margin-bottom: 12px;
+        }
+
+        .properties-results-title {
+          margin: 0;
+          color: #111827;
+          font-size: 16px;
+          font-weight: 950;
+        }
+
+        .properties-results-note {
+          margin: 0;
+          color: #7A6E68;
+          font-size: 12px;
+          font-weight: 800;
         }
 
         .properties-grid {
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 16px;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 14px;
+        }
+
+        @media (min-width: 768px) {
+          .properties-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .properties-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+          }
         }
 
         .properties-empty {
-          border: 1.5px dashed #D8C8BA;
-          border-radius: 16px;
-          background: rgba(255,255,255,0.45);
-          padding: 68px 24px;
+          border: 1px dashed #D8C8BA;
+          border-radius: 8px;
+          background: #fff;
+          padding: 52px 24px;
           text-align: center;
         }
 
@@ -313,16 +416,21 @@ export default async function PropertiesPage({
         }
 
         @media (max-width: 980px) {
-          .properties-header-inner {
-            align-items: flex-start;
-            flex-direction: column;
+          .properties-panel-top,
+          .properties-toolbar {
+            grid-template-columns: 1fr;
+          }
+
+          .properties-count-card {
+            width: 100%;
+            text-align: left;
+          }
+
+          .properties-tabs {
+            width: 100%;
           }
 
           .properties-form {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-
-          .properties-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
         }
@@ -332,12 +440,61 @@ export default async function PropertiesPage({
             padding: 0 12px;
           }
 
-          .properties-header {
-            padding: 22px 0 18px;
+          .properties-browse {
+            padding: 12px 0 12px;
+          }
+
+          .properties-panel {
+            padding: 12px;
+          }
+
+          .properties-panel-top {
+            gap: 10px;
+            margin-bottom: 10px;
+          }
+
+          .properties-kicker {
+            padding: 5px 9px;
+            font-size: 10.5px;
+          }
+
+          .properties-title {
+            margin-top: 8px;
+            font-size: 25px;
+          }
+
+          .properties-sub {
+            display: none;
+          }
+
+          .properties-count-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+          }
+
+          .properties-count-num {
+            font-size: 22px;
+          }
+
+          .properties-toolbar {
+            gap: 10px;
+            padding-top: 10px;
+          }
+
+          .properties-tab {
+            min-height: 36px;
+            padding: 7px 10px;
           }
 
           .properties-form {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 7px;
+          }
+
+          .properties-form input {
+            grid-column: 1 / -1;
           }
 
           .properties-btn,
@@ -345,76 +502,109 @@ export default async function PropertiesPage({
             width: 100%;
           }
 
+          .properties-active {
+            margin-top: 9px;
+          }
+
+          .properties-results {
+            padding-top: 0;
+          }
+
+          .properties-results-head {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 4px;
+          }
+
           .properties-grid {
             grid-template-columns: 1fr;
             gap: 12px;
+          }
+
+          .properties-empty {
+            padding: 38px 18px;
+          }
+        }
+
+        @media (max-width: 390px) {
+          .properties-form {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
 
       <main className="properties-page">
-        <section className="properties-header">
-          <div className="properties-wrap properties-header-inner">
-            <div>
-              <p className="properties-kicker">Property browse</p>
-              <h1 className="properties-title">{titleForType(type)}</h1>
-              <p className="properties-sub">
-                Filter verified Hubballi-Dharwad listings in one place. Switch between all, rent, and buy without leaving this grid.
-              </p>
-            </div>
-            <p className="properties-count">
-              {listings.length} {listings.length === 1 ? 'property' : 'properties'} found
-            </p>
-          </div>
-        </section>
-
-        <section className="properties-controls" aria-label="Property filters">
+        <section className="properties-browse" aria-label="Property filters">
           <div className="properties-wrap">
-            <nav className="properties-tabs" aria-label="Listing type filters">
-              <Link href={propertiesHref({ type: 'all', bhk, category, locality })} className={tabClass(type === 'all')}>
-                All
-              </Link>
-              <Link href={propertiesHref({ type: 'rent', bhk, category, locality })} className={tabClass(type === 'rent')}>
-                Rent
-              </Link>
-              <Link href={propertiesHref({ type: 'sale', bhk, category, locality })} className={tabClass(type === 'sale')}>
-                Buy
-              </Link>
-            </nav>
+            <div className="properties-panel">
+              <div className="properties-panel-top">
+                <div>
+                  <span className="properties-kicker" data-i18n="properties_kicker">Verified Hubballi-Dharwad listings</span>
+                  <h1 className="properties-title">{titleForType(type)}</h1>
+                  <p className="properties-sub" data-i18n="properties_subtitle">
+                    Browse verified rent and buy properties with quick filters for BHK, property type, and locality.
+                  </p>
+                </div>
+                <div className="properties-count-card" aria-label="Matching property count">
+                  <div className="properties-count-num">{listings.length}</div>
+                  <div className="properties-count-label">{listings.length === 1 ? 'property found' : 'properties found'}</div>
+                </div>
+              </div>
 
-            <div className="properties-filter-card">
-              <form method="GET" action="/properties" className="properties-form">
-                {type !== 'all' && <input type="hidden" name="type" value={type} />}
-                <select name="bhk" defaultValue={bhk} aria-label="BHK">
-                  <option value="">All BHK</option>
-                  <option value="1">1 BHK</option>
-                  <option value="2">2 BHK</option>
-                  <option value="3">3 BHK</option>
-                  <option value="4+">4+ BHK</option>
-                </select>
-                <select name="category" defaultValue={category} aria-label="Property category">
-                  <option value="">All types</option>
-                  <option value="apartment">Apartment</option>
-                  <option value="independent_house">Independent house</option>
-                  <option value="house_in_layout">House in layout</option>
-                  <option value="commercial">Commercial</option>
-                  <option value="plot">Plot</option>
-                </select>
-                <input
-                  name="locality"
-                  defaultValue={locality}
-                  placeholder="Search locality"
-                  aria-label="Search locality"
-                />
-                <button type="submit" className="properties-btn">
-                  Search
-                </button>
-                {hasFilters && (
-                  <Link href="/properties" className="properties-clear">
-                    Clear
+              <div className="properties-toolbar">
+                <nav className="properties-tabs" aria-label="Listing type filters">
+                  <Link href={propertiesHref({ type: 'all', bhk, category, locality })} className={tabClass(type === 'all')}>
+                    <span data-i18n="properties_all">All</span>
                   </Link>
-                )}
-              </form>
+                  <Link href={propertiesHref({ type: 'rent', bhk, category, locality })} className={tabClass(type === 'rent')}>
+                    <span data-i18n="nav_rent">Rent</span>
+                  </Link>
+                  <Link href={propertiesHref({ type: 'sale', bhk, category, locality })} className={tabClass(type === 'sale')}>
+                    <span data-i18n="nav_buy">Buy</span>
+                  </Link>
+                </nav>
+
+                <form method="GET" action="/properties" className="properties-form">
+                  {type !== 'all' && <input type="hidden" name="type" value={type} />}
+                  <select name="bhk" defaultValue={bhk} aria-label="BHK">
+                    <option value="">All BHK</option>
+                    <option value="1">1 BHK</option>
+                    <option value="2">2 BHK</option>
+                    <option value="3">3 BHK</option>
+                    <option value="4+">4+ BHK</option>
+                  </select>
+                  <select name="category" defaultValue={category} aria-label="Property category">
+                    <option value="">All types</option>
+                    <option value="apartment">Apartment</option>
+                    <option value="independent_house">Independent house</option>
+                    <option value="house_in_layout">House in layout</option>
+                    <option value="commercial">Commercial</option>
+                    <option value="plot">Plot</option>
+                  </select>
+                  <input
+                    name="locality"
+                    defaultValue={locality}
+                    placeholder="Locality"
+                    aria-label="Search locality"
+                  />
+                  <button type="submit" className="properties-btn" data-i18n="properties_search">
+                    Search
+                  </button>
+                  {hasFilters && (
+                    <Link href="/properties" className="properties-clear" data-i18n="properties_clear">
+                      Clear
+                    </Link>
+                  )}
+                </form>
+              </div>
+
+              {activeFilters.length > 0 && (
+                <div className="properties-active" aria-label="Active filters">
+                  {activeFilters.map((filter) => (
+                    <span className="properties-chip" key={filter}>{filter}</span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -423,6 +613,10 @@ export default async function PropertiesPage({
           <div className="properties-wrap">
             {visibleListings.length > 0 ? (
               <>
+                <div className="properties-results-head">
+                  <h2 className="properties-results-title">Available properties</h2>
+                  <p className="properties-results-note">Showing {visibleListings.length} of {listings.length}</p>
+                </div>
                 <div className="properties-grid">
                   {visibleListings.map((listing) => (
                     <PropertyCard key={listing.id} listing={listing} />

@@ -51,109 +51,118 @@ function VisitForm() {
 
   if (success) {
     return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-green-500 text-sm font-black">OK</span>
-        </div>
-        <h2 className="text-xl font-bold text-gray-800 mb-2">Visit Request Submitted!</h2>
-        <p className="text-gray-500 text-sm mb-6">
+      <div className="pf-success-page">
+        <div className="pf-success-card">
+          <div className="pf-success-mark">OK</div>
+          <h2 data-i18n="success_visit_title">Visit Request Submitted</h2>
+          <p data-i18n="success_visit_copy">
           We will contact you within 24 hours to confirm your visit.
-        </p>
-        <Link href="/" className="bg-orange-500 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-orange-600">
-          Back to Home
-        </Link>
+          </p>
+          <Link href="/" className="pf-back" data-i18n="action_back_home">
+            Back to Home
+          </Link>
+        </div>
       </div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="pf-form">
       {title && (
-        <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-          <p className="text-sm text-orange-700 font-medium">Requesting visit for:</p>
-          <p className="text-sm text-gray-700 mt-0.5">{title}</p>
+        <div className="pf-note">
+          <p className="m-0">Requesting visit for: {title}</p>
         </div>
       )}
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Your Name <span className="text-red-500">*</span>
-        </label>
-        <input
-          value={form.finder_name}
-          onChange={e => set('finder_name', e.target.value)}
-          required
-          placeholder="Enter your full name"
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-        />
+      <div className="pf-section">
+        <p className="pf-section-title" data-i18n="form_contact_details">Contact details</p>
+        <div className="pf-grid-2">
+          <div className="pf-field">
+            <label className="pf-label">
+              <span data-i18n="form_name">Your Name</span> <span className="pf-required">*</span>
+            </label>
+            <input
+              value={form.finder_name}
+              onChange={e => set('finder_name', e.target.value)}
+              required
+              placeholder="Enter your full name"
+              className="pf-input"
+            />
+          </div>
+
+          <div className="pf-field">
+            <label className="pf-label">
+              <span data-i18n="form_phone">Phone Number</span> <span className="pf-required">*</span>
+            </label>
+            <input
+              value={form.finder_phone}
+              onChange={e => set('finder_phone', e.target.value)}
+              required
+              placeholder="10-digit mobile number"
+              maxLength={10}
+              className="pf-input"
+            />
+          </div>
+        </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Phone Number <span className="text-red-500">*</span>
-        </label>
-        <input
-          value={form.finder_phone}
-          onChange={e => set('finder_phone', e.target.value)}
-          required
-          placeholder="10-digit mobile number"
-          maxLength={10}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-        />
-      </div>
+      <div className="pf-section">
+        <p className="pf-section-title" data-i18n="form_visit_preference">Visit preference</p>
+        <div className="pf-grid-2">
+          <div className="pf-field">
+            <label className="pf-label">
+              <span data-i18n="form_preferred_day">Preferred Day</span> <span className="pf-required">*</span>
+            </label>
+            <input
+              type="date"
+              value={form.preferred_day}
+              onChange={e => set('preferred_day', e.target.value)}
+              required
+              min={new Date().toISOString().split('T')[0]}
+              className="pf-input"
+            />
+          </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Preferred Day <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="date"
-          value={form.preferred_day}
-          onChange={e => set('preferred_day', e.target.value)}
-          required
-          min={new Date().toISOString().split('T')[0]}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-        />
-      </div>
+          <div className="pf-field">
+            <label className="pf-label">
+              <span data-i18n="form_preferred_time">Preferred Time</span> <span className="pf-required">*</span>
+            </label>
+            <select
+              value={form.preferred_time}
+              onChange={e => set('preferred_time', e.target.value)}
+              className="pf-input"
+            >
+              <option value="morning">Morning (9am - 12pm)</option>
+              <option value="afternoon">Afternoon (12pm - 4pm)</option>
+              <option value="evening">Evening (4pm - 7pm)</option>
+            </select>
+          </div>
+        </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Preferred Time <span className="text-red-500">*</span>
-        </label>
-        <select
-          value={form.preferred_time}
-          onChange={e => set('preferred_time', e.target.value)}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-        >
-          <option value="morning">Morning (9am - 12pm)</option>
-          <option value="afternoon">Afternoon (12pm - 4pm)</option>
-          <option value="evening">Evening (4pm - 7pm)</option>
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Message (Optional)
-        </label>
-        <textarea
-          value={form.message}
-          onChange={e => set('message', e.target.value)}
-          rows={3}
-          placeholder="Any special requirements or questions..."
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-        />
+        <div className="pf-field">
+          <label className="pf-label">
+            <span data-i18n="form_message_optional">Message (Optional)</span>
+          </label>
+          <textarea
+            value={form.message}
+            onChange={e => set('message', e.target.value)}
+            rows={3}
+            placeholder="Any special requirements or questions..."
+            className="pf-input"
+          />
+        </div>
       </div>
 
       {error && (
-        <p className="text-red-500 text-sm">{error}</p>
+        <p className="pf-error">{error}</p>
       )}
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-orange-500 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-orange-600 disabled:opacity-50"
+        className="pf-submit"
       >
-        {loading ? 'Submitting...' : 'Request Visit'}
+        {loading ? 'Submitting...' : <span data-i18n="action_request_visit">Request Visit</span>}
       </button>
     </form>
   )
@@ -161,16 +170,21 @@ function VisitForm() {
 
 export default function VisitPage() {
   return (
-    <div className="page-shell">
-      <div className="mx-auto max-w-2xl px-3 sm:px-5 py-10">
-        <div className="content-card p-6 sm:p-8">
-          <h1 className="text-xl font-bold text-gray-800 mb-1">Request a Visit</h1>
-          <p className="text-gray-500 text-sm mb-6">
-            Fill in your details and we will coordinate the visit for you.
-          </p>
-          <Suspense fallback={<p className="text-gray-400 text-sm">Loading...</p>}>
-            <VisitForm />
-          </Suspense>
+    <div className="pf-page">
+      <div className="pf-wrap">
+        <div className="pf-card">
+          <div className="pf-head">
+            <span className="pf-kicker" data-i18n="form_visit_kicker">Visit coordination</span>
+            <h1 className="pf-title" data-i18n="form_visit_title">Request a Visit</h1>
+            <p className="pf-subtitle" data-i18n="form_visit_subtitle">
+              Share your contact details and preferred timing. We will coordinate the visit and confirm the next step with you.
+            </p>
+          </div>
+          <div className="pf-body">
+            <Suspense fallback={<p className="text-gray-400 text-sm">Loading...</p>}>
+              <VisitForm />
+            </Suspense>
+          </div>
         </div>
       </div>
     </div>

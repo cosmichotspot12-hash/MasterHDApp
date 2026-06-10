@@ -146,7 +146,7 @@ export default async function PropertyDetailPage({
   return (
     <div className="page-shell pb-28 md:pb-12">
       <div className="site-container py-4 sm:py-6 lg:py-8">
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-6">
+        <div className="grid gap-4 grid-cols-1 md:gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-6">
           <main className="min-w-0 space-y-5">
             {listing.photos && listing.photos.length > 0 && (
               <section className="overflow-hidden rounded-lg border border-[#dedbd2] bg-white">
@@ -176,7 +176,7 @@ export default async function PropertyDetailPage({
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <div className="mb-3 flex flex-wrap gap-2">
-                    <span className="rounded-full bg-[#fff0e2] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#9f4a22]">
+                    <span className="rounded-full bg-[#fff0e2] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#9f4a22]" data-i18n={listing.listing_type === 'rent' ? 'label_for_rent' : 'label_for_sale'}>
                       {listing.listing_type === 'rent' ? 'For Rent' : 'For Sale'}
                     </span>
                     {listing.negotiable && (
@@ -212,7 +212,7 @@ export default async function PropertyDetailPage({
               </div>
             </section>
 
-            <section className="grid gap-5 xl:grid-cols-[.95fr_1.05fr]">
+            <section className="grid gap-4 grid-cols-1 md:gap-5 xl:grid-cols-[.95fr_1.05fr]">
               {detailItems.length > 0 && (
                 <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
                   <h2 className="mb-4 text-lg font-black text-[#20201d]">Property Details</h2>
@@ -254,7 +254,7 @@ export default async function PropertyDetailPage({
               </section>
             )}
 
-            <section className="grid gap-5 lg:grid-cols-2">
+            <section className="grid gap-4 grid-cols-1 md:gap-5 lg:grid-cols-2">
               {listing.listing_type === 'rent' && preferenceItems.length > 0 && (
                 <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
                   <h2 className="mb-4 text-lg font-black text-[#20201d]">Preferences</h2>
@@ -284,7 +284,7 @@ export default async function PropertyDetailPage({
             </section>
 
             {(listing.nearby_places || listing.google_maps_url) && (
-              <section className="grid gap-5 lg:grid-cols-2">
+              <section className="grid gap-4 grid-cols-1 md:gap-5 lg:grid-cols-2">
                 {listing.nearby_places && (
                   <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
                     <h2 className="mb-3 text-lg font-black text-[#20201d]">Nearby Places</h2>
@@ -319,7 +319,7 @@ export default async function PropertyDetailPage({
                   href={'/visit?listing_id=' + listing.id + '&title=' + encodeURIComponent(listing.title)}
                   className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#9f4a22] px-4 text-sm font-bold text-white hover:bg-[#c95f2c]"
                 >
-                  Request Visit
+                  <span data-i18n="action_request_visit">Request Visit</span>
                 </Link>
 
                 <a
@@ -328,14 +328,14 @@ export default async function PropertyDetailPage({
                   rel="noreferrer"
                   className="inline-flex min-h-11 items-center justify-center rounded-md bg-green-600 px-4 text-sm font-bold text-white hover:bg-green-700"
                 >
-                  WhatsApp Us
+                  <span data-i18n="label_whatsapp">WhatsApp Us</span>
                 </a>
 
                 <a
                   href={'tel:' + WHATSAPP_NUMBER.replace('91', '')}
                   className="inline-flex min-h-11 items-center justify-center rounded-md border border-[#dedbd2] bg-white px-4 text-sm font-bold text-[#20201d] hover:bg-[#fffaf4]"
                 >
-                  Call Us
+                  <span data-i18n="label_call">Call Us</span>
                 </a>
               </div>
 
@@ -352,7 +352,7 @@ export default async function PropertyDetailPage({
           href={'/visit?listing_id=' + listing.id + '&title=' + encodeURIComponent(listing.title)}
           className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#9f4a22] px-2 text-center text-xs font-bold text-white"
         >
-          Request Visit
+          <span data-i18n="action_request_visit">Request Visit</span>
         </Link>
 
         <a
@@ -361,14 +361,14 @@ export default async function PropertyDetailPage({
           rel="noreferrer"
           className="inline-flex min-h-11 items-center justify-center rounded-md bg-green-600 px-2 text-center text-xs font-bold text-white"
         >
-          WhatsApp
+          <span data-i18n="label_whatsapp">WhatsApp</span>
         </a>
 
         <a
           href={'tel:' + WHATSAPP_NUMBER.replace('91', '')}
           className="inline-flex min-h-11 items-center justify-center rounded-md border border-[#dedbd2] bg-white px-2 text-center text-xs font-bold text-[#20201d]"
         >
-          Call
+          <span data-i18n="label_call">Call</span>
         </a>
       </div>
     </div>
