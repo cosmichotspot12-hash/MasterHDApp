@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Personal data - never commit
+Property Demand Data-350.csv
+requirements-import-preview.csv
+backups/

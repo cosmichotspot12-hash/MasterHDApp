@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { RequirementsLocalityWorkspace, type Requirement } from '@/components/admin-operations'
+import { RequirementsLocalityWorkspace, type AdminListing, type Requirement } from '@/components/admin-operations'
 import { adminApiHeaders } from '@/lib/admin-api'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
@@ -9,22 +9,27 @@ export function normalizeLocality(value: string) {
   return value.trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
-async function getRequirements() {
+async function getRequirementsAndListings() {
   try {
     const headers = await adminApiHeaders()
-    const res = await fetch(APP_URL + '/api/admin/reqs', {
-      cache: 'no-store',
-      headers,
-    })
-    const { data } = await res.json()
-    return (data || []) as Requirement[]
+    const [reqRes, listRes] = await Promise.all([
+      fetch(APP_URL + '/api/admin/reqs', { cache: 'no-store', headers }),
+      fetch(APP_URL + '/api/admin/listings', { cache: 'no-store', headers }),
+    ])
+    const reqJson = await reqRes.json()
+    const listJson = await listRes.json()
+    return {
+      requirements: (reqJson.data || []) as Requirement[],
+      listings: (listJson.data || []) as AdminListing[],
+    }
   } catch {
-    return [] as Requirement[]
+    return { requirements: [] as Requirement[], listings: [] as AdminListing[] }
   }
 }
 
 export async function RequirementsLocalityView({ locality }: { locality: string }) {
-  const allRequirements = await getRequirements()
+  const { requirements: allRequirements, listings } = await getRequirementsAndListings()
+  const activeListings = listings.filter((l) => l.status === 'active')
   const normalizedLocality = normalizeLocality(locality)
   const requirements = normalizedLocality
     ? allRequirements.filter((requirement) => normalizeLocality(requirement.locality_preference || '') === normalizedLocality)
@@ -54,7 +59,7 @@ export async function RequirementsLocalityView({ locality }: { locality: string 
       </div>
 
       {normalizedLocality ? (
-        <RequirementsLocalityWorkspace locality={locality} requirements={requirements} whatsappNumber={WHATSAPP_NUMBER} />
+        <RequirementsLocalityWorkspace locality={locality} requirements={requirements} activeListings={activeListings} whatsappNumber={WHATSAPP_NUMBER} />
       ) : (
         <div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-sm font-semibold text-slate-500">
           Select a locality from the requirements page.
