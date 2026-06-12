@@ -1,24 +1,37 @@
-import { RequirementsQueue, type Requirement } from '@/components/admin-operations'
+import { DemandIntelligence, RequirementsQueue, type AdminListing, type Requirement } from '@/components/admin-operations'
 import { adminApiHeaders } from '@/lib/admin-api'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-async function getRequirements() {
+async function getRequirementsData() {
   try {
     const headers = await adminApiHeaders()
-    const res = await fetch(APP_URL + '/api/admin/reqs', {
-      cache: 'no-store',
-      headers,
-    })
-    const { data } = await res.json()
-    return (data || []) as Requirement[]
+    const [requirementsRes, listingsRes] = await Promise.all([
+      fetch(APP_URL + '/api/admin/reqs', {
+        cache: 'no-store',
+        headers,
+      }),
+      fetch(APP_URL + '/api/admin/listings', {
+        cache: 'no-store',
+        headers,
+      }),
+    ])
+    const [requirementsJson, listingsJson] = await Promise.all([
+      requirementsRes.json(),
+      listingsRes.json(),
+    ])
+    return {
+      requirements: (requirementsJson.data || []) as Requirement[],
+      listings: (listingsJson.data || []) as AdminListing[],
+    }
   } catch {
-    return [] as Requirement[]
+    return { requirements: [] as Requirement[], listings: [] as AdminListing[] }
   }
 }
 
 export default async function RequirementsPage() {
-  const requirements = await getRequirements()
+  const { requirements, listings } = await getRequirementsData()
+  const activeListings = listings.filter((listing) => listing.status === 'active')
   const newCount = requirements.filter((requirement) => requirement.status === 'new').length
   const localityCount = new Set(requirements.map((requirement) => requirement.locality_preference).filter(Boolean)).size
 
@@ -34,6 +47,7 @@ export default async function RequirementsPage() {
           <span className="w-fit rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-600">{localityCount} localities</span>
         </div>
       </div>
+      <DemandIntelligence requirements={requirements} listings={activeListings} />
       <RequirementsQueue requirements={requirements} />
     </div>
   )

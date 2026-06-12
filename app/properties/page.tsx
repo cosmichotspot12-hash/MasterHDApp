@@ -6,8 +6,10 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const PAGE_SIZE = 12
 
 type PropertyType = 'all' | 'rent' | 'sale'
+type PropertyView = 'available' | 'closed'
 
 type PropertySearchParams = {
+  view?: string
   type?: string
   bhk?: string
   category?: string
@@ -26,13 +28,19 @@ function normalizeType(type?: string): PropertyType {
   return 'all'
 }
 
+function normalizeView(view?: string): PropertyView {
+  return view === 'closed' ? 'closed' : 'available'
+}
+
 function buildApiUrl(params: {
+  view: PropertyView
   type: PropertyType
   bhk: string
   category: string
   locality: string
 }) {
   const apiParams = new URLSearchParams()
+  if (params.view === 'closed') apiParams.set('view', 'closed')
   if (params.type !== 'all') apiParams.set('type', params.type)
   if (params.bhk) apiParams.set('bhk', params.bhk)
   if (params.category) apiParams.set('category', params.category)
@@ -43,6 +51,7 @@ function buildApiUrl(params: {
 }
 
 async function getListings(params: {
+  view: PropertyView
   type: PropertyType
   bhk: string
   category: string
@@ -58,6 +67,7 @@ async function getListings(params: {
 }
 
 function propertiesHref(params: {
+  view?: PropertyView
   type?: PropertyType
   bhk?: string
   category?: string
@@ -65,6 +75,7 @@ function propertiesHref(params: {
   page?: number
 }) {
   const query = new URLSearchParams()
+  if (params.view === 'closed') query.set('view', 'closed')
   if (params.type && params.type !== 'all') query.set('type', params.type)
   if (params.bhk) query.set('bhk', params.bhk)
   if (params.category) query.set('category', params.category)
@@ -85,6 +96,16 @@ function titleForType(type: PropertyType) {
   return 'All verified properties'
 }
 
+function titleForPage(view: PropertyView, type: PropertyType) {
+  if (view === 'closed') {
+    if (type === 'rent') return 'Recently rented properties'
+    if (type === 'sale') return 'Recently sold properties'
+    return 'Recently closed properties'
+  }
+
+  return titleForType(type)
+}
+
 function labelForCategory(value: string) {
   if (!value) return ''
   return value
@@ -100,16 +121,18 @@ export default async function PropertiesPage({
   searchParams: Promise<PropertySearchParams>
 }) {
   const params = await searchParams
+  const view = normalizeView(params.view)
   const type = normalizeType(params.type)
   const bhk = params.bhk || ''
   const category = params.category || ''
   const locality = params.locality || ''
   const page = Math.max(1, Number(params.page || 1) || 1)
-  const listings = await getListings({ type, bhk, category, locality })
+  const listings = await getListings({ view, type, bhk, category, locality })
   const visibleListings = listings.slice(0, page * PAGE_SIZE)
   const hasMore = listings.length > visibleListings.length
   const hasFilters = type !== 'all' || Boolean(bhk || category || locality)
   const activeFilters = [
+    view === 'closed' ? 'Recently Closed' : '',
     type !== 'all' ? (type === 'rent' ? 'Rent' : 'Buy') : '',
     bhk ? bhk + ' BHK' : '',
     category ? labelForCategory(category) : '',
@@ -135,22 +158,22 @@ export default async function PropertiesPage({
         }
 
         .properties-browse {
-          padding: 22px 0 18px;
+          padding: 14px 0 12px;
         }
 
         .properties-panel {
           border: 1px solid #E4DED6;
           border-radius: 8px;
           background: #fff;
-          padding: 16px;
+          padding: 14px;
         }
 
         .properties-panel-top {
           display: grid;
           grid-template-columns: minmax(0, 1fr) auto;
-          gap: 18px;
+          gap: 14px;
           align-items: end;
-          margin-bottom: 14px;
+          margin-bottom: 11px;
         }
 
         .properties-kicker {
@@ -159,64 +182,74 @@ export default async function PropertiesPage({
           border: 1px solid #DCEBDD;
           border-radius: 999px;
           background: #F4FBF5;
-          padding: 6px 10px;
+          padding: 4px 9px;
           color: #14724B;
-          font-size: 11px;
+          font-size: 10.5px;
           font-weight: 900;
         }
 
         .properties-title {
-          margin: 10px 0 0;
+          margin: 7px 0 0;
           color: #111827;
-          font-size: clamp(24px, 3vw, 40px);
+          font-size: clamp(23px, 2.2vw, 31px);
           font-weight: 950;
           line-height: 1.08;
         }
 
         .properties-sub {
-          margin: 7px 0 0;
+          margin: 5px 0 0;
           max-width: 680px;
           color: #5B6472;
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 600;
-          line-height: 1.55;
+          line-height: 1.4;
         }
 
         .properties-count-card {
-          min-width: 156px;
+          min-width: 118px;
           border: 1px solid #E4DED6;
           border-radius: 8px;
           background: #FFF9F1;
-          padding: 12px 14px;
+          padding: 9px 11px;
           text-align: right;
         }
 
         .properties-count-num {
           color: #111827;
-          font-size: 27px;
+          font-size: 23px;
           font-weight: 950;
           line-height: 1;
         }
 
         .properties-count-label {
-          margin-top: 4px;
+          margin-top: 3px;
           color: #7A6E68;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 850;
         }
 
         .properties-toolbar {
           display: grid;
           grid-template-columns: auto minmax(0, 1fr);
-          gap: 12px;
+          gap: 10px;
           align-items: center;
           border-top: 1px solid #F0EBE5;
-          padding-top: 14px;
+          padding-top: 11px;
+        }
+
+        .properties-status-tabs {
+          display: inline-grid;
+          grid-template-columns: repeat(2, minmax(104px, 1fr));
+          gap: 4px;
+          border: 1px solid #E4DED6;
+          border-radius: 8px;
+          background: #fff;
+          padding: 4px;
         }
 
         .properties-tabs {
           display: inline-grid;
-          grid-template-columns: repeat(3, minmax(70px, 1fr));
+          grid-template-columns: repeat(3, minmax(62px, 1fr));
           gap: 4px;
           border: 1px solid #E4DED6;
           border-radius: 8px;
@@ -224,13 +257,20 @@ export default async function PropertiesPage({
           padding: 4px;
         }
 
+        .properties-filter-row {
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr);
+          gap: 10px;
+          align-items: center;
+        }
+
         .properties-tab {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          min-height: 38px;
+          min-height: 34px;
           border-radius: 6px;
-          padding: 8px 14px;
+          padding: 7px 12px;
           color: #5B6472;
           font-size: 13px;
           font-weight: 900;
@@ -251,7 +291,7 @@ export default async function PropertiesPage({
         .properties-form {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 8px;
+          gap: 7px;
           align-items: center;
         }
 
@@ -270,11 +310,11 @@ export default async function PropertiesPage({
         .properties-form input,
         .properties-form select {
           width: 100%;
-          min-height: 40px;
+          min-height: 36px;
           border: 1px solid #D1D5DB;
           border-radius: 8px;
           background: #fff;
-          padding: 8px 10px;
+          padding: 7px 10px;
           color: #374151;
           font-size: 13px;
           font-weight: 700;
@@ -292,9 +332,9 @@ export default async function PropertiesPage({
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          min-height: 40px;
+          min-height: 36px;
           border-radius: 8px;
-          padding: 9px 14px;
+          padding: 8px 14px;
           font-size: 13px;
           font-weight: 900;
           text-decoration: none;
@@ -416,18 +456,30 @@ export default async function PropertiesPage({
         }
 
         @media (max-width: 980px) {
-          .properties-panel-top,
           .properties-toolbar {
+            grid-template-columns: minmax(210px, 0.8fr) minmax(0, 1.4fr);
+          }
+
+          .properties-form {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+
+        @media (max-width: 760px) {
+          .properties-panel-top,
+          .properties-toolbar,
+          .properties-filter-row {
             grid-template-columns: 1fr;
+          }
+
+          .properties-status-tabs,
+          .properties-tabs {
+            width: 100%;
           }
 
           .properties-count-card {
             width: 100%;
             text-align: left;
-          }
-
-          .properties-tabs {
-            width: 100%;
           }
 
           .properties-form {
@@ -437,30 +489,33 @@ export default async function PropertiesPage({
 
         @media (max-width: 620px) {
           .properties-wrap {
-            padding: 0 12px;
+            padding: 0 8px;
           }
 
           .properties-browse {
-            padding: 12px 0 12px;
+            padding: 8px 0;
           }
 
           .properties-panel {
-            padding: 12px;
+            padding: 10px;
           }
 
           .properties-panel-top {
-            gap: 10px;
-            margin-bottom: 10px;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 8px;
+            align-items: start;
+            margin-bottom: 8px;
           }
 
           .properties-kicker {
-            padding: 5px 9px;
-            font-size: 10.5px;
+            padding: 3px 8px;
+            font-size: 10px;
           }
 
           .properties-title {
-            margin-top: 8px;
-            font-size: 25px;
+            margin-top: 6px;
+            font-size: 21px;
+            line-height: 1.12;
           }
 
           .properties-sub {
@@ -469,32 +524,57 @@ export default async function PropertiesPage({
 
           .properties-count-card {
             display: flex;
+            width: auto;
+            min-width: 72px;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            padding: 10px 12px;
+            justify-content: center;
+            padding: 6px 8px;
+            text-align: center;
           }
 
           .properties-count-num {
-            font-size: 22px;
+            font-size: 19px;
+          }
+
+          .properties-count-label {
+            margin-top: 1px;
+            font-size: 9.5px;
+            line-height: 1.05;
           }
 
           .properties-toolbar {
-            gap: 10px;
-            padding-top: 10px;
+            gap: 8px;
+            padding-top: 8px;
           }
 
           .properties-tab {
-            min-height: 36px;
-            padding: 7px 10px;
+            min-height: 31px;
+            padding: 6px 8px;
+            font-size: 12px;
           }
 
           .properties-form {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 7px;
+            gap: 6px;
           }
 
           .properties-form input {
-            grid-column: 1 / -1;
+            grid-column: auto;
+          }
+
+          .properties-form input,
+          .properties-form select {
+            min-height: 33px;
+            padding: 6px 9px;
+            font-size: 12px;
+          }
+
+          .properties-btn,
+          .properties-clear {
+            min-height: 33px;
+            padding: 6px 10px;
+            font-size: 12px;
           }
 
           .properties-btn,
@@ -503,7 +583,13 @@ export default async function PropertiesPage({
           }
 
           .properties-active {
-            margin-top: 9px;
+            gap: 5px;
+            margin-top: 7px;
+          }
+
+          .properties-chip {
+            padding: 5px 8px;
+            font-size: 11px;
           }
 
           .properties-results {
@@ -530,6 +616,10 @@ export default async function PropertiesPage({
           .properties-form {
             grid-template-columns: 1fr;
           }
+
+          .properties-form input {
+            grid-column: 1;
+          }
         }
       `}</style>
 
@@ -540,31 +630,49 @@ export default async function PropertiesPage({
               <div className="properties-panel-top">
                 <div>
                   <span className="properties-kicker" data-i18n="properties_kicker">Verified Hubballi-Dharwad listings</span>
-                  <h1 className="properties-title">{titleForType(type)}</h1>
+                  <h1 className="properties-title">{titleForPage(view, type)}</h1>
                   <p className="properties-sub" data-i18n="properties_subtitle">
-                    Browse verified rent and buy properties with quick filters for BHK, property type, and locality.
+                    {view === 'closed'
+                      ? 'Proof of properties already rented or sold through our local workflow.'
+                      : 'Browse verified rent and buy properties with quick filters for BHK, property type, and locality.'}
                   </p>
                 </div>
                 <div className="properties-count-card" aria-label="Matching property count">
                   <div className="properties-count-num">{listings.length}</div>
-                  <div className="properties-count-label">{listings.length === 1 ? 'property found' : 'properties found'}</div>
+                  <div className="properties-count-label">
+                    {view === 'closed'
+                      ? listings.length === 1 ? 'closed property' : 'closed properties'
+                      : listings.length === 1 ? 'property found' : 'properties found'}
+                  </div>
                 </div>
               </div>
 
               <div className="properties-toolbar">
-                <nav className="properties-tabs" aria-label="Listing type filters">
-                  <Link href={propertiesHref({ type: 'all', bhk, category, locality })} className={tabClass(type === 'all')}>
-                    <span data-i18n="properties_all">All</span>
-                  </Link>
-                  <Link href={propertiesHref({ type: 'rent', bhk, category, locality })} className={tabClass(type === 'rent')}>
-                    <span data-i18n="nav_rent">Rent</span>
-                  </Link>
-                  <Link href={propertiesHref({ type: 'sale', bhk, category, locality })} className={tabClass(type === 'sale')}>
-                    <span data-i18n="nav_buy">Buy</span>
-                  </Link>
-                </nav>
+                <div className="properties-filter-row">
+                  <nav className="properties-status-tabs" aria-label="Property availability filters">
+                    <Link href={propertiesHref({ view: 'available', type, bhk, category, locality })} className={tabClass(view === 'available')}>
+                      Available
+                    </Link>
+                    <Link href={propertiesHref({ view: 'closed', type, bhk, category, locality })} className={tabClass(view === 'closed')}>
+                      Recently Closed
+                    </Link>
+                  </nav>
+
+                  <nav className="properties-tabs" aria-label="Listing type filters">
+                    <Link href={propertiesHref({ view, type: 'all', bhk, category, locality })} className={tabClass(type === 'all')}>
+                      <span data-i18n="properties_all">All</span>
+                    </Link>
+                    <Link href={propertiesHref({ view, type: 'rent', bhk, category, locality })} className={tabClass(type === 'rent')}>
+                      <span data-i18n="nav_rent">Rent</span>
+                    </Link>
+                    <Link href={propertiesHref({ view, type: 'sale', bhk, category, locality })} className={tabClass(type === 'sale')}>
+                      <span data-i18n="nav_buy">Buy</span>
+                    </Link>
+                  </nav>
+                </div>
 
                 <form method="GET" action="/properties" className="properties-form">
+                  {view === 'closed' && <input type="hidden" name="view" value="closed" />}
                   {type !== 'all' && <input type="hidden" name="type" value={type} />}
                   <select name="bhk" defaultValue={bhk} aria-label="BHK">
                     <option value="">All BHK</option>
@@ -591,7 +699,7 @@ export default async function PropertiesPage({
                     Search
                   </button>
                   {hasFilters && (
-                    <Link href="/properties" className="properties-clear" data-i18n="properties_clear">
+                    <Link href={view === 'closed' ? '/properties?view=closed' : '/properties'} className="properties-clear" data-i18n="properties_clear">
                       Clear
                     </Link>
                   )}
@@ -614,7 +722,7 @@ export default async function PropertiesPage({
             {visibleListings.length > 0 ? (
               <>
                 <div className="properties-results-head">
-                  <h2 className="properties-results-title">Available properties</h2>
+                  <h2 className="properties-results-title">{view === 'closed' ? 'Closed properties' : 'Available properties'}</h2>
                   <p className="properties-results-note">Showing {visibleListings.length} of {listings.length}</p>
                 </div>
                 <div className="properties-grid">
@@ -625,7 +733,7 @@ export default async function PropertiesPage({
                 {hasMore && (
                   <div className="properties-more">
                     <Link
-                      href={propertiesHref({ type, bhk, category, locality, page: page + 1 })}
+                      href={propertiesHref({ view, type, bhk, category, locality, page: page + 1 })}
                       className="properties-clear"
                     >
                       Show more properties

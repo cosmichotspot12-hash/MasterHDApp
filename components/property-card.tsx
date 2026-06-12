@@ -13,6 +13,7 @@ export type PropertyCardListing = {
   photos?: string[] | null
   is_featured?: boolean | null
   negotiable?: boolean | null
+  status?: string | null
 }
 
 function formatPrice(listing: PropertyCardListing) {
@@ -95,6 +96,15 @@ export function PropertyCardStyles() {
           transform: translateY(-2px);
         }
 
+        .pc-closed {
+          border-color: #D8C8BA;
+          background: #FFFDF9;
+        }
+
+        .pc-closed:hover {
+          transform: none;
+        }
+
         .pc-link {
           display: flex;
           flex: 1;
@@ -116,6 +126,10 @@ export function PropertyCardStyles() {
           content: '';
           background: linear-gradient(180deg, rgba(24,18,14,0.34) 0%, rgba(24,18,14,0.02) 38%, rgba(24,18,14,0.18) 100%);
           pointer-events: none;
+        }
+
+        .pc-closed .pc-photo::after {
+          background: linear-gradient(180deg, rgba(24,18,14,0.42) 0%, rgba(24,18,14,0.16) 40%, rgba(24,18,14,0.62) 100%);
         }
 
         .pc-photo img {
@@ -169,6 +183,11 @@ export function PropertyCardStyles() {
 
         .pc-type-sale {
           background: #13734A;
+          color: #fff;
+        }
+
+        .pc-type-closed {
+          background: #111827;
           color: #fff;
         }
 
@@ -272,6 +291,20 @@ export function PropertyCardStyles() {
           border-color: #334155;
           background: #334155;
           transform: translateY(-1px);
+        }
+
+        .pc-closed-note {
+          display: inline-flex;
+          min-height: 36px;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid #E4DED6;
+          border-radius: 8px;
+          background: #FFF9F1;
+          padding: 8px 10px;
+          color: #7A3D1F;
+          font-size: 12px;
+          font-weight: 900;
         }
 
         @media (max-width: 620px) {
@@ -378,57 +411,74 @@ export function PropertyCardStyles() {
 
 export default function PropertyCard({ listing }: { listing: PropertyCardListing }) {
   const isRent = listing.listing_type === 'rent'
+  const isClosed = listing.status === 'rented_sold'
   const category = formatCategory(listing.property_category)
   const firstPhoto = listing.photos?.[0]
+  const closedLabel = isRent ? 'Rented' : 'Sold'
+  const cardContent = (
+    <>
+      <div className="pc-photo">
+        {firstPhoto ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={firstPhoto} alt={listing.title} />
+        ) : (
+          <div className="pc-photo-empty">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21" />
+            </svg>
+          </div>
+        )}
+
+        <div className="pc-badge-row">
+          <span className={`pc-type pc-type-${isClosed ? 'closed' : isRent ? 'rent' : 'sale'}`} data-i18n={isRent ? 'nav_rent' : 'nav_sale'}>
+            {isClosed ? closedLabel : isRent ? 'Rent' : 'Sale'}
+          </span>
+        </div>
+
+        {listing.bhk_count && <span className="pc-bhk">{listing.bhk_count} BHK</span>}
+      </div>
+
+      <div className="pc-body">
+        <p className="pc-locality">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+          </svg>
+          {listing.locality}
+        </p>
+        <h2 className="pc-title">{listing.title}</h2>
+        <div className="pc-info-row">
+          <span>{category}</span>
+          {listing.bhk_count && <span>{listing.bhk_count} BHK</span>}
+          {listing.furnishing && <span>{listing.furnishing.replace('_', ' ')}</span>}
+        </div>
+        <p className="pc-price">
+          {formatPrice(listing)}
+          {isRent && <span className="pc-price-unit">/mo</span>}
+        </p>
+      </div>
+    </>
+  )
 
   return (
-    <article className="pc">
-      <Link href={'/property/' + listing.slug} className="pc-link" aria-label={'View ' + listing.title}>
-        <div className="pc-photo">
-          {firstPhoto ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={firstPhoto} alt={listing.title} />
-          ) : (
-            <div className="pc-photo-empty">
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21" />
-              </svg>
-            </div>
-          )}
-
-          <div className="pc-badge-row">
-            <span className={`pc-type pc-type-${isRent ? 'rent' : 'sale'}`} data-i18n={isRent ? 'nav_rent' : 'nav_sale'}>
-              {isRent ? 'Rent' : 'Sale'}
-            </span>
-          </div>
-
-          {listing.bhk_count && <span className="pc-bhk">{listing.bhk_count} BHK</span>}
+    <article className={'pc' + (isClosed ? ' pc-closed' : '')}>
+      {isClosed ? (
+        <div className="pc-link" aria-label={closedLabel + ' property: ' + listing.title}>
+          {cardContent}
         </div>
-
-        <div className="pc-body">
-          <p className="pc-locality">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-            </svg>
-            {listing.locality}
-          </p>
-          <h2 className="pc-title">{listing.title}</h2>
-          <div className="pc-info-row">
-            <span>{category}</span>
-            {listing.bhk_count && <span>{listing.bhk_count} BHK</span>}
-            {listing.furnishing && <span>{listing.furnishing.replace('_', ' ')}</span>}
-          </div>
-          <p className="pc-price">
-            {formatPrice(listing)}
-            {isRent && <span className="pc-price-unit">/mo</span>}
-          </p>
-        </div>
-      </Link>
+      ) : (
+        <Link href={'/property/' + listing.slug} className="pc-link" aria-label={'View ' + listing.title}>
+          {cardContent}
+        </Link>
+      )}
 
       <div className="pc-footer">
-        <Link href={visitHref(listing)} className="pc-visit-btn" data-i18n="action_request_visit">
-          Request Visit
-        </Link>
+        {isClosed ? (
+          <span className="pc-closed-note">Closed through HubliDharwad.app</span>
+        ) : (
+          <Link href={visitHref(listing)} className="pc-visit-btn" data-i18n="action_request_visit">
+            Request Visit
+          </Link>
+        )}
       </div>
     </article>
   )

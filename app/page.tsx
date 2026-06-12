@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import PropertyCard, { PropertyCardStyles, type PropertyCardListing } from '@/components/property-card'
+import { getPublicDemandSummary } from '@/lib/public-demand'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const HOME_PREVIEW_COUNT = 4
@@ -16,13 +17,15 @@ async function fetchListings(url: string) {
 }
 
 async function getHomeData() {
-  const [previewListings, allListings] = await Promise.all([
+  const [previewListings, allListings, demand] = await Promise.all([
     fetchListings(APP_URL + `/api/listings?sort=recent&limit=${HOME_PREVIEW_COUNT}`),
     fetchListings(APP_URL + '/api/listings?sort=recent'),
+    getPublicDemandSummary(),
   ])
   return {
     previewListings,
     totalListings: allListings.length || previewListings.length,
+    demand,
   }
 }
 
@@ -101,7 +104,7 @@ const LOCALITY_CHIPS = [
 ]
 
 export default async function HomePage() {
-  const { previewListings, totalListings } = await getHomeData()
+  const { previewListings, totalListings, demand } = await getHomeData()
 
   return (
     <>
@@ -132,6 +135,10 @@ export default async function HomePage() {
         @keyframes hd-fade-up {
           from { opacity: 0; transform: translateY(20px); }
           to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes hd-live-pulse {
+          0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(20,128,64,0.34); }
+          55% { opacity: .72; transform: scale(.86); box-shadow: 0 0 0 7px rgba(20,128,64,0); }
         }
         .hd-shine::before {
           content: '';
@@ -695,34 +702,79 @@ export default async function HomePage() {
           background: #fff;
         }
 
-        .hd-premium-trust {
+        .hd-premium-demand {
           display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 8px;
-          margin: 0;
-          padding: 0;
-          list-style: none;
-        }
-
-        .hd-premium-trust li {
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 10px;
+          align-items: center;
+          overflow: hidden;
           border: 1px solid #E4DED6;
           border-left: 3px solid #A95424;
           border-radius: 8px;
-          background: #fff;
-          padding: 11px 12px;
-          color: #334155;
+          background:
+            linear-gradient(135deg, #FFFFFF 0%, #FFF9F1 100%),
+            radial-gradient(circle at 94% 8%, rgba(169,84,36,.12), transparent 32%);
+          padding: 12px;
+          color: #111827;
+          text-decoration: none;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.78);
+        }
+
+        .hd-premium-demand:hover {
+          border-color: #D8C9BA;
+          background:
+            linear-gradient(135deg, #FFFFFF 0%, #FFF4E6 100%),
+            radial-gradient(circle at 94% 8%, rgba(169,84,36,.16), transparent 32%);
+        }
+
+        .hd-demand-live {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          color: #9F4A22;
+          font-size: 10.5px;
+          font-weight: 950;
+          letter-spacing: .04em;
+          text-transform: uppercase;
+        }
+
+        .hd-demand-dot {
+          width: 8px;
+          height: 8px;
+          flex: 0 0 auto;
+          border-radius: 999px;
+          background: #C95F2C;
+          animation: hd-live-pulse 1.35s ease-in-out infinite;
+        }
+
+        .hd-demand-main {
+          margin-top: 5px;
+          color: #111827;
+          font-size: 16px;
+          font-weight: 950;
+          line-height: 1.12;
+        }
+
+        .hd-demand-sub {
+          margin-top: 4px;
+          color: #64748B;
           font-size: 12px;
-          font-weight: 850;
+          font-weight: 800;
           line-height: 1.35;
         }
 
-        .hd-premium-trust li:nth-child(2) {
-          border-left-color: #111827;
-          background: #FFFDF9;
-        }
-
-        .hd-premium-trust li:nth-child(3) {
-          border-left-color: #6B5F58;
+        .hd-demand-action {
+          display: inline-flex;
+          min-height: 34px;
+          align-items: center;
+          justify-content: center;
+          border-radius: 8px;
+          background: #111827;
+          padding: 8px 10px;
+          color: #fff;
+          font-size: 11px;
+          font-weight: 950;
+          white-space: nowrap;
         }
 
         .hd-premium-stage {
@@ -979,16 +1031,20 @@ export default async function HomePage() {
             padding: 10px 12px;
             font-size: 13px;
           }
-          .hd-premium-trust {
-            grid-template-columns: 1fr 1fr;
-            gap: 7px;
+          .hd-premium-demand {
+            gap: 8px;
+            padding: 10px;
           }
-          .hd-premium-trust li {
-            padding: 9px;
-            font-size: 11.5px;
+          .hd-demand-main {
+            font-size: 14px;
           }
-          .hd-premium-trust li:nth-child(3) {
-            display: none;
+          .hd-demand-sub {
+            font-size: 10.5px;
+          }
+          .hd-demand-action {
+            min-height: 30px;
+            padding: 7px 8px;
+            font-size: 10px;
           }
           .hd-premium-feature {
             grid-template-columns: 1fr;
@@ -1031,7 +1087,7 @@ export default async function HomePage() {
                     <span data-i18n="hero_support">verified local support</span>
                   </span>
                   <h1 className="hd-premium-title" data-i18n="hero_title">
-                    Hubballi-Dharwad's property marketplace.
+                    Hubballi-Dharwad&apos;s property marketplace.
                   </h1>
                   <p className="hd-premium-copy-text" data-i18n="hero_copy">
                     Browse rent and sale listings, post your requirement, or list your property with local verification, video walkthroughs, and organised visit support.
@@ -1049,11 +1105,21 @@ export default async function HomePage() {
                   </div>
                 </div>
 
-                <ul className="hd-premium-trust" aria-label="Trust highlights">
-                  <li data-i18n="hero_trust_verified">Personally verified property details</li>
-                  <li data-i18n="hero_trust_video">Video walkthroughs before visits</li>
-                  <li data-i18n="hero_trust_partners">Owners, brokers and promoters welcome</li>
-                </ul>
+                <Link href="/list" className="hd-premium-demand" aria-label="Live local demand. List your property">
+                  <div>
+                    <div className="hd-demand-live">
+                      <span className="hd-demand-dot" aria-hidden />
+                      Live local demand
+                    </div>
+                    <div className="hd-demand-main">
+                      {demand.totalActive} active property requirements
+                    </div>
+                    <div className="hd-demand-sub">
+                      {demand.rentTotal} rent seekers &middot; {demand.saleTotal} buyers
+                    </div>
+                  </div>
+                  <span className="hd-demand-action">List property</span>
+                </Link>
               </div>
 
               <div className="hd-premium-stage">

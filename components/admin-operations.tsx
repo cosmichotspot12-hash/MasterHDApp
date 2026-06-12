@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { Children, useMemo, useState } from 'react'
 import StatusUpdater from '@/app/admin/owner-submissions/StatusUpdater'
 import SourceUpdater from '@/app/admin/owner-submissions/SourceUpdater'
 import DeleteButton from '@/app/admin/listings/DeleteButton'
@@ -21,6 +21,9 @@ export type AdminListing = {
   created_at?: string | null
   bhk_count?: string | null
   furnishing?: string | null
+  preferred_tenants?: string | null
+  food_preference?: string | null
+  facing?: string | null
   photos?: string[] | null
   owner_name?: string | null
   owner_phone?: string | null
@@ -73,6 +76,7 @@ export type Requirement = {
 const visitStatuses = ['all', 'new', 'contacted', 'visit_scheduled', 'visit_done', 'converted', 'dropped']
 const ownerStatuses = ['all', 'new', 'contacted', 'visit_scheduled', 'listed', 'rejected']
 const requirementStatuses = ['all', 'new', 'contacted', 'matched', 'fulfilled', 'no_match']
+const matchableRequirementStatuses = new Set(['new', 'contacted', 'matched'])
 
 function formatDate(value?: string | null) {
   if (!value) return 'Not set'
@@ -199,29 +203,29 @@ function AdminPropertyCard({
   const isRent = listing.listing_type === 'rent'
   const body = (
     <>
-      <div className="relative aspect-[16/10] overflow-hidden bg-orange-50">
+      <div className="relative aspect-[4/3] overflow-hidden bg-orange-50 sm:aspect-[5/3]">
         {firstPhoto ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={firstPhoto} alt={listing.title} className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full items-center justify-center text-slate-400">No photo</div>
+          <div className="flex h-full items-center justify-center text-xs font-semibold text-slate-400">No photo</div>
         )}
-        <div className="absolute left-2 top-2 flex gap-2">
-          <span className={`rounded-full px-2 py-1 text-[11px] font-bold text-white ${isRent ? 'bg-blue-700' : 'bg-green-700'}`}>{isRent ? 'Rent' : 'Sale'}</span>
-          {newRequestCount ? <span className="rounded-full bg-red-600 px-2 py-1 text-[11px] font-bold text-white">{newRequestCount} new</span> : null}
+        <div className="absolute left-1.5 top-1.5 flex gap-1.5">
+          <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white ${isRent ? 'bg-blue-700' : 'bg-green-700'}`}>{isRent ? 'Rent' : 'Sale'}</span>
+          {newRequestCount ? <span className="rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white">{newRequestCount} new</span> : null}
         </div>
-        {listing.bhk_count && <span className="absolute right-2 top-2 rounded-full bg-white/95 px-2 py-1 text-[11px] font-bold text-slate-900">{listing.bhk_count} BHK</span>}
+        {listing.bhk_count && <span className="absolute right-1.5 top-1.5 rounded-full bg-white/95 px-1.5 py-0.5 text-[10px] font-bold text-slate-900">{listing.bhk_count} BHK</span>}
       </div>
-      <div className="grid flex-1 gap-2 p-3">
-        <p className="text-xs font-bold text-slate-500">{listing.locality}</p>
-        <h2 className="line-clamp-2 text-sm font-extrabold leading-snug text-slate-950">{listing.title}</h2>
-        <div className="flex flex-wrap gap-1 text-[11px] font-semibold text-slate-600">
-          <span className="rounded-full bg-orange-50 px-2 py-1">{formatLabel(listing.property_category)}</span>
-          {listing.furnishing && <span className="rounded-full bg-orange-50 px-2 py-1">{formatLabel(listing.furnishing)}</span>}
+      <div className="grid flex-1 gap-1.5 p-2.5">
+        <p className="truncate text-[11px] font-bold text-slate-500">{listing.locality}</p>
+        <h2 className="line-clamp-2 text-[13px] font-extrabold leading-tight text-slate-950">{listing.title}</h2>
+        <div className="flex flex-wrap gap-1 text-[10px] font-semibold text-slate-600">
+          <span className="max-w-full truncate rounded-full bg-orange-50 px-1.5 py-0.5">{formatLabel(listing.property_category)}</span>
+          {listing.furnishing && <span className="max-w-full truncate rounded-full bg-orange-50 px-1.5 py-0.5">{formatLabel(listing.furnishing)}</span>}
         </div>
-        <div className="mt-auto flex items-end justify-between gap-3">
-          <p className="text-lg font-black text-slate-950">{formatPrice(listing.price)}{isRent && <span className="text-xs font-semibold text-slate-500">/mo</span>}</p>
-          {requestCount !== undefined && <span className="rounded-full border border-slate-200 px-2 py-1 text-[11px] font-bold text-slate-600">{requestCount} visits</span>}
+        <div className="mt-auto flex items-end justify-between gap-2">
+          <p className="min-w-0 truncate text-sm font-black text-slate-950 sm:text-[15px]">{formatPrice(listing.price)}{isRent && <span className="text-[10px] font-semibold text-slate-500">/mo</span>}</p>
+          {requestCount !== undefined && <span className="shrink-0 rounded-full border border-slate-200 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">{requestCount} visits</span>}
         </div>
       </div>
     </>
@@ -240,7 +244,7 @@ function AdminPropertyCard({
       ) : (
         <div className="flex flex-1 flex-col">{body}</div>
       )}
-      {actions && <div className="grid gap-2 border-t border-slate-100 p-3">{actions}</div>}
+      {actions && <div className="grid gap-1.5 border-t border-slate-100 p-2.5">{actions}</div>}
     </article>
   )
 }
@@ -263,7 +267,7 @@ export function ListingsInventory({ listings, visits }: { listings: AdminListing
     <div>
       <FilterBar search={search} onSearch={setSearch} status={status} onStatus={setStatus} statuses={['all', 'active', 'draft', 'rented_sold', 'inactive']} type={type} onType={setType} placeholder="Search title, locality, owner, phone" />
       {filtered.length === 0 ? <EmptyState text="No listings match these filters." /> : (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2.5 sm:grid-cols-[repeat(auto-fit,minmax(190px,1fr))] lg:gap-3">
           {filtered.map((listing) => (
             <AdminPropertyCard
               key={listing.id}
@@ -271,10 +275,10 @@ export function ListingsInventory({ listings, visits }: { listings: AdminListing
               requestCount={requestCounts[listing.id] || 0}
               href={`/admin/listings/${listing.id}`}
               actions={
-                <div className="flex flex-wrap gap-2">
-                  <Link href={`/admin/listings/${listing.id}`} className="inline-flex min-h-9 items-center justify-center rounded-md border border-slate-900 bg-slate-900 px-3 text-xs font-semibold text-white">Open</Link>
-                  <Link href={`/admin/listings/${listing.id}/edit`} className="inline-flex min-h-9 items-center justify-center rounded-md border border-slate-900 bg-slate-900 px-3 text-xs font-semibold text-white">Edit</Link>
-                  {listing.slug && <Link href={`/property/${listing.slug}`} className="inline-flex min-h-9 items-center justify-center rounded-md border border-slate-200 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50">View public</Link>}
+                <div className="grid grid-cols-2 gap-1.5">
+                  <Link href={`/admin/listings/${listing.id}`} className="inline-flex min-h-8 items-center justify-center rounded-md border border-slate-900 bg-slate-900 px-2 text-[11px] font-semibold text-white">Open</Link>
+                  <Link href={`/admin/listings/${listing.id}/edit`} className="inline-flex min-h-8 items-center justify-center rounded-md border border-slate-900 bg-slate-900 px-2 text-[11px] font-semibold text-white">Edit</Link>
+                  {listing.slug && <Link href={`/property/${listing.slug}`} className="inline-flex min-h-8 items-center justify-center rounded-md border border-slate-200 px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50">Public</Link>}
                   <DeleteButton id={listing.id} />
                 </div>
               }
@@ -315,7 +319,7 @@ export function VisitRequestsWorkspace({ listings, requests }: { listings: Admin
     <div>
       <FilterBar search={search} onSearch={setSearch} status={status} onStatus={setStatus} statuses={visitStatuses} type={type} onType={setType} placeholder="Search property, locality, finder, phone" />
       {filteredListings.length === 0 ? <EmptyState text="No active properties match these filters." /> : (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2.5 sm:grid-cols-[repeat(auto-fit,minmax(190px,1fr))] lg:gap-3">
           {filteredListings.map((listing) => {
             const propertyRequests = grouped[listing.id] || []
             return (
@@ -326,7 +330,7 @@ export function VisitRequestsWorkspace({ listings, requests }: { listings: Admin
                 newRequestCount={propertyRequests.filter((request) => request.status === 'new').length}
                 href={`/admin/listings/${listing.id}`}
                 actions={
-                  <Link href={`/admin/listings/${listing.id}`} className="inline-flex min-h-9 items-center justify-center rounded-md border border-slate-900 bg-slate-900 px-3 text-xs font-semibold text-white">
+                  <Link href={`/admin/listings/${listing.id}`} className="inline-flex min-h-8 items-center justify-center rounded-md border border-slate-900 bg-slate-900 px-2 text-[11px] font-semibold text-white">
                     Open workspace
                   </Link>
                 }
@@ -443,8 +447,8 @@ export function PropertyWorkspace({
 
       {tab === 'matches' && (
         <section className="grid gap-3">
-          {isClosed ? <EmptyState text="Matched requirements are hidden because this property is closed." /> : matchedRequirements.length === 0 ? <EmptyState text="No matched seeker requirements found for this property." /> : matchedRequirements.map(({ requirement, budgetWarning }) => (
-            <MatchedRequirementCard key={requirement.id} requirement={requirement} listing={listing} budgetWarning={budgetWarning} whatsappNumber={whatsappNumber} />
+          {isClosed ? <EmptyState text="Matched requirements are hidden because this property is closed." /> : matchedRequirements.length === 0 ? <EmptyState text="No matched seeker requirements found for this property." /> : matchedRequirements.map((match) => (
+            <MatchedRequirementCard key={match.requirement.id} match={match} listing={listing} whatsappNumber={whatsappNumber} />
           ))}
         </section>
       )}
@@ -470,16 +474,15 @@ function DetailItem({ label, value }: { label: string; value: string }) {
 }
 
 function MatchedRequirementCard({
-  requirement,
+  match,
   listing,
-  budgetWarning,
   whatsappNumber,
 }: {
-  requirement: Requirement
+  match: RequirementMatch
   listing: AdminListing
-  budgetWarning: boolean
   whatsappNumber: string
 }) {
+  const { requirement, score, strength, reasons, budgetWarning } = match
   const budget = (requirement.budget_min ? formatPrice(requirement.budget_min) + ' - ' : '') + formatPrice(requirement.budget_max)
   const message = `Hi ${requirement.finder_name}, we have a ${listing.bhk_count || ''} ${formatLabel(listing.property_category)} in ${listing.locality} for ${formatPrice(listing.price)}. Let us know if you would like details.`
 
@@ -489,8 +492,9 @@ function MatchedRequirementCard({
       phone={requirement.finder_phone}
       status={requirement.status}
       submitted={requirement.created_at}
-      details={[formatLabel(requirement.listing_type), requirement.bhk_count + ' BHK', requirement.locality_preference, budget, budgetWarning ? 'Above budget' : 'Budget match']}
+      details={[strength + ' match', score + '% score', formatLabel(requirement.listing_type), requirement.bhk_count + ' BHK', requirement.locality_preference, budget, budgetWarning ? 'Above budget' : 'Budget fit']}
       note={requirement.special_requirements || undefined}
+      insight={reasons.join(' · ')}
       statusControl={<StatusUpdater id={requirement.id} currentStatus={requirement.status} type="reqs" options={requirementStatuses.filter((option) => option !== 'all')} />}
       actions={<><ActionLink href={waLink(whatsappNumber, message)} tone="green">WhatsApp</ActionLink><ActionLink href={'tel:' + requirement.finder_phone} tone="blue">Call</ActionLink></>}
     />
@@ -720,6 +724,178 @@ export function RequirementsQueue({ requirements }: { requirements: Requirement[
   )
 }
 
+type DemandLocalitySummary = {
+  locality: string
+  total: number
+  fresh: number
+  urgent: number
+  activeSupply: number
+  unmatched: number
+  rent: number
+  sale: number
+  topType: string
+  topBhk: string
+  medianBudget: number | null
+}
+
+export function DemandIntelligence({ requirements, listings }: { requirements: Requirement[]; listings: AdminListing[] }) {
+  const insight = useMemo(() => {
+    const openRequirements = requirements.filter((item) => matchableRequirementStatuses.has(item.status))
+    const activeListings = listings.filter((listing) => listing.status === 'active')
+    const summaries = openRequirements.reduce<Record<string, DemandLocalitySummary>>((acc, item) => {
+      const locality = item.locality_preference || 'Locality not set'
+      const current = acc[locality] || {
+        locality,
+        total: 0,
+        fresh: 0,
+        urgent: 0,
+        activeSupply: 0,
+        unmatched: 0,
+        rent: 0,
+        sale: 0,
+        topType: '',
+        topBhk: '',
+        medianBudget: null,
+      }
+
+      current.total += 1
+      current.fresh += item.status === 'new' ? 1 : 0
+      current.urgent += item.timeline === 'immediately' || item.timeline === 'within_1_month' ? 1 : 0
+      current.rent += item.listing_type === 'rent' ? 1 : 0
+      current.sale += item.listing_type === 'sale' ? 1 : 0
+      current.unmatched += matchListingsForRequirement(item, activeListings).length === 0 ? 1 : 0
+      acc[locality] = current
+      return acc
+    }, {})
+
+    const listingCounts = activeListings.reduce<Record<string, number>>((acc, listing) => {
+      const locality = listing.locality || 'Locality not set'
+      acc[locality] = (acc[locality] || 0) + 1
+      return acc
+    }, {})
+
+    const localities = Object.values(summaries).map((summary) => {
+      const items = openRequirements.filter((item) => (item.locality_preference || 'Locality not set') === summary.locality)
+      return {
+        ...summary,
+        activeSupply: listingCounts[summary.locality] || 0,
+        topType: mostCommon(items.map((item) => item.property_category).filter(Boolean)) || 'Any',
+        topBhk: mostCommon(items.map((item) => item.bhk_count).filter(Boolean)) || 'Any',
+        medianBudget: median(items.map((item) => item.budget_max).filter((value): value is number => Boolean(value))),
+      }
+    })
+
+    const hotLocalities = [...localities]
+      .sort((a, b) => b.total - a.total || b.fresh - a.fresh || a.locality.localeCompare(b.locality))
+      .slice(0, 3)
+
+    const supplyGaps = [...localities]
+      .filter((item) => item.unmatched > 0)
+      .sort((a, b) => b.unmatched - a.unmatched || b.urgent - a.urgent || b.total - a.total || a.locality.localeCompare(b.locality))
+      .slice(0, 4)
+
+    const urgentUnmatched = openRequirements
+      .filter((item) => item.timeline === 'immediately' || item.timeline === 'within_1_month' || item.status === 'new')
+      .map((item) => ({ requirement: item, matches: matchListingsForRequirement(item, activeListings) }))
+      .filter((item) => item.matches.length === 0)
+      .sort((a, b) => demandPriority(b.requirement) - demandPriority(a.requirement) || new Date(b.requirement.created_at).getTime() - new Date(a.requirement.created_at).getTime())
+      .slice(0, 4)
+
+    const topCategories = Object.entries(countRequirementsBy(openRequirements, (item) => formatDemandNeed(item)))
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 4)
+
+    return {
+      openRequirements,
+      activeListings,
+      hotLocalities,
+      supplyGaps,
+      urgentUnmatched,
+      topCategories,
+      totalUnmatched: localities.reduce((sum, item) => sum + item.unmatched, 0),
+      urgentCount: openRequirements.filter((item) => item.timeline === 'immediately' || item.timeline === 'within_1_month').length,
+    }
+  }, [requirements, listings])
+
+  if (insight.openRequirements.length === 0) return null
+
+  return (
+    <section className="mb-6 rounded-lg border border-slate-200 bg-white p-4">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Demand intelligence</p>
+          <h2 className="mt-1 text-xl font-black text-slate-950">Where demand is ahead of inventory</h2>
+        </div>
+        <div className="grid grid-cols-3 gap-2 sm:min-w-[420px]">
+          <LocalityMetric label="Open" value={insight.openRequirements.length} />
+          <LocalityMetric label="Unmatched" value={insight.totalUnmatched} />
+          <LocalityMetric label="Urgent" value={insight.urgentCount} />
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-4 xl:grid-cols-[1.2fr_1fr]">
+        <div className="grid gap-3">
+          <InsightPanel title="Supply gaps" empty="No supply gaps found against active listings.">
+            {insight.supplyGaps.map((item) => (
+              <Link key={item.locality} href={'/admin/requirements/locality?name=' + encodeURIComponent(item.locality)} className="grid gap-2 rounded-md border border-slate-200 bg-slate-50 p-3 hover:border-slate-300 hover:bg-white md:grid-cols-[1fr_auto]">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-black text-slate-950">{item.locality}</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">{item.topBhk} BHK {formatLabel(item.topType)} - {formatPrice(item.medianBudget)} median budget</p>
+                </div>
+                <div className="flex flex-wrap gap-2 md:justify-end">
+                  <DemandBadge label="unmatched" value={item.unmatched} tone="red" />
+                  <DemandBadge label="active supply" value={item.activeSupply} />
+                  {item.urgent > 0 && <DemandBadge label="urgent" value={item.urgent} tone="amber" />}
+                </div>
+              </Link>
+            ))}
+          </InsightPanel>
+
+          <InsightPanel title="Hot localities" empty="No locality demand yet.">
+            <div className="grid gap-2 md:grid-cols-3">
+              {insight.hotLocalities.map((item) => (
+                <Link key={item.locality} href={'/admin/requirements/locality?name=' + encodeURIComponent(item.locality)} className="rounded-md border border-slate-200 bg-slate-50 p-3 hover:border-slate-300 hover:bg-white">
+                  <p className="truncate text-sm font-black text-slate-950">{item.locality}</p>
+                  <div className="mt-3 grid grid-cols-3 gap-1.5">
+                    <LocalityMetric label="Total" value={item.total} />
+                    <LocalityMetric label="Rent" value={item.rent} />
+                    <LocalityMetric label="Sale" value={item.sale} />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </InsightPanel>
+        </div>
+
+        <div className="grid gap-3">
+          <InsightPanel title="Top requested needs" empty="No requirement pattern yet.">
+            {insight.topCategories.map(([label, count]) => (
+              <div key={label} className="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                <p className="min-w-0 truncate text-sm font-bold text-slate-800">{label}</p>
+                <span className="shrink-0 rounded-full bg-slate-900 px-2 py-1 text-xs font-bold text-white">{count}</span>
+              </div>
+            ))}
+          </InsightPanel>
+
+          <InsightPanel title="Urgent unmatched seekers" empty="No urgent unmatched seekers.">
+            {insight.urgentUnmatched.map(({ requirement }) => (
+              <Link key={requirement.id} href={'/admin/requirements/locality?name=' + encodeURIComponent(requirement.locality_preference || 'Locality not set')} className="block rounded-md border border-red-100 bg-red-50 px-3 py-2 hover:border-red-200 hover:bg-white">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-black text-slate-950">{requirement.finder_name}</p>
+                    <p className="mt-1 text-xs font-semibold text-slate-600">{requirement.locality_preference} - {formatDemandNeed(requirement)} - {formatPrice(requirement.budget_max)}</p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-red-600 px-2 py-1 text-[10px] font-bold text-white">{formatLabel(requirement.timeline)}</span>
+                </div>
+              </Link>
+            ))}
+          </InsightPanel>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export function RequirementsLocalityWorkspace({ locality, requirements, activeListings = [], whatsappNumber }: { locality: string; requirements: Requirement[]; activeListings?: AdminListing[]; whatsappNumber: string }) {
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('all')
@@ -806,7 +982,7 @@ export function RequirementsLocalityWorkspace({ locality, requirements, activeLi
   )
 }
 
-function MatchingProperties({ requirement, matches }: { requirement: Requirement; matches: { listing: AdminListing; overBudget: boolean }[] }) {
+function MatchingProperties({ requirement, matches }: { requirement: Requirement; matches: ListingMatch[] }) {
   const [open, setOpen] = useState(false)
 
   if (matches.length === 0) {
@@ -863,6 +1039,33 @@ function LocalityMetric({ label, value }: { label: string; value: string | numbe
   )
 }
 
+function InsightPanel({ title, empty, children }: { title: string; empty: string; children: React.ReactNode }) {
+  const hasChildren = Children.count(children) > 0
+
+  return (
+    <div className="rounded-md border border-slate-200 p-3">
+      <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">{title}</h3>
+      <div className="mt-3 grid gap-2">
+        {hasChildren ? children : <EmptyState text={empty} compact />}
+      </div>
+    </div>
+  )
+}
+
+function DemandBadge({ label, value, tone = 'slate' }: { label: string; value: number; tone?: 'slate' | 'red' | 'amber' }) {
+  const toneClass = tone === 'red'
+    ? 'bg-red-100 text-red-700'
+    : tone === 'amber'
+      ? 'bg-amber-100 text-amber-700'
+      : 'bg-white text-slate-700'
+
+  return (
+    <span className={`inline-flex min-h-7 items-center gap-1 rounded-full border border-slate-200 px-2 text-xs font-bold ${toneClass}`}>
+      {value} {label}
+    </span>
+  )
+}
+
 function LeadQueueLayout({
   children,
   search,
@@ -895,6 +1098,7 @@ function LeadCard({
   submitted,
   details,
   note,
+  insight,
   statusControl,
   actions,
 }: {
@@ -904,6 +1108,7 @@ function LeadCard({
   submitted: string
   details: string[]
   note?: string
+  insight?: string
   statusControl: React.ReactNode
   actions: React.ReactNode
 }) {
@@ -919,6 +1124,7 @@ function LeadCard({
           <div className="mt-3 flex flex-wrap gap-2">
             {details.filter(Boolean).map((detail) => <span key={detail} className="rounded-full bg-orange-50 px-2 py-1 text-xs font-semibold capitalize text-slate-700">{detail}</span>)}
           </div>
+          {insight && <p className="mt-3 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-xs font-bold text-green-800">{insight}</p>}
           {note && <p className="mt-3 text-sm text-slate-600">{note}</p>}
           <p className="mt-3 text-xs font-semibold text-slate-400">Submitted {formatDate(submitted)}</p>
         </div>
@@ -965,57 +1171,237 @@ function daysOnMarket(listing: AdminListing) {
   return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)))
 }
 
-function matchRequirements(listing: AdminListing, requirements: Requirement[]) {
-  const listingLocality = listing.locality.toLowerCase().trim()
-  const listingBhk = normalizeBhk(listing.bhk_count)
+type MatchStrength = 'Strong' | 'Good' | 'Possible'
 
+type MatchScore = {
+  score: number
+  strength: MatchStrength
+  reasons: string[]
+  overBudget: boolean
+}
+
+type RequirementMatch = MatchScore & {
+  requirement: Requirement
+  budgetWarning: boolean
+}
+
+type ListingMatch = MatchScore & {
+  listing: AdminListing
+}
+
+function matchRequirements(listing: AdminListing, requirements: Requirement[]): RequirementMatch[] {
   return requirements
-    .filter((requirement) => {
-      if (requirement.listing_type !== listing.listing_type) return false
-
-      const requirementLocality = requirement.locality_preference.toLowerCase().trim()
-      const localityMatch = listingLocality.includes(requirementLocality) || requirementLocality.includes(listingLocality)
-      if (!localityMatch) return false
-
-      const requirementBhk = normalizeBhk(requirement.bhk_count)
-      if (listingBhk && requirementBhk && listingBhk !== requirementBhk) return false
-
-      return true
+    .filter((requirement) => matchableRequirementStatuses.has(requirement.status))
+    .map((requirement) => {
+      const match = scoreListingRequirement(listing, requirement)
+      if (!match) return null
+      return {
+        requirement,
+        ...match,
+        budgetWarning: match.overBudget,
+      }
     })
-    .map((requirement) => ({
-      requirement,
-      budgetWarning: Number(listing.price) > Number(requirement.budget_max || 0),
-    }))
+    .filter((match): match is RequirementMatch => Boolean(match))
+    .sort((a, b) => b.score - a.score || Number(a.budgetWarning) - Number(b.budgetWarning) || new Date(b.requirement.created_at).getTime() - new Date(a.requirement.created_at).getTime())
 }
 
 // Reverse of matchRequirements: given a seeker, find active listings that fit.
-function matchListingsForRequirement(requirement: Requirement, listings: AdminListing[]) {
-  const reqLocality = requirement.locality_preference.toLowerCase().trim()
-  const reqBhk = normalizeBhk(requirement.bhk_count)
+function matchListingsForRequirement(requirement: Requirement, listings: AdminListing[]): ListingMatch[] {
+  if (!matchableRequirementStatuses.has(requirement.status)) return []
 
   return listings
-    .filter((listing) => {
-      if (listing.status !== 'active') return false
-      if (listing.listing_type !== requirement.listing_type) return false
-
-      const listingLocality = listing.locality.toLowerCase().trim()
-      const localityMatch = listingLocality.includes(reqLocality) || reqLocality.includes(listingLocality)
-      if (!localityMatch) return false
-
-      const listingBhk = normalizeBhk(listing.bhk_count)
-      if (listingBhk && reqBhk && listingBhk !== reqBhk) return false
-
-      return true
+    .filter((listing) => listing.status === 'active')
+    .map((listing) => {
+      const match = scoreListingRequirement(listing, requirement)
+      if (!match) return null
+      return {
+        listing,
+        ...match,
+      }
     })
-    .map((listing) => ({
-      listing,
-      overBudget: Number(listing.price) > Number(requirement.budget_max || 0),
-    }))
-    .sort((a, b) => Number(a.overBudget) - Number(b.overBudget) || Number(a.listing.price) - Number(b.listing.price))
+    .filter((match): match is ListingMatch => Boolean(match))
+    .sort((a, b) => b.score - a.score || Number(a.overBudget) - Number(b.overBudget) || Number(a.listing.price) - Number(b.listing.price))
+}
+
+function scoreListingRequirement(listing: AdminListing, requirement: Requirement): MatchScore | null {
+  if (listing.status !== 'active') return null
+  if (listing.listing_type !== requirement.listing_type) return null
+
+  const reasons: string[] = []
+  let score = 0
+
+  const locality = scoreLocality(listing.locality, requirement.locality_preference)
+  if (locality.score === 0) return null
+  score += locality.score
+  reasons.push(locality.reason)
+
+  const category = scoreCategory(listing.property_category, requirement.property_category)
+  if (category.score === 0 && requirement.property_category) return null
+  score += category.score
+  reasons.push(category.reason)
+
+  const bhk = scoreBhk(listing.bhk_count, requirement.bhk_count)
+  if (bhk.score === 0 && requirement.bhk_count !== 'any') return null
+  score += bhk.score
+  reasons.push(bhk.reason)
+
+  const budget = scoreBudget(Number(listing.price || 0), Number(requirement.budget_min || 0), Number(requirement.budget_max || 0), listing.listing_type)
+  if (budget.score === 0) return null
+  score += budget.score
+  reasons.push(budget.reason)
+
+  const furnishing = scorePreference(listing.furnishing, requirement.furnishing_preference, 'Furnishing')
+  score += furnishing.score
+  if (furnishing.reason) reasons.push(furnishing.reason)
+
+  const facing = scorePreference(listing.facing, requirement.facing_preference, 'Facing')
+  score += facing.score
+  if (facing.reason) reasons.push(facing.reason)
+
+  const tenant = scoreTenantPreference(listing.preferred_tenants, requirement.tenant_type)
+  score += tenant.score
+  if (tenant.reason) reasons.push(tenant.reason)
+
+  const food = scorePreference(listing.food_preference, requirement.food_preference, 'Food')
+  score += food.score
+  if (food.reason) reasons.push(food.reason)
+
+  const timeline = scoreTimeline(requirement.timeline)
+  score += timeline.score
+  if (timeline.reason) reasons.push(timeline.reason)
+
+  const finalScore = Math.min(100, Math.max(0, Math.round(score)))
+  if (finalScore < 55) return null
+
+  return {
+    score: finalScore,
+    strength: matchStrength(finalScore),
+    reasons: reasons.slice(0, 5),
+    overBudget: budget.overBudget,
+  }
+}
+
+function scoreLocality(listingLocality: string, requirementLocality: string) {
+  const listing = normalizeLocalityForMatch(listingLocality)
+  const requirement = normalizeLocalityForMatch(requirementLocality)
+  if (!listing || !requirement) return { score: 0, reason: '' }
+
+  if (listing.compact === requirement.compact) return { score: 30, reason: 'Exact locality' }
+  if (listing.compact.includes(requirement.compact) || requirement.compact.includes(listing.compact)) {
+    return { score: 24, reason: 'Close locality' }
+  }
+
+  const overlap = tokenOverlap(listing.tokens, requirement.tokens)
+  if (overlap >= 0.6) return { score: 18, reason: 'Nearby locality words' }
+  if (overlap >= 0.4) return { score: 10, reason: 'Loose locality match' }
+
+  return { score: 0, reason: '' }
+}
+
+function scoreCategory(listingCategory?: string | null, requirementCategory?: string | null) {
+  const listing = normalizeChoice(listingCategory)
+  const requirement = normalizeChoice(requirementCategory)
+  if (!requirement || requirement === 'any') return { score: 8, reason: 'Any property type' }
+  if (!listing) return { score: 4, reason: 'Property type not set' }
+  if (listing === requirement) return { score: 15, reason: 'Property type match' }
+  return { score: 0, reason: '' }
+}
+
+function scoreBhk(listingValue?: string | null, requirementValue?: string | null) {
+  const listing = normalizeBhk(listingValue)
+  const requirement = normalizeBhk(requirementValue)
+  if (!requirement || requirement === 'any') return { score: 12, reason: 'Any BHK accepted' }
+  if (!listing) return { score: 4, reason: 'BHK not set' }
+  if (requirement === '4+') return Number(listing) >= 4 ? { score: 15, reason: 'BHK match' } : { score: 0, reason: '' }
+  if (listing === requirement) return { score: 15, reason: 'BHK match' }
+  return { score: 0, reason: '' }
+}
+
+function scoreBudget(price: number, budgetMin: number, budgetMax: number, listingType: string) {
+  if (!price || !budgetMax) return { score: 8, reason: 'Budget needs review', overBudget: false }
+
+  const tolerance = listingType === 'rent' ? 1.15 : 1.1
+  const softTolerance = listingType === 'rent' ? 1.25 : 1.18
+  const overBudget = price > budgetMax
+
+  if (price <= budgetMax && (!budgetMin || price >= budgetMin * 0.75)) {
+    return { score: 25, reason: 'Budget fits', overBudget }
+  }
+  if (price <= budgetMax * tolerance) {
+    return { score: 16, reason: 'Slightly above budget', overBudget }
+  }
+  if (price <= budgetMax * softTolerance) {
+    return { score: 7, reason: 'Budget stretch', overBudget }
+  }
+
+  return { score: 0, reason: '', overBudget }
+}
+
+function scorePreference(listingValue?: string | null, requirementValue?: string | null, label = 'Preference') {
+  const listing = normalizeChoice(listingValue)
+  const requirement = normalizeChoice(requirementValue)
+  if (!requirement || requirement === 'any') return { score: 3, reason: '' }
+  if (!listing || listing === 'any') return { score: 2, reason: '' }
+  if (listing === requirement) return { score: 5, reason: label + ' match' }
+  return { score: 0, reason: '' }
+}
+
+function scoreTenantPreference(listingValue?: string | null, requirementValue?: string | null) {
+  const listing = normalizeChoice(listingValue)
+  const requirement = normalizeChoice(requirementValue)
+  if (!requirement) return { score: 0, reason: '' }
+  if (!listing || listing === 'any') return { score: 3, reason: '' }
+  if (listing.includes(requirement) || requirement.includes(listing)) return { score: 6, reason: 'Tenant preference match' }
+  if (listing.includes('family') && requirement !== 'family') return { score: -8, reason: 'Tenant preference conflict' }
+  return { score: 0, reason: '' }
+}
+
+function scoreTimeline(value?: string | null) {
+  if (value === 'immediately') return { score: 5, reason: 'Immediate seeker' }
+  if (value === 'within_1_month') return { score: 3, reason: 'Near-term seeker' }
+  if (value === 'within_3_months') return { score: 1, reason: '' }
+  return { score: 0, reason: '' }
+}
+
+function matchStrength(score: number): MatchStrength {
+  if (score >= 82) return 'Strong'
+  if (score >= 68) return 'Good'
+  return 'Possible'
+}
+
+function normalizeChoice(value?: string | null) {
+  return (value || '').toLowerCase().trim().replace(/\s+/g, '_')
+}
+
+function normalizeLocalityForMatch(value?: string | null) {
+  const cleaned = (value || '')
+    .toLowerCase()
+    .replace(/hubballi/g, 'hubli')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  const tokens = cleaned
+    .split(' ')
+    .filter((token) => token && !['hubli', 'dharwad', 'road', 'area', 'near'].includes(token))
+
+  return {
+    compact: tokens.join(''),
+    tokens,
+  }
+}
+
+function tokenOverlap(a: string[], b: string[]) {
+  if (!a.length || !b.length) return 0
+  const source = new Set(a)
+  const matches = b.filter((token) => source.has(token)).length
+  return matches / Math.min(a.length, b.length)
 }
 
 function normalizeBhk(value?: string | null) {
   if (!value) return ''
+  if (value.toLowerCase().includes('any')) return 'any'
+  if (value.includes('4')) return value.includes('+') ? '4+' : '4'
   const match = value.match(/\d/)
   return match ? match[0] : value.toLowerCase().trim()
 }
@@ -1027,4 +1413,33 @@ function mostCommon(values: string[]) {
   }, {})
 
   return Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] || ''
+}
+
+function median(values: number[]) {
+  if (values.length === 0) return null
+  const sorted = [...values].sort((a, b) => a - b)
+  const middle = Math.floor(sorted.length / 2)
+  if (sorted.length % 2 === 1) return sorted[middle]
+  return Math.round((sorted[middle - 1] + sorted[middle]) / 2)
+}
+
+function countRequirementsBy(requirements: Requirement[], getKey: (requirement: Requirement) => string) {
+  return requirements.reduce<Record<string, number>>((acc, requirement) => {
+    const key = getKey(requirement)
+    acc[key] = (acc[key] || 0) + 1
+    return acc
+  }, {})
+}
+
+function formatDemandNeed(requirement: Requirement) {
+  const bhk = requirement.bhk_count && requirement.bhk_count !== 'any' ? requirement.bhk_count + ' BHK' : 'Any BHK'
+  return `${formatLabel(requirement.listing_type)} ${bhk} ${formatLabel(requirement.property_category)}`
+}
+
+function demandPriority(requirement: Requirement) {
+  let score = 0
+  if (requirement.status === 'new') score += 3
+  if (requirement.timeline === 'immediately') score += 4
+  if (requirement.timeline === 'within_1_month') score += 2
+  return score
 }

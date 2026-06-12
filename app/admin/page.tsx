@@ -201,33 +201,6 @@ function buildSeekerLeads(reqs: RequirementItem[], listings: ListingItem[]): Lea
   return leads.sort(byNewest)
 }
 
-function groupRequirementsByLocality(requirements: RequirementItem[]) {
-  const grouped: Record<string, { rent: number; sale: number; budget_min: number; budget_max: number }> = {}
-
-  requirements.forEach((req) => {
-    const locality = req.locality_preference.trim()
-    if (!grouped[locality]) {
-      grouped[locality] = { rent: 0, sale: 0, budget_min: Infinity, budget_max: 0 }
-    }
-    if (req.listing_type === 'rent') {
-      grouped[locality].rent += 1
-    } else if (req.listing_type === 'sale') {
-      grouped[locality].sale += 1
-    }
-    grouped[locality].budget_min = Math.min(grouped[locality].budget_min, req.budget_min || req.budget_max)
-    grouped[locality].budget_max = Math.max(grouped[locality].budget_max, req.budget_max)
-  })
-
-  return Object.entries(grouped)
-    .map(([locality, stats]) => ({
-      locality,
-      ...stats,
-      budget_min: stats.budget_min === Infinity ? 0 : stats.budget_min,
-      total: stats.rent + stats.sale,
-    }))
-    .sort((a, b) => b.total - a.total)
-}
-
 type DealItem = {
   id: string
   fee_earned: number
@@ -295,7 +268,6 @@ async function getAdminData() {
       draftListings: listingData.filter((item) => item.status === 'draft').length,
       newRequirementsTotal: requirementData.filter((item) => item.status === 'new').length,
       attentionProperties,
-      requirementsByLocality: groupRequirementsByLocality(requirementData),
       monthRevenue,
       monthDealCount: monthDeals.length,
     }
@@ -308,7 +280,6 @@ async function getAdminData() {
       totalListings: 0, activeListings: 0, draftListings: 0,
       newRequirementsTotal: 0,
       attentionProperties: [],
-      requirementsByLocality: [] as ReturnType<typeof groupRequirementsByLocality>,
       monthRevenue: 0,
       monthDealCount: 0,
     }
@@ -926,89 +897,6 @@ export default function AdminDashboard() {
                 <span className="dao-arrow">{ICON_CHEVRON}</span>
               </Link>
             ))
-          )}
-        </div>
-
-        {/* Demand by Locality */}
-        <div className="dao-card">
-          <div className="dao-card-hd">
-            <div>
-              <div className="dao-card-hd-title">🔥 Buyer Demand by Locality</div>
-              <div className="dao-card-hd-sub">Where seekers are looking — post to Instagram</div>
-            </div>
-            <button
-              onClick={() => {
-                const text = counts.requirementsByLocality
-                  .slice(0, 5)
-                  .map(
-                    (item) =>
-                      `${item.locality}: ${item.rent > 0 ? `${item.rent} rent` : ''} ${item.sale > 0 ? `${item.sale} sale` : ''}`.trim()
-                  )
-                  .join('\n')
-                const fullText = `📊 THIS WEEK'S BUYER DEMAND:\n\n${text}\n\nOwn a property in these areas? DM us to list today.`
-                navigator.clipboard.writeText(fullText)
-                alert('Copied! Paste on Instagram.')
-              }}
-              className="dao-card-link"
-              style={{ border: 'none', background: 'none', cursor: 'pointer' }}
-            >
-              Copy for Instagram
-            </button>
-          </div>
-
-          {counts.requirementsByLocality.length === 0 ? (
-            <div className="dao-empty">No requirements yet</div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px', padding: '12px' }}>
-              {counts.requirementsByLocality.slice(0, 9).map((item) => (
-                <div
-                  key={item.locality}
-                  style={{
-                    border: '1px solid #E8ECF1',
-                    borderRadius: '10px',
-                    padding: '14px',
-                    background: '#F8FAFC',
-                  }}
-                >
-                  <div style={{ fontWeight: 700, fontSize: '14px', color: '#0D1117', marginBottom: '8px' }}>
-                    {item.locality}
-                  </div>
-                  <div style={{ display: 'grid', gap: '6px', fontSize: '13px' }}>
-                    <div style={{ color: '#64748B' }}>
-                      <strong style={{ color: '#DC2626' }}>{item.rent}</strong> looking for rent
-                    </div>
-                    <div style={{ color: '#64748B' }}>
-                      <strong style={{ color: '#2563EB' }}>{item.sale}</strong> looking to buy
-                    </div>
-                    {item.budget_min > 0 && (
-                      <div style={{ color: '#64748B', fontSize: '12px' }}>
-                        Budget: ₹{item.budget_min.toLocaleString('en-IN')} — ₹{item.budget_max.toLocaleString('en-IN')}
-                      </div>
-                    )}
-                    <button
-                      onClick={() => {
-                        const text = `📍 ${item.locality}\n🔴 ${item.rent} looking for RENT (₹${item.budget_min.toLocaleString('en-IN')} - ₹${item.budget_max.toLocaleString('en-IN')})\n🔵 ${item.sale} looking to BUY\n\nOwn a property here? List now and get matched instantly!`
-                        navigator.clipboard.writeText(text)
-                        alert('Copied for Instagram!')
-                      }}
-                      style={{
-                        marginTop: '8px',
-                        padding: '6px 10px',
-                        background: '#111827',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Copy Post
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
           )}
         </div>
 

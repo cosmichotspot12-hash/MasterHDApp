@@ -13,14 +13,16 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')
     const bhk = searchParams.get('bhk')
     const locality = searchParams.get('locality')
+    const view = searchParams.get('view')
     const sort = searchParams.get('sort')
     const limitParam = searchParams.get('limit')
     const limit = limitParam ? Number(limitParam) : 0
+    const status = view === 'closed' ? 'rented_sold' : 'active'
 
     let query = supabaseAdmin
       .from('listings')
       .select('id, title, slug, listing_type, property_category, locality, price, bhk_count, furnishing, photos, youtube_url, is_featured, negotiable, status, facing, preferred_tenants, food_preference')
-      .eq('status', 'active')
+      .eq('status', status)
 
     if (sort === 'recent') {
       query = query.order('created_at', { ascending: false })
@@ -39,7 +41,8 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
     if (error) throw error
     return NextResponse.json({ data })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unable to fetch listings'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

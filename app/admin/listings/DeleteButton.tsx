@@ -10,7 +10,7 @@ export default function DeleteButton({ id }: { id: string }) {
   return (
     <button
       onClick={handleDelete}
-      className="text-red-500 hover:text-red-600 font-medium text-sm"
+      className="inline-flex min-h-8 items-center justify-center rounded-md border border-red-100 bg-red-50 px-2 text-[11px] font-semibold text-red-600 hover:bg-red-100 hover:text-red-700"
     >
       Delete
     </button>
