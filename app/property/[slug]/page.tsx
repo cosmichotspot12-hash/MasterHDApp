@@ -50,10 +50,40 @@ async function getListing(slug: string) {
   }
 }
 
-function getYouTubeEmbedUrl(url: string) {
+type VideoEmbed = {
+  provider: 'youtube' | 'instagram'
+  src: string
+}
+
+function getVideoEmbed(url: string): VideoEmbed | null {
   if (!url) return null
-  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)
-  if (match) return 'https://www.youtube.com/embed/' + match[1]
+
+  const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([^&\n?#/]+)/)
+  if (youtubeMatch) {
+    return {
+      provider: 'youtube',
+      src: 'https://www.youtube.com/embed/' + youtubeMatch[1],
+    }
+  }
+
+  try {
+    const parsedUrl = new URL(url)
+    const host = parsedUrl.hostname.replace(/^www\./, '')
+
+    if (host === 'instagram.com' || host.endsWith('.instagram.com')) {
+      const pathMatch = parsedUrl.pathname.match(/^\/(p|reel|tv)\/([^/?#]+)\/?/)
+
+      if (pathMatch) {
+        return {
+          provider: 'instagram',
+          src: 'https://www.instagram.com/' + pathMatch[1] + '/' + pathMatch[2] + '/embed',
+        }
+      }
+    }
+  } catch {
+    return null
+  }
+
   return null
 }
 
@@ -105,7 +135,7 @@ export default async function PropertyDetailPage({
 
   if (!listing) notFound()
 
-  const embedUrl = getYouTubeEmbedUrl(listing.youtube_url)
+  const videoEmbed = getVideoEmbed(listing.youtube_url)
 
   const amenities = [
     listing.lift && 'Lift',
@@ -235,18 +265,19 @@ export default async function PropertyDetailPage({
               )}
             </section>
 
-            {embedUrl && (
+            {videoEmbed && (
               <section className="rounded-lg border border-[#dedbd2] bg-white p-3 sm:p-4">
                 <div className="mb-3 flex items-center justify-between gap-3 px-1">
                   <h2 className="text-lg font-black text-[#20201d]">Video Tour</h2>
                   <span className="text-xs font-bold uppercase tracking-wide text-[#9f4a22]">Watch before visiting</span>
                 </div>
                 <div className="overflow-hidden rounded-md bg-black">
-                  <div className="relative aspect-video">
+                  <div className={videoEmbed.provider === 'instagram' ? 'relative min-h-[560px] sm:min-h-[680px]' : 'relative aspect-video'}>
                     <iframe
-                      src={embedUrl}
+                      src={videoEmbed.src}
                       className="absolute inset-0 h-full w-full"
                       allowFullScreen
+                      loading="lazy"
                       title={listing.title}
                     />
                   </div>

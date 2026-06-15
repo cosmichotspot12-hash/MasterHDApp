@@ -169,10 +169,6 @@ export default async function PropertiesPage({
         }
 
         .properties-panel-top {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
-          gap: 14px;
-          align-items: end;
           margin-bottom: 11px;
         }
 
@@ -203,29 +199,6 @@ export default async function PropertiesPage({
           font-size: 13px;
           font-weight: 600;
           line-height: 1.4;
-        }
-
-        .properties-count-card {
-          min-width: 118px;
-          border: 1px solid #E4DED6;
-          border-radius: 8px;
-          background: #FFF9F1;
-          padding: 9px 11px;
-          text-align: right;
-        }
-
-        .properties-count-num {
-          color: #111827;
-          font-size: 23px;
-          font-weight: 950;
-          line-height: 1;
-        }
-
-        .properties-count-label {
-          margin-top: 3px;
-          color: #7A6E68;
-          font-size: 11px;
-          font-weight: 850;
         }
 
         .properties-toolbar {
@@ -402,13 +375,6 @@ export default async function PropertiesPage({
           font-weight: 950;
         }
 
-        .properties-results-note {
-          margin: 0;
-          color: #7A6E68;
-          font-size: 12px;
-          font-weight: 800;
-        }
-
         .properties-grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -477,11 +443,6 @@ export default async function PropertiesPage({
             width: 100%;
           }
 
-          .properties-count-card {
-            width: 100%;
-            text-align: left;
-          }
-
           .properties-form {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
@@ -501,9 +462,6 @@ export default async function PropertiesPage({
           }
 
           .properties-panel-top {
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 8px;
-            align-items: start;
             margin-bottom: 8px;
           }
 
@@ -520,27 +478,6 @@ export default async function PropertiesPage({
 
           .properties-sub {
             display: none;
-          }
-
-          .properties-count-card {
-            display: flex;
-            width: auto;
-            min-width: 72px;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 6px 8px;
-            text-align: center;
-          }
-
-          .properties-count-num {
-            font-size: 19px;
-          }
-
-          .properties-count-label {
-            margin-top: 1px;
-            font-size: 9.5px;
-            line-height: 1.05;
           }
 
           .properties-toolbar {
@@ -628,23 +565,13 @@ export default async function PropertiesPage({
           <div className="properties-wrap">
             <div className="properties-panel">
               <div className="properties-panel-top">
-                <div>
-                  <span className="properties-kicker" data-i18n="properties_kicker">Verified Hubballi-Dharwad listings</span>
-                  <h1 className="properties-title">{titleForPage(view, type)}</h1>
-                  <p className="properties-sub" data-i18n="properties_subtitle">
-                    {view === 'closed'
-                      ? 'Proof of properties already rented or sold through our local workflow.'
-                      : 'Browse verified rent and buy properties with quick filters for BHK, property type, and locality.'}
-                  </p>
-                </div>
-                <div className="properties-count-card" aria-label="Matching property count">
-                  <div className="properties-count-num">{listings.length}</div>
-                  <div className="properties-count-label">
-                    {view === 'closed'
-                      ? listings.length === 1 ? 'closed property' : 'closed properties'
-                      : listings.length === 1 ? 'property found' : 'properties found'}
-                  </div>
-                </div>
+                <span className="properties-kicker" data-i18n="properties_kicker">Verified Hubballi-Dharwad listings</span>
+                <h1 className="properties-title">{titleForPage(view, type)}</h1>
+                <p className="properties-sub" data-i18n="properties_subtitle">
+                  {view === 'closed'
+                    ? 'Proof of properties already rented or sold through our local workflow.'
+                    : 'Browse verified rent and buy properties with quick filters for BHK, property type, and locality.'}
+                </p>
               </div>
 
               <div className="properties-toolbar">
@@ -723,7 +650,6 @@ export default async function PropertiesPage({
               <>
                 <div className="properties-results-head">
                   <h2 className="properties-results-title">{view === 'closed' ? 'Closed properties' : 'Available properties'}</h2>
-                  <p className="properties-results-note">Showing {visibleListings.length} of {listings.length}</p>
                 </div>
                 <div className="properties-grid">
                   {visibleListings.map((listing) => (

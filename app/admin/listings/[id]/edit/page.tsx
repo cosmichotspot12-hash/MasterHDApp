@@ -133,7 +133,7 @@ export default function EditListingPage() {
       const allPhotos = [...existingPhotos, ...newPhotoUrls].slice(0, 5)
 
       if (allPhotos.length === 0 && !form.youtube_url && form.status === 'active') {
-        setError('Cannot set status to Active without at least one photo or YouTube URL.')
+        setError('Cannot set status to Active without at least one photo or video URL.')
         setLoading(false)
         return
       }
@@ -512,9 +512,9 @@ export default function EditListingPage() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">YouTube URL</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">YouTube or Instagram URL</label>
               <input value={form.youtube_url} onChange={e => set('youtube_url', e.target.value)}
-                placeholder="Paste YouTube video link"
+                placeholder="Paste YouTube video or public Instagram post/reel link"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
             </div>
           </div>
