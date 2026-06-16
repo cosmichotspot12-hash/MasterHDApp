@@ -1,43 +1,120 @@
-import { VisitRequestsWorkspace, type AdminListing, type VisitRequest } from '@/components/admin-operations'
-import { adminApiHeaders } from '@/lib/admin-api'
+import StatusUpdater from '../owner-submissions/StatusUpdater'
 
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ''
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-async function getVisitWorkspaceData() {
+type VisitRequest = {
+  id: string
+  finder_name: string
+  finder_phone: string
+  property_title: string
+  listing_id: string
+  preferred_day: string
+  preferred_time: string
+  message: string
+  status: string
+  created_at: string
+}
+
+async function getVisitRequests() {
   try {
-    const headers = await adminApiHeaders()
-    const [listingsRes, requestsRes] = await Promise.all([
-      fetch(APP_URL + '/api/admin/listings', { cache: 'no-store', headers }),
-      fetch(APP_URL + '/api/admin/visit-req', { cache: 'no-store', headers }),
-    ])
-    const [listingsJson, requestsJson] = await Promise.all([listingsRes.json(), requestsRes.json()])
-    return {
-      listings: (listingsJson.data || []) as AdminListing[],
-      requests: (requestsJson.data || []) as VisitRequest[],
-    }
+    const res = await fetch(APP_URL + '/api/admin/visit-req', {
+      cache: 'no-store'
+    })
+    const { data } = await res.json()
+    return data || []
   } catch {
-    return { listings: [] as AdminListing[], requests: [] as VisitRequest[] }
+    return []
   }
 }
 
+function getWhatsAppLink(name: string, property: string) {
+  const msg = 'Hi ' + name + ', we received your visit request for ' + property + '. We will arrange a visit for you. What day and time works best?'
+  return 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg)
+}
+
 export default async function VisitRequestsPage() {
-  const { listings, requests } = await getVisitWorkspaceData()
-  const activeCount = listings.filter((listing) => listing.status === 'active').length
-  const newCount = requests.filter((request) => request.status === 'new').length
+  const requests: VisitRequest[] = await getVisitRequests()
+  const newCount = requests.filter((v) => v.status === 'new').length
 
   return (
     <div>
-      <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-2xl font-black text-slate-950">Visit Requests</h1>
-          <p className="mt-1 text-sm text-slate-500">Open a property to schedule and follow up with interested finders.</p>
-        </div>
-        <div className="flex gap-2">
-          <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-600">{activeCount} active properties</span>
-          <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold text-red-700">{newCount} new requests</span>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Visit Requests</h1>
+        <p className="text-gray-500 text-sm mt-1">
+          Finders who want to visit properties
+          {newCount > 0 && (
+            <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+              {newCount} new
+            </span>
+          )}
+        </p>
       </div>
-      <VisitRequestsWorkspace listings={listings} requests={requests} />
+
+      {requests.length === 0 ? (
+        <div className="bg-white rounded-lg p-12 text-center">
+          <p className="text-gray-500">No visit requests yet.</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="text-left px-4 py-3 text-gray-600 font-medium">Finder</th>
+                <th className="text-left px-4 py-3 text-gray-600 font-medium">Phone</th>
+                <th className="text-left px-4 py-3 text-gray-600 font-medium">Property</th>
+                <th className="text-left px-4 py-3 text-gray-600 font-medium">Preferred Day</th>
+                <th className="text-left px-4 py-3 text-gray-600 font-medium">Time</th>
+                <th className="text-left px-4 py-3 text-gray-600 font-medium">Status</th>
+                <th className="text-left px-4 py-3 text-gray-600 font-medium">Submitted</th>
+                <th className="text-left px-4 py-3 text-gray-600 font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {requests.map((v) => (
+                <tr key={v.id} className={v.status === 'new' ? 'bg-orange-50 hover:bg-orange-100' : 'hover:bg-gray-50'}>
+                  <td className="px-4 py-3 font-medium text-gray-800">{v.finder_name}</td>
+                  <td className="px-4 py-3 text-gray-600">{v.finder_phone}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">{v.property_title}</td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {new Date(v.preferred_day).toLocaleDateString('en-IN')}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 capitalize">{v.preferred_time}</td>
+                  <td className="px-4 py-3">
+                    <StatusUpdater
+                      id={v.id}
+                      currentStatus={v.status}
+                      type="visit-req"
+                      options={['new', 'contacted', 'visit_scheduled', 'visit_done', 'converted', 'dropped']}
+                    />
+                  </td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">
+                    {new Date(v.created_at).toLocaleDateString('en-IN')}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      
+                      <a  href={getWhatsAppLink(v.finder_name, v.property_title)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="bg-green-500 text-white text-xs px-2 py-1 rounded hover:bg-green-600"
+                      >
+                        WhatsApp
+                      </a>
+                      
+                       <a href={'tel:' + v.finder_phone}
+                        className="bg-blue-500 text-white text-xs px-2 py-1 rounded hover:bg-blue-600"
+                       >
+                        Call
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }

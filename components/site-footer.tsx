@@ -6,6 +6,7 @@ const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210
 const footerLinks = [
   { href: '/properties?type=rent', label: 'Rent' },
   { href: '/properties?type=sale', label: 'Buy' },
+  { href: '/properties?type=lease', label: 'Lease' },
   { href: '/services', label: 'Services' },
   { href: '/find', label: 'Find' },
   { href: '/list', label: 'List' },
@@ -308,7 +309,7 @@ export default function SiteFooter() {
                 <p className="sf-col-title" data-i18n="footer_browse">Browse</p>
                 <nav className="sf-nav" aria-label="Footer navigation">
                   {footerLinks.map(({ href, label }) => (
-                    <Link key={href} href={href} className="sf-link" data-i18n={label === 'Rent' ? 'nav_rent' : label === 'Buy' ? 'nav_buy' : label === 'Services' ? 'nav_services' : label === 'Find' ? 'form_requirement_title' : 'nav_list_property'}>
+                    <Link key={href} href={href} className="sf-link" data-i18n={label === 'Rent' ? 'nav_rent' : label === 'Buy' ? 'nav_buy' : label === 'Lease' ? 'nav_lease' : label === 'Services' ? 'nav_services' : label === 'Find' ? 'form_requirement_title' : 'nav_list_property'}>
                       {label}
                     </Link>
                   ))}

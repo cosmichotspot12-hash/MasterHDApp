@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getErrorMessage } from '@/lib/api-errors'
+import { hasRecentRequirement } from '@/lib/lead-dedupe'
 import { validateRequirement } from '@/lib/lead-validation'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { assertRateLimit, isRateLimitError } from '@/lib/rate-limit'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export async function GET() {
   try {
@@ -14,15 +12,19 @@ export async function GET() {
       .select('id')
     if (error) throw error
     return NextResponse.json({ data })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: getErrorMessage(err, 'Unable to fetch requirements') }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    assertRateLimit(request, 'requirements', { max: 5, windowMs: 10 * 60 * 1000 })
     const body = await request.json()
     const requirement = validateRequirement(body)
+    if (await hasRecentRequirement(requirement)) {
+      return NextResponse.json({ success: true, duplicate: true })
+    }
     const { error } = await supabaseAdmin
       .from('requirements')
       .insert([requirement])
@@ -30,6 +32,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unable to submit right now.'
-    return NextResponse.json({ error: message }, { status: 400 })
+    return NextResponse.json({ error: message }, { status: isRateLimitError(err) ? 429 : 400 })
   }
 }

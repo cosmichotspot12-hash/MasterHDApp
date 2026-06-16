@@ -1,18 +1,13 @@
 import { OwnerQueue, type OwnerSubmission } from '@/components/admin-operations'
-import { adminApiHeaders } from '@/lib/admin-api'
+import { getAdminOwnerSubmissions } from '@/lib/admin-data'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+export const dynamic = 'force-dynamic'
+
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ''
 
 async function getSubmissions() {
   try {
-    const headers = await adminApiHeaders()
-    const res = await fetch(APP_URL + '/api/admin/owner-sub', {
-      cache: 'no-store',
-      headers,
-    })
-    const { data } = await res.json()
-    return (data || []) as OwnerSubmission[]
+    return await getAdminOwnerSubmissions()
   } catch {
     return [] as OwnerSubmission[]
   }

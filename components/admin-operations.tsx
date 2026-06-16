@@ -5,6 +5,11 @@ import { Children, useMemo, useState } from 'react'
 import StatusUpdater from '@/app/admin/owner-submissions/StatusUpdater'
 import SourceUpdater from '@/app/admin/owner-submissions/SourceUpdater'
 import DeleteButton from '@/app/admin/listings/DeleteButton'
+import {
+  hasRecurringPrice,
+  listingTypeClosedLabel,
+  listingTypeLabel,
+} from '@/lib/listing-types'
 
 export type AdminListing = {
   id: string
@@ -173,9 +178,10 @@ function FilterBar({
       </select>
       {type !== undefined && onType && (
         <select value={type} onChange={(event) => onType(event.target.value)} className="px-3 py-2 text-sm">
-          <option value="all">Rent and sale</option>
+          <option value="all">Rent, sale, and lease</option>
           <option value="rent">Rent</option>
           <option value="sale">Sale</option>
+          <option value="lease">Lease</option>
         </select>
       )}
     </div>
@@ -200,7 +206,9 @@ function AdminPropertyCard({
   actions?: React.ReactNode
 }) {
   const firstPhoto = listing.photos?.[0]
-  const isRent = listing.listing_type === 'rent'
+  const typeLabel = listingTypeLabel(listing.listing_type)
+  const typeColor = listing.listing_type === 'sale' ? 'bg-green-700' : listing.listing_type === 'lease' ? 'bg-purple-700' : 'bg-blue-700'
+  const recurringPrice = hasRecurringPrice(listing.listing_type)
   const body = (
     <>
       <div className="relative aspect-[4/3] overflow-hidden bg-orange-50 sm:aspect-[5/3]">
@@ -211,7 +219,7 @@ function AdminPropertyCard({
           <div className="flex h-full items-center justify-center text-xs font-semibold text-slate-400">No photo</div>
         )}
         <div className="absolute left-1.5 top-1.5 flex gap-1.5">
-          <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white ${isRent ? 'bg-blue-700' : 'bg-green-700'}`}>{isRent ? 'Rent' : 'Sale'}</span>
+          <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white ${typeColor}`}>{typeLabel}</span>
           {newRequestCount ? <span className="rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white">{newRequestCount} new</span> : null}
         </div>
         {listing.bhk_count && <span className="absolute right-1.5 top-1.5 rounded-full bg-white/95 px-1.5 py-0.5 text-[10px] font-bold text-slate-900">{listing.bhk_count} BHK</span>}
@@ -224,7 +232,7 @@ function AdminPropertyCard({
           {listing.furnishing && <span className="max-w-full truncate rounded-full bg-orange-50 px-1.5 py-0.5">{formatLabel(listing.furnishing)}</span>}
         </div>
         <div className="mt-auto flex items-end justify-between gap-2">
-          <p className="min-w-0 truncate text-sm font-black text-slate-950 sm:text-[15px]">{formatPrice(listing.price)}{isRent && <span className="text-[10px] font-semibold text-slate-500">/mo</span>}</p>
+          <p className="min-w-0 truncate text-sm font-black text-slate-950 sm:text-[15px]">{formatPrice(listing.price)}{recurringPrice && <span className="text-[10px] font-semibold text-slate-500">/mo</span>}</p>
           {requestCount !== undefined && <span className="shrink-0 rounded-full border border-slate-200 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">{requestCount} visits</span>}
         </div>
       </div>
@@ -363,7 +371,7 @@ export function PropertyWorkspace({
     <div className="grid gap-5">
       {isClosed && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-800">
-          This property is marked Rented/Sold and is hidden from public listings.
+          This property is marked {listingTypeClosedLabel(listing.listing_type)} and is hidden from public listings.
         </div>
       )}
 
@@ -386,7 +394,7 @@ export function PropertyWorkspace({
               </div>
               <h1 className="text-2xl font-black leading-tight text-slate-950">{listing.title}</h1>
               <p className="mt-2 text-sm font-semibold text-slate-500">{listing.locality}</p>
-              <p className="mt-3 text-2xl font-black text-slate-950">{formatPrice(listing.price)}{listing.listing_type === 'rent' && <span className="text-sm font-semibold text-slate-500">/mo</span>}</p>
+              <p className="mt-3 text-2xl font-black text-slate-950">{formatPrice(listing.price)}{hasRecurringPrice(listing.listing_type) && <span className="text-sm font-semibold text-slate-500">/mo</span>}</p>
             </div>
 
             <div className="grid gap-2 rounded-md border border-slate-200 bg-slate-50 p-3">
@@ -576,7 +584,7 @@ function CloseDealButton({ listing, matches }: { listing: AdminListing; matches:
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => !saving && setOpen(false)}>
           <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-black text-slate-950">Close this deal</h3>
-            <p className="mt-1 text-sm text-slate-500">Records revenue, marks the property {listing.listing_type === 'sale' ? 'sold' : 'rented'}, and fulfils the seeker.</p>
+            <p className="mt-1 text-sm text-slate-500">Records revenue, marks the property {listingTypeClosedLabel(listing.listing_type).toLowerCase()}, and fulfils the seeker.</p>
 
             <div className="mt-4 grid gap-4">
               <div>
@@ -694,6 +702,7 @@ export function RequirementsQueue({ requirements }: { requirements: Requirement[
         fresh: items.filter((item) => item.status === 'new').length,
         rent: items.filter((item) => item.listing_type === 'rent').length,
         sale: items.filter((item) => item.listing_type === 'sale').length,
+        lease: items.filter((item) => item.listing_type === 'lease').length,
         topBhk: mostCommon(items.map((item) => item.bhk_count).filter(Boolean)),
       }))
       .sort((a, b) => b.fresh - a.fresh || b.total - a.total || a.locality.localeCompare(b.locality))
@@ -712,9 +721,10 @@ export function RequirementsQueue({ requirements }: { requirements: Requirement[
             </div>
             {summary.fresh > 0 && <span className="rounded-full bg-red-600 px-2 py-1 text-xs font-bold text-white">{summary.fresh} new</span>}
           </div>
-          <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="mt-4 grid grid-cols-4 gap-2">
             <LocalityMetric label="Rent" value={summary.rent} />
             <LocalityMetric label="Sale" value={summary.sale} />
+            <LocalityMetric label="Lease" value={summary.lease} />
             <LocalityMetric label="Top BHK" value={summary.topBhk || '-'} />
           </div>
           <p className="mt-4 text-xs font-bold text-slate-500">Open locality -&gt;</p>
@@ -733,6 +743,7 @@ type DemandLocalitySummary = {
   unmatched: number
   rent: number
   sale: number
+  lease: number
   topType: string
   topBhk: string
   medianBudget: number | null
@@ -753,6 +764,7 @@ export function DemandIntelligence({ requirements, listings }: { requirements: R
         unmatched: 0,
         rent: 0,
         sale: 0,
+        lease: 0,
         topType: '',
         topBhk: '',
         medianBudget: null,
@@ -763,6 +775,7 @@ export function DemandIntelligence({ requirements, listings }: { requirements: R
       current.urgent += item.timeline === 'immediately' || item.timeline === 'within_1_month' ? 1 : 0
       current.rent += item.listing_type === 'rent' ? 1 : 0
       current.sale += item.listing_type === 'sale' ? 1 : 0
+      current.lease += item.listing_type === 'lease' ? 1 : 0
       current.unmatched += matchListingsForRequirement(item, activeListings).length === 0 ? 1 : 0
       acc[locality] = current
       return acc
@@ -856,10 +869,11 @@ export function DemandIntelligence({ requirements, listings }: { requirements: R
               {insight.hotLocalities.map((item) => (
                 <Link key={item.locality} href={'/admin/requirements/locality?name=' + encodeURIComponent(item.locality)} className="rounded-md border border-slate-200 bg-slate-50 p-3 hover:border-slate-300 hover:bg-white">
                   <p className="truncate text-sm font-black text-slate-950">{item.locality}</p>
-                  <div className="mt-3 grid grid-cols-3 gap-1.5">
+                  <div className="mt-3 grid grid-cols-4 gap-1.5">
                     <LocalityMetric label="Total" value={item.total} />
                     <LocalityMetric label="Rent" value={item.rent} />
                     <LocalityMetric label="Sale" value={item.sale} />
+                    <LocalityMetric label="Lease" value={item.lease} />
                   </div>
                 </Link>
               ))}
@@ -943,9 +957,10 @@ export function RequirementsLocalityWorkspace({ locality, requirements, activeLi
           {requirementStatuses.map((item) => <option key={item} value={item}>{item === 'all' ? 'All status' : formatLabel(item)}</option>)}
         </select>
         <select value={type} onChange={(event) => setType(event.target.value)} className="px-3 py-2 text-sm">
-          <option value="all">Rent and sale</option>
+          <option value="all">Rent, sale, and lease</option>
           <option value="rent">Rent</option>
           <option value="sale">Sale</option>
+          <option value="lease">Lease</option>
         </select>
         <select value={bhk} onChange={(event) => setBhk(event.target.value)} className="px-3 py-2 text-sm">
           <option value="all">All BHK</option>
@@ -1007,7 +1022,7 @@ function MatchingProperties({ requirement, matches }: { requirement: Requirement
         <div className="grid gap-2 px-4 pb-3">
           {matches.map(({ listing, overBudget }) => {
             const url = listing.slug ? `${typeof window !== 'undefined' ? window.location.origin : ''}/property/${listing.slug}` : ''
-            const message = `Hi ${requirement.finder_name}, this is HubliDharwad.app. We have a verified ${listing.bhk_count ? listing.bhk_count + ' BHK ' : ''}${formatLabel(listing.property_category)} in ${listing.locality} for ${formatPrice(listing.price)}${listing.listing_type === 'rent' ? '/mo' : ''}.${url ? ' See it here: ' + url : ''} Want to schedule a visit?`
+            const message = `Hi ${requirement.finder_name}, this is HubliDharwad.app. We have a verified ${listing.bhk_count ? listing.bhk_count + ' BHK ' : ''}${formatLabel(listing.property_category)} in ${listing.locality} for ${formatPrice(listing.price)}${hasRecurringPrice(listing.listing_type) ? '/mo' : ''}.${url ? ' See it here: ' + url : ''} Want to schedule a visit?`
             return (
               <div key={listing.id} className="flex flex-col gap-2 rounded-md border border-slate-200 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">

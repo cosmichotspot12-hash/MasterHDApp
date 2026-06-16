@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { adminUnauthorized, isAdminRequest } from '@/lib/admin-auth'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { adminForbidden, adminUnauthorized, isAdminRequest, isSameOriginRequest } from '@/lib/admin-auth'
+import { getErrorMessage } from '@/lib/api-errors'
+import { sanitizeOwnerSubmissionPayload } from '@/lib/admin-validation'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export async function GET(request: NextRequest) {
-  if (!isAdminRequest(request)) return adminUnauthorized()
+  if (!(await isAdminRequest(request))) return adminUnauthorized()
 
   try {
     const { data, error } = await supabaseAdmin
@@ -17,22 +14,23 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
     if (error) throw error
     return NextResponse.json({ data })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: getErrorMessage(err) }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
-  if (!isAdminRequest(request)) return adminUnauthorized()
+  if (!isSameOriginRequest(request)) return adminForbidden('Invalid request origin')
+  if (!(await isAdminRequest(request))) return adminUnauthorized()
 
   try {
-    const body = await request.json()
+    const body = sanitizeOwnerSubmissionPayload(await request.json())
     const { error } = await supabaseAdmin
       .from('owner_submissions')
       .insert([body])
     if (error) throw error
     return NextResponse.json({ success: true })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: getErrorMessage(err) }, { status: 400 })
   }
 }

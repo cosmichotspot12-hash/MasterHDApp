@@ -5,7 +5,7 @@ import { getPublicDemandSummary, type PublicDemandLocality } from '@/lib/public-
 
 export const metadata: Metadata = {
   title: 'List Your Property | MasterHD',
-  description: 'Show your property to real tenants and buyers looking in Hubballi-Dharwad localities right now.',
+  description: 'Show your property to real tenants, buyers, and lease seekers looking in Hubballi-Dharwad localities right now.',
 }
 
 function DemandCard({ item }: { item: PublicDemandLocality }) {
@@ -18,6 +18,7 @@ function DemandCard({ item }: { item: PublicDemandLocality }) {
       <div className="ld-split" aria-label={`Demand split for ${item.locality}`}>
         <span>{item.rent} rent</span>
         <span>{item.sale} sale</span>
+        <span>{item.lease} lease</span>
       </div>
     </article>
   )
@@ -436,13 +437,17 @@ export default async function ListPage() {
                 <strong>{demand.saleTotal}</strong>
                 <span>buyer requirements</span>
               </div>
+              <div className="ld-stat">
+                <strong>{demand.leaseTotal}</strong>
+                <span>lease seekers</span>
+              </div>
             </div>
 
             <div className="ld-body">
               <div className="ld-section-head">
                 <div>
                   <h2>Top demand areas right now</h2>
-                  <p>Aggregated from real forms: locality-wise demand and rent/sale split.</p>
+                  <p>Aggregated from real forms: locality-wise demand and rent/sale/lease split.</p>
                 </div>
                 <span className="ld-privacy">Privacy-safe public view</span>
               </div>

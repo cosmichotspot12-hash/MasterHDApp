@@ -1,25 +1,17 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import PropertyCard, { PropertyCardStyles, type PropertyCardListing } from '@/components/property-card'
+import PropertyCard, { PropertyCardStyles } from '@/components/property-card'
+import { getPublicListings } from '@/lib/listings-data'
 import { getPublicDemandSummary } from '@/lib/public-demand'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const HOME_PREVIEW_COUNT = 4
 
-async function fetchListings(url: string) {
-  try {
-    const res = await fetch(url, { cache: 'no-store' })
-    const json = await res.json()
-    return (json.data || []) as PropertyCardListing[]
-  } catch {
-    return [] as PropertyCardListing[]
-  }
-}
+export const dynamic = 'force-dynamic'
 
 async function getHomeData() {
   const [previewListings, allListings, demand] = await Promise.all([
-    fetchListings(APP_URL + `/api/listings?sort=recent&limit=${HOME_PREVIEW_COUNT}`),
-    fetchListings(APP_URL + '/api/listings?sort=recent'),
+    getPublicListings({ sort: 'recent', limit: HOME_PREVIEW_COUNT }),
+    getPublicListings({ sort: 'recent' }),
     getPublicDemandSummary(),
   ])
   return {
@@ -1115,7 +1107,7 @@ export default async function HomePage() {
                       {demand.totalActive} active property requirements
                     </div>
                     <div className="hd-demand-sub">
-                      {demand.rentTotal} rent seekers &middot; {demand.saleTotal} buyers
+                      {demand.rentTotal} rent seekers &middot; {demand.saleTotal} buyers &middot; {demand.leaseTotal} lease seekers
                     </div>
                   </div>
                   <span className="hd-demand-action">List property</span>

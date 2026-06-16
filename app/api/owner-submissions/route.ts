@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { hasRecentOwnerSubmission } from '@/lib/lead-dedupe'
 import { validateOwnerSubmission } from '@/lib/lead-validation'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { assertRateLimit, isRateLimitError } from '@/lib/rate-limit'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export async function POST(request: NextRequest) {
   try {
+    assertRateLimit(request, 'owner-submissions', { max: 5, windowMs: 10 * 60 * 1000 })
     const body = await request.json()
     const submission = validateOwnerSubmission(body)
+    if (await hasRecentOwnerSubmission(submission)) {
+      return NextResponse.json({ success: true, duplicate: true })
+    }
     const { error } = await supabaseAdmin
       .from('owner_submissions')
       .insert([submission])
@@ -18,6 +19,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unable to submit right now.'
-    return NextResponse.json({ error: message }, { status: 400 })
+    return NextResponse.json({ error: message }, { status: isRateLimitError(err) ? 429 : 400 })
   }
 }

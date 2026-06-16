@@ -127,6 +127,7 @@ export default function FindPage() {
                   className="pf-input">
                   <option value="rent">Rent</option>
                   <option value="sale">Buy</option>
+                  <option value="lease">Lease</option>
                 </select>
               </div>
               <div className="pf-field">

@@ -1,20 +1,18 @@
 import Link from 'next/link'
 import { ListingsInventory, type AdminListing, type VisitRequest } from '@/components/admin-operations'
-import { adminApiHeaders } from '@/lib/admin-api'
+import { getAdminListings, getAdminVisitRequests } from '@/lib/admin-data'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+export const dynamic = 'force-dynamic'
 
 async function getListingsData() {
   try {
-    const headers = await adminApiHeaders()
-    const [listingsRes, visitsRes] = await Promise.all([
-      fetch(APP_URL + '/api/admin/listings', { cache: 'no-store', headers }),
-      fetch(APP_URL + '/api/admin/visit-req', { cache: 'no-store', headers }),
+    const [listings, visits] = await Promise.all([
+      getAdminListings(),
+      getAdminVisitRequests(),
     ])
-    const [listingsJson, visitsJson] = await Promise.all([listingsRes.json(), visitsRes.json()])
     return {
-      listings: (listingsJson.data || []) as AdminListing[],
-      visits: (visitsJson.data || []) as VisitRequest[],
+      listings,
+      visits,
     }
   } catch {
     return { listings: [] as AdminListing[], visits: [] as VisitRequest[] }

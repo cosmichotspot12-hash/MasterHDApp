@@ -1,12 +1,6 @@
 import { MetadataRoute } from 'next'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+import { APP_URL } from '@/lib/env'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { data: listings } = await supabaseAdmin
@@ -36,6 +30,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: APP_URL + '/sale',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: APP_URL + '/lease',
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,

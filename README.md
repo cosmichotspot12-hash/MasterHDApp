@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MasterHD App
 
-## Getting Started
+Property listing and lead-operations app for Hubli-Dharwad.
 
-First, run the development server:
+## What It Does
+
+- Public property browsing for rent, sale, and lease listings.
+- Property detail pages with photos, video links, visit CTAs, and SEO metadata.
+- Lead capture for owner submissions, seeker requirements, and visit requests.
+- Admin workspace for listings, owner leads, requirements, visit requests, and deals.
+- Supabase-backed storage, database access, and admin operations.
+- PWA manifest/service worker support.
+
+## Tech Stack
+
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Supabase
+- next-pwa
+
+## Setup
+
+Copy the example environment file and fill in the real values:
+
+```bash
+cp .env.example .env.local
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run locally:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Build for production:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Lint:
 
-## Learn More
+```bash
+npm run lint
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Environment Variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Required:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_PASSWORD`
 
-## Deploy on Vercel
+Recommended:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `ADMIN_SESSION_SECRET`
+- `NEXT_PUBLIC_APP_URL`
+- `NEXT_PUBLIC_WHATSAPP_NUMBER`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`SUPABASE_SERVICE_ROLE_KEY` is server-only. Do not expose it to client components.
+
+## Database Scripts
+
+- `scripts/deals-table.sql` adds the deals ledger and lead source columns.
+- `scripts/setup-deals.mjs` attempts to apply the deals SQL through a Supabase RPC if available.
+- `scripts/parse-demand-csv.mjs` parses imported demand CSV data into preview records.
+- `scripts/import-demand.mjs` imports preview records into Supabase with a dry-run default.
+
+## Notes For Future Changes
+
+This project uses Next.js 16. Before changing framework conventions, read the local docs in:
+
+```text
+node_modules/next/dist/docs/
+```
+
+Admin pages and service-role database helpers must remain server-only. Public API mutations should keep validation, rate limiting, and duplicate checks in place.

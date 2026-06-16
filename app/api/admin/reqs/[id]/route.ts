@@ -1,28 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { adminUnauthorized, isAdminRequest } from '@/lib/admin-auth'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { adminForbidden, adminUnauthorized, isAdminRequest, isSameOriginRequest } from '@/lib/admin-auth'
+import { getErrorMessage } from '@/lib/api-errors'
+import { sanitizeRequirementPatch } from '@/lib/admin-validation'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!isAdminRequest(request)) return adminUnauthorized()
+  if (!isSameOriginRequest(request)) return adminForbidden('Invalid request origin')
+  if (!(await isAdminRequest(request))) return adminUnauthorized()
 
   try {
     const { id } = await params
-    const body = await request.json()
+    const body = sanitizeRequirementPatch(await request.json())
     const { error } = await supabaseAdmin
       .from('requirements')
       .update(body)
       .eq('id', id)
     if (error) throw error
     return NextResponse.json({ success: true })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: getErrorMessage(err) }, { status: 400 })
   }
 }

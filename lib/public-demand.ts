@@ -13,6 +13,7 @@ export type PublicDemandLocality = {
   total: number
   rent: number
   sale: number
+  lease: number
   latestCreatedAt: string | null
 }
 
@@ -21,6 +22,7 @@ export type PublicDemandSummary = {
   localityCount: number
   rentTotal: number
   saleTotal: number
+  leaseTotal: number
   localities: PublicDemandLocality[]
 }
 
@@ -43,6 +45,7 @@ export async function getPublicDemandSummary(): Promise<PublicDemandSummary> {
       localityCount: 0,
       rentTotal: 0,
       saleTotal: 0,
+      leaseTotal: 0,
       localities: [],
     }
   }
@@ -67,6 +70,7 @@ export async function getPublicDemandSummary(): Promise<PublicDemandSummary> {
         total: rows.length,
         rent: rows.filter((row) => row.listing_type === 'rent').length,
         sale: rows.filter((row) => row.listing_type === 'sale').length,
+        lease: rows.filter((row) => row.listing_type === 'lease').length,
         latestCreatedAt: rows[0]?.created_at || null,
       }
     })
@@ -77,6 +81,7 @@ export async function getPublicDemandSummary(): Promise<PublicDemandSummary> {
     localityCount: localities.length,
     rentTotal: activeRows.filter((row) => row.listing_type === 'rent').length,
     saleTotal: activeRows.filter((row) => row.listing_type === 'sale').length,
+    leaseTotal: activeRows.filter((row) => row.listing_type === 'lease').length,
     localities: localities.slice(0, 8),
   }
 }

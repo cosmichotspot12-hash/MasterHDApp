@@ -1,4 +1,10 @@
 import Link from 'next/link'
+import {
+  hasRecurringPrice,
+  listingTypeClosedLabel,
+  listingTypeI18nKey,
+  listingTypeLabel,
+} from '@/lib/listing-types'
 
 export type PropertyCardListing = {
   id: string
@@ -41,6 +47,7 @@ function formatReadableSalePrice(amount: number) {
   }).format(price)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function formatSalePrice(amount: number) {
   if (amount >= 10000000) return '₹' + trimDecimal(amount / 10000000) + ' Cr'
   if (amount >= 100000) return '₹' + trimDecimal(amount / 100000) + ' Lakh'
@@ -183,6 +190,11 @@ export function PropertyCardStyles() {
 
         .pc-type-sale {
           background: #13734A;
+          color: #fff;
+        }
+
+        .pc-type-lease {
+          background: #7C3AED;
           color: #fff;
         }
 
@@ -410,11 +422,13 @@ export function PropertyCardStyles() {
 }
 
 export default function PropertyCard({ listing }: { listing: PropertyCardListing }) {
-  const isRent = listing.listing_type === 'rent'
   const isClosed = listing.status === 'rented_sold'
   const category = formatCategory(listing.property_category)
   const firstPhoto = listing.photos?.[0]
-  const closedLabel = isRent ? 'Rented' : 'Sold'
+  const closedLabel = listingTypeClosedLabel(listing.listing_type)
+  const typeLabel = listingTypeLabel(listing.listing_type)
+  const typeClass = listing.listing_type === 'lease' ? 'lease' : listing.listing_type === 'sale' ? 'sale' : 'rent'
+  const recurringPrice = hasRecurringPrice(listing.listing_type)
   const cardContent = (
     <>
       <div className="pc-photo">
@@ -430,8 +444,8 @@ export default function PropertyCard({ listing }: { listing: PropertyCardListing
         )}
 
         <div className="pc-badge-row">
-          <span className={`pc-type pc-type-${isClosed ? 'closed' : isRent ? 'rent' : 'sale'}`} data-i18n={isRent ? 'nav_rent' : 'nav_sale'}>
-            {isClosed ? closedLabel : isRent ? 'Rent' : 'Sale'}
+          <span className={`pc-type pc-type-${isClosed ? 'closed' : typeClass}`} data-i18n={listingTypeI18nKey(listing.listing_type)}>
+            {isClosed ? closedLabel : typeLabel}
           </span>
         </div>
 
@@ -453,7 +467,7 @@ export default function PropertyCard({ listing }: { listing: PropertyCardListing
         </div>
         <p className="pc-price">
           {formatPrice(listing)}
-          {isRent && <span className="pc-price-unit">/mo</span>}
+          {recurringPrice && <span className="pc-price-unit">/mo</span>}
         </p>
       </div>
     </>

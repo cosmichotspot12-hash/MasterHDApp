@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getPublicListingBySlug } from '@/lib/listings-data'
+import { hasRecurringPrice, listingTypeForI18nKey, listingTypeForLabel } from '@/lib/listing-types'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+/* eslint-disable @next/next/no-img-element */
+
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ''
 
 export async function generateMetadata({
@@ -28,7 +31,7 @@ export async function generateMetadata({
       listing.locality +
       ', Hubli-Dharwad. Price: ' +
       price +
-      (listing.listing_type === 'rent' ? '/month' : '') +
+      (hasRecurringPrice(listing.listing_type) ? '/month' : '') +
       '. Contact us for a visit.',
     openGraph: {
       title: listing.title + ' | Hubli Dharwad App',
@@ -40,11 +43,7 @@ export async function generateMetadata({
 
 async function getListing(slug: string) {
   try {
-    const res = await fetch(APP_URL + '/api/listings/' + slug, {
-      cache: 'no-store',
-    })
-    const { data } = await res.json()
-    return data
+    return await getPublicListingBySlug(slug)
   } catch {
     return null
   }
@@ -55,7 +54,7 @@ type VideoEmbed = {
   src: string
 }
 
-function getVideoEmbed(url: string): VideoEmbed | null {
+function getVideoEmbed(url?: string | null): VideoEmbed | null {
   if (!url) return null
 
   const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([^&\n?#/]+)/)
@@ -115,6 +114,7 @@ function formatReadableSalePrice(amount: number) {
   return formatINR(price)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function formatSalePrice(amount: number) {
   if (amount >= 10000000) return '₹' + trimDecimal(amount / 10000000) + ' Cr'
   if (amount >= 100000) return '₹' + trimDecimal(amount / 100000) + ' Lakh'
@@ -206,8 +206,8 @@ export default async function PropertyDetailPage({
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <div className="mb-3 flex flex-wrap gap-2">
-                    <span className="rounded-full bg-[#fff0e2] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#9f4a22]" data-i18n={listing.listing_type === 'rent' ? 'label_for_rent' : 'label_for_sale'}>
-                      {listing.listing_type === 'rent' ? 'For Rent' : 'For Sale'}
+                    <span className="rounded-full bg-[#fff0e2] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#9f4a22]" data-i18n={listingTypeForI18nKey(listing.listing_type)}>
+                      {listingTypeForLabel(listing.listing_type)}
                     </span>
                     {listing.negotiable && (
                       <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-blue-700">
@@ -229,7 +229,7 @@ export default async function PropertyDetailPage({
                 <div className="shrink-0 rounded-lg bg-[#fff9f1] p-4 sm:min-w-48 sm:text-right">
                   <p className="text-2xl font-black text-[#9f4a22] sm:text-3xl">
                     {formatDisplayPrice(listing.listing_type, listing.price)}
-                    {listing.listing_type === 'rent' && (
+                    {hasRecurringPrice(listing.listing_type) && (
                       <span className="ml-1 text-sm font-semibold text-gray-500">/month</span>
                     )}
                   </p>
@@ -286,7 +286,7 @@ export default async function PropertyDetailPage({
             )}
 
             <section className="grid gap-4 grid-cols-1 md:gap-5 lg:grid-cols-2">
-              {listing.listing_type === 'rent' && preferenceItems.length > 0 && (
+              {(listing.listing_type === 'rent' || listing.listing_type === 'lease') && preferenceItems.length > 0 && (
                 <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
                   <h2 className="mb-4 text-lg font-black text-[#20201d]">Preferences</h2>
                   <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">

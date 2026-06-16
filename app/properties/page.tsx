@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import PropertyCard, { PropertyCardStyles, type PropertyCardListing } from '@/components/property-card'
+import { isListingType, listingTypeActionLabel } from '@/lib/listing-types'
+import { getPublicListings } from '@/lib/listings-data'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const PAGE_SIZE = 12
 
-type PropertyType = 'all' | 'rent' | 'sale'
+type PropertyType = 'all' | 'rent' | 'sale' | 'lease'
 type PropertyView = 'available' | 'closed'
 
 type PropertySearchParams = {
@@ -24,30 +25,12 @@ export const metadata: Metadata = {
 }
 
 function normalizeType(type?: string): PropertyType {
-  if (type === 'rent' || type === 'sale') return type
+  if (isListingType(type)) return type
   return 'all'
 }
 
 function normalizeView(view?: string): PropertyView {
   return view === 'closed' ? 'closed' : 'available'
-}
-
-function buildApiUrl(params: {
-  view: PropertyView
-  type: PropertyType
-  bhk: string
-  category: string
-  locality: string
-}) {
-  const apiParams = new URLSearchParams()
-  if (params.view === 'closed') apiParams.set('view', 'closed')
-  if (params.type !== 'all') apiParams.set('type', params.type)
-  if (params.bhk) apiParams.set('bhk', params.bhk)
-  if (params.category) apiParams.set('category', params.category)
-  if (params.locality) apiParams.set('locality', params.locality)
-
-  const query = apiParams.toString()
-  return APP_URL + '/api/listings' + (query ? '?' + query : '')
 }
 
 async function getListings(params: {
@@ -58,9 +41,13 @@ async function getListings(params: {
   locality: string
 }) {
   try {
-    const res = await fetch(buildApiUrl(params), { cache: 'no-store' })
-    const json = await res.json()
-    return (json.data || []) as PropertyCardListing[]
+    return await getPublicListings({
+      view: params.view,
+      type: params.type === 'all' ? null : params.type,
+      bhk: params.bhk,
+      category: params.category,
+      locality: params.locality,
+    }) as PropertyCardListing[]
   } catch {
     return [] as PropertyCardListing[]
   }
@@ -93,6 +80,7 @@ function tabClass(isActive: boolean) {
 function titleForType(type: PropertyType) {
   if (type === 'rent') return 'Properties for rent'
   if (type === 'sale') return 'Properties to buy'
+  if (type === 'lease') return 'Properties for lease'
   return 'All verified properties'
 }
 
@@ -100,6 +88,7 @@ function titleForPage(view: PropertyView, type: PropertyType) {
   if (view === 'closed') {
     if (type === 'rent') return 'Recently rented properties'
     if (type === 'sale') return 'Recently sold properties'
+    if (type === 'lease') return 'Recently leased properties'
     return 'Recently closed properties'
   }
 
@@ -133,7 +122,7 @@ export default async function PropertiesPage({
   const hasFilters = type !== 'all' || Boolean(bhk || category || locality)
   const activeFilters = [
     view === 'closed' ? 'Recently Closed' : '',
-    type !== 'all' ? (type === 'rent' ? 'Rent' : 'Buy') : '',
+    type !== 'all' ? listingTypeActionLabel(type) : '',
     bhk ? bhk + ' BHK' : '',
     category ? labelForCategory(category) : '',
     locality,
@@ -222,7 +211,7 @@ export default async function PropertiesPage({
 
         .properties-tabs {
           display: inline-grid;
-          grid-template-columns: repeat(3, minmax(62px, 1fr));
+          grid-template-columns: repeat(4, minmax(62px, 1fr));
           gap: 4px;
           border: 1px solid #E4DED6;
           border-radius: 8px;
@@ -570,7 +559,7 @@ export default async function PropertiesPage({
                 <p className="properties-sub" data-i18n="properties_subtitle">
                   {view === 'closed'
                     ? 'Proof of properties already rented or sold through our local workflow.'
-                    : 'Browse verified rent and buy properties with quick filters for BHK, property type, and locality.'}
+                    : 'Browse verified rent, buy, and lease properties with quick filters for BHK, property type, and locality.'}
                 </p>
               </div>
 
@@ -594,6 +583,9 @@ export default async function PropertiesPage({
                     </Link>
                     <Link href={propertiesHref({ view, type: 'sale', bhk, category, locality })} className={tabClass(type === 'sale')}>
                       <span data-i18n="nav_buy">Buy</span>
+                    </Link>
+                    <Link href={propertiesHref({ view, type: 'lease', bhk, category, locality })} className={tabClass(type === 'lease')}>
+                      <span data-i18n="nav_lease">Lease</span>
                     </Link>
                   </nav>
                 </div>

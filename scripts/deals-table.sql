@@ -8,7 +8,7 @@ create table if not exists public.deals (
   property_title text,                       -- snapshot, survives if listing is deleted
   seeker_name   text,
   seeker_phone  text,
-  deal_type     text not null,               -- 'rent' | 'sale'
+  deal_type     text not null,               -- 'rent' | 'sale' | 'lease'
   fee_earned    integer not null default 0,  -- brokerage fee in INR
   closed_date   date not null default current_date,
   notes         text,

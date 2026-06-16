@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import { RequirementsLocalityWorkspace, type AdminListing, type Requirement } from '@/components/admin-operations'
-import { adminApiHeaders } from '@/lib/admin-api'
+import { getAdminListings, getAdminRequirements } from '@/lib/admin-data'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ''
 
 export function normalizeLocality(value: string) {
@@ -11,16 +10,13 @@ export function normalizeLocality(value: string) {
 
 async function getRequirementsAndListings() {
   try {
-    const headers = await adminApiHeaders()
-    const [reqRes, listRes] = await Promise.all([
-      fetch(APP_URL + '/api/admin/reqs', { cache: 'no-store', headers }),
-      fetch(APP_URL + '/api/admin/listings', { cache: 'no-store', headers }),
+    const [requirements, listings] = await Promise.all([
+      getAdminRequirements(),
+      getAdminListings(),
     ])
-    const reqJson = await reqRes.json()
-    const listJson = await listRes.json()
     return {
-      requirements: (reqJson.data || []) as Requirement[],
-      listings: (listJson.data || []) as AdminListing[],
+      requirements,
+      listings,
     }
   } catch {
     return { requirements: [] as Requirement[], listings: [] as AdminListing[] }
@@ -38,6 +34,7 @@ export async function RequirementsLocalityView({ locality }: { locality: string 
   const newCount = requirements.filter((requirement) => requirement.status === 'new').length
   const rentCount = requirements.filter((requirement) => requirement.listing_type === 'rent').length
   const saleCount = requirements.filter((requirement) => requirement.listing_type === 'sale').length
+  const leaseCount = requirements.filter((requirement) => requirement.listing_type === 'lease').length
   const title = locality || 'Locality'
 
   return (
@@ -55,6 +52,7 @@ export async function RequirementsLocalityView({ locality }: { locality: string 
           <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold text-red-700">{newCount} new</span>
           <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">{rentCount} rent</span>
           <span className="rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs font-bold text-green-700">{saleCount} sale</span>
+          <span className="rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700">{leaseCount} lease</span>
         </div>
       </div>
 

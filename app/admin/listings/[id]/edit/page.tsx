@@ -1,8 +1,83 @@
 'use client'
 
+import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { getErrorMessage } from '@/lib/api-errors'
+import { hasRentalPreferences, hasRecurringPrice } from '@/lib/listing-types'
 import { supabase } from '@/lib/supabase'
+
+const initialListingForm = {
+  listing_type: 'rent',
+  property_category: 'apartment',
+  city: 'Hubli-Dharwad',
+  locality: '',
+  landmark: '',
+  google_maps_url: '',
+  title: '',
+  society_building_name: '',
+  bhk_count: '',
+  bathrooms: '',
+  property_floor: '',
+  total_floors: '',
+  is_ground_floor: false,
+  age_of_property: '',
+  water_supply: '',
+  facing: '',
+  furnishing: '',
+  price: '',
+  negotiable: false,
+  deposit_amount: '',
+  maintenance_charges: '',
+  available_from: '',
+  preferred_tenants: '',
+  food_preference: '',
+  pets_allowed: false,
+  female_bachelors_allowed: false,
+  lift: false,
+  power_backup: false,
+  water_24_7: false,
+  cctv: false,
+  security_guard: false,
+  car_parking: false,
+  two_wheeler_parking: false,
+  gym: false,
+  garden: false,
+  swimming_pool: false,
+  description: '',
+  nearby_places: '',
+  youtube_url: '',
+  owner_name: '',
+  owner_phone: '',
+  status: 'draft',
+  is_featured: false,
+  date_listed: '',
+  follow_up_date: '',
+  internal_notes: '',
+}
+
+type ListingForm = typeof initialListingForm
+type ListingFormKey = keyof ListingForm
+type ListingApiData = Partial<ListingForm> & {
+  photos?: string[] | null
+  price?: number | string | null
+  deposit_amount?: number | string | null
+  property_floor?: number | string | null
+  total_floors?: number | string | null
+}
+
+const AMENITY_FIELDS = [
+  ['lift', 'Lift'],
+  ['power_backup', 'Power Backup'],
+  ['water_24_7', '24/7 Water'],
+  ['cctv', 'CCTV'],
+  ['security_guard', 'Security Guard'],
+  ['car_parking', 'Car Parking'],
+  ['two_wheeler_parking', 'Two-Wheeler Parking'],
+  ['gym', 'Gym'],
+  ['garden', 'Garden'],
+  ['swimming_pool', 'Swimming Pool'],
+] as const satisfies readonly (readonly [ListingFormKey, string])[]
 
 export default function EditListingPage() {
   const router = useRouter()
@@ -15,62 +90,16 @@ export default function EditListingPage() {
   const [photos, setPhotos] = useState<File[]>([])
   const [existingPhotos, setExistingPhotos] = useState<string[]>([])
 
-  const [form, setForm] = useState({
-    listing_type: 'rent',
-    property_category: 'apartment',
-    city: 'Hubli-Dharwad',
-    locality: '',
-    landmark: '',
-    google_maps_url: '',
-    title: '',
-    society_building_name: '',
-    bhk_count: '',
-    bathrooms: '',
-    property_floor: '',
-    total_floors: '',
-    is_ground_floor: false,
-    age_of_property: '',
-    water_supply: '',
-    facing: '',
-    furnishing: '',
-    price: '',
-    negotiable: false,
-    deposit_amount: '',
-    maintenance_charges: '',
-    available_from: '',
-    preferred_tenants: '',
-    food_preference: '',
-    pets_allowed: false,
-    female_bachelors_allowed: false,
-    lift: false,
-    power_backup: false,
-    water_24_7: false,
-    cctv: false,
-    security_guard: false,
-    car_parking: false,
-    two_wheeler_parking: false,
-    gym: false,
-    garden: false,
-    swimming_pool: false,
-    description: '',
-    nearby_places: '',
-    youtube_url: '',
-    owner_name: '',
-    owner_phone: '',
-    status: 'draft',
-    is_featured: false,
-    date_listed: '',
-    follow_up_date: '',
-    internal_notes: '',
-  })
+  const [form, setForm] = useState<ListingForm>(initialListingForm)
 
   useEffect(() => {
     async function fetchListing() {
       const res = await fetch(`/api/admin/listings/${id}`)
-      const { data } = await res.json()
+      const { data } = await res.json() as { data?: ListingApiData }
       if (data) {
         setExistingPhotos(data.photos || [])
         setForm({
+          ...initialListingForm,
           ...data,
           price: data.price?.toString() || '',
           deposit_amount: data.deposit_amount?.toString() || '',
@@ -85,17 +114,18 @@ export default function EditListingPage() {
     fetchListing()
   }, [id])
 
-  function set(field: string, value: any) {
+  function set<K extends ListingFormKey>(field: K, value: ListingForm[K]) {
     setForm(prev => ({ ...prev, [field]: value }))
   }
 
   const isRent = form.listing_type === 'rent'
+  const isLease = form.listing_type === 'lease'
   const isPlot = form.property_category === 'plot'
   const isApartment = form.property_category === 'apartment'
   const isCommercial = form.property_category === 'commercial'
   const showBHK = !isPlot && !isCommercial
   const showAmenities = !isPlot
-  const showRentalPrefs = isRent
+  const showRentalPrefs = hasRentalPreferences(form.listing_type)
   const showFloor = isApartment
   const showGroundFloor = !isApartment && !isPlot
 
@@ -159,8 +189,8 @@ export default function EditListingPage() {
       if (!res.ok) throw new Error(result.error || 'Failed to update listing')
 
       router.push('/admin/listings')
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong')
+    } catch (err: unknown) {
+      setError(getErrorMessage(err))
     }
     setLoading(false)
   }
@@ -188,6 +218,7 @@ export default function EditListingPage() {
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
                 <option value="rent">Rent</option>
                 <option value="sale">Sale</option>
+                <option value="lease">Lease</option>
               </select>
             </div>
             <div>
@@ -363,7 +394,7 @@ export default function EditListingPage() {
                 className="w-4 h-4 accent-orange-500" />
               <label htmlFor="negotiable" className="text-sm font-medium text-gray-700">Negotiable</label>
             </div>
-            {isRent && (
+            {hasRecurringPrice(form.listing_type) && (
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Deposit Amount (₹)</label>
@@ -388,7 +419,7 @@ export default function EditListingPage() {
         {/* SECTION 5 — RENTAL PREFERENCES */}
         {showRentalPrefs && (
           <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h2 className="font-bold text-gray-800 mb-4 text-lg border-b pb-2">Rental Preferences</h2>
+            <h2 className="font-bold text-gray-800 mb-4 text-lg border-b pb-2">{isLease ? 'Lease Preferences' : 'Rental Preferences'}</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Available From</label>
@@ -439,20 +470,9 @@ export default function EditListingPage() {
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <h2 className="font-bold text-gray-800 mb-4 text-lg border-b pb-2">Amenities</h2>
             <div className="grid grid-cols-3 gap-3">
-              {[
-                ['lift', 'Lift'],
-                ['power_backup', 'Power Backup'],
-                ['water_24_7', '24/7 Water'],
-                ['cctv', 'CCTV'],
-                ['security_guard', 'Security Guard'],
-                ['car_parking', 'Car Parking'],
-                ['two_wheeler_parking', 'Two-Wheeler Parking'],
-                ['gym', 'Gym'],
-                ['garden', 'Garden'],
-                ['swimming_pool', 'Swimming Pool'],
-              ].map(([key, label]) => (
+              {AMENITY_FIELDS.map(([key, label]) => (
                 <div key={key} className="flex items-center gap-2">
-                  <input type="checkbox" id={key} checked={(form as any)[key]}
+                  <input type="checkbox" id={key} checked={Boolean(form[key])}
                     onChange={e => set(key, e.target.checked)}
                     className="w-4 h-4 accent-orange-500" />
                   <label htmlFor={key} className="text-sm text-gray-700">{label}</label>
@@ -491,6 +511,7 @@ export default function EditListingPage() {
                 <div className="flex gap-2 flex-wrap">
                   {existingPhotos.map((url, i) => (
                     <div key={url} className="relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={url} alt={`Photo ${i + 1}`} className="w-20 h-20 object-cover rounded-md border" />
                       {i === 0 && <span className="absolute top-0 left-0 bg-orange-500 text-white text-xs px-1 rounded-tl-md">Cover</span>}
                       <button type="button" onClick={() => removeExistingPhoto(url)}
@@ -588,10 +609,10 @@ export default function EditListingPage() {
             className="bg-orange-500 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 disabled:opacity-50">
             {loading ? 'Saving...' : 'Update Listing'}
           </button>
-          <a href="/admin/listings"
+          <Link href="/admin/listings"
             className="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-200">
             Cancel
-          </a>
+          </Link>
         </div>
 
       </form>

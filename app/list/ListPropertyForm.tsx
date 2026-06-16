@@ -119,6 +119,7 @@ export default function ListPropertyForm() {
                 >
                   <option value="rent">For Rent</option>
                   <option value="sale">For Sale</option>
+                  <option value="lease">For Lease</option>
                 </select>
               </div>
 
@@ -144,7 +145,7 @@ export default function ListPropertyForm() {
                 type="number"
                 value={form.expected_price}
                 onChange={(e) => set('expected_price', e.target.value)}
-                placeholder="Monthly rent or sale price"
+                placeholder="Monthly rent, sale price, or lease amount"
                 className="pf-input"
               />
             </div>

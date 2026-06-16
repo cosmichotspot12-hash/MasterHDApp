@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+import { APP_URL } from '@/lib/env'
+import { listingTypeNoun, listingTypeVerb } from '@/lib/listing-types'
 
 type StatusItem = { status: string }
 type ListingItem = StatusItem & {
@@ -126,9 +126,9 @@ function buildOwnerLeads(owners: OwnerItem[]): Lead[] {
       id: 'o-' + o.id,
       name: o.owner_name,
       phone: o.owner_phone,
-      detail: [o.listing_type === 'sale' ? 'Selling' : 'Renting out', o.locality, o.expected_price ? '₹' + o.expected_price.toLocaleString('en-IN') : ''].filter(Boolean).join(' · '),
+      detail: [listingTypeVerb(o.listing_type), o.locality, o.expected_price ? '₹' + o.expected_price.toLocaleString('en-IN') : ''].filter(Boolean).join(' · '),
       href: '/admin/owner-submissions',
-      whatsappText: `Hi ${o.owner_name}, this is ${BRAND}. Thanks for submitting your property in ${o.locality} for ${o.listing_type === 'sale' ? 'sale' : 'rent'}. We have verified seekers looking in your area — let's get it listed. When can we talk?`,
+      whatsappText: `Hi ${o.owner_name}, this is ${BRAND}. Thanks for submitting your property in ${o.locality} for ${listingTypeNoun(o.listing_type)}. We have verified seekers looking in your area — let's get it listed. When can we talk?`,
       created_at: o.created_at,
     }))
     .sort(byNewest)

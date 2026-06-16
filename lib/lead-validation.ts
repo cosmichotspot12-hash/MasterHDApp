@@ -1,3 +1,5 @@
+import { LISTING_TYPES } from '@/lib/listing-types'
+
 type LeadPayload = Record<string, unknown>
 
 function asText(value: unknown, maxLength = 160) {
@@ -34,7 +36,7 @@ export function validateOwnerSubmission(body: LeadPayload) {
   return {
     owner_name,
     owner_phone,
-    listing_type: asChoice(body.listing_type, ['rent', 'sale'], 'rent'),
+    listing_type: asChoice(body.listing_type, [...LISTING_TYPES], 'rent'),
     locality,
     expected_price: asNumber(body.expected_price),
     status: 'new',
@@ -54,7 +56,7 @@ export function validateRequirement(body: LeadPayload) {
   return {
     finder_name,
     finder_phone,
-    listing_type: asChoice(body.listing_type, ['rent', 'sale'], 'rent'),
+    listing_type: asChoice(body.listing_type, [...LISTING_TYPES], 'rent'),
     property_category: asChoice(
       body.property_category,
       ['apartment', 'independent_house', 'house_in_layout', 'commercial', 'plot'],

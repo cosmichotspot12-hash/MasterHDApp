@@ -1,28 +1,17 @@
 import { DemandIntelligence, RequirementsQueue, type AdminListing, type Requirement } from '@/components/admin-operations'
-import { adminApiHeaders } from '@/lib/admin-api'
+import { getAdminListings, getAdminRequirements } from '@/lib/admin-data'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+export const dynamic = 'force-dynamic'
 
 async function getRequirementsData() {
   try {
-    const headers = await adminApiHeaders()
-    const [requirementsRes, listingsRes] = await Promise.all([
-      fetch(APP_URL + '/api/admin/reqs', {
-        cache: 'no-store',
-        headers,
-      }),
-      fetch(APP_URL + '/api/admin/listings', {
-        cache: 'no-store',
-        headers,
-      }),
-    ])
-    const [requirementsJson, listingsJson] = await Promise.all([
-      requirementsRes.json(),
-      listingsRes.json(),
+    const [requirements, listings] = await Promise.all([
+      getAdminRequirements(),
+      getAdminListings(),
     ])
     return {
-      requirements: (requirementsJson.data || []) as Requirement[],
-      listings: (listingsJson.data || []) as AdminListing[],
+      requirements,
+      listings,
     }
   } catch {
     return { requirements: [] as Requirement[], listings: [] as AdminListing[] }

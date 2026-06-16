@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Hubli Dharwad App - Properties in Hubli-Dharwad',
     short_name: 'Hubli Dharwad App',
-    description: 'Find properties for rent and sale in Hubli-Dharwad',
+    description: 'Find properties for rent, sale, and lease in Hubli-Dharwad',
     start_url: '/',
     display: 'standalone',
     background_color: '#fff4e6',

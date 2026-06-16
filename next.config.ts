@@ -1,4 +1,7 @@
 import type { NextConfig } from 'next'
+import { createRequire } from 'node:module'
+
+const loadCommonJs = createRequire(import.meta.url)
 
 let nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -7,7 +10,7 @@ let nextConfig: NextConfig = {
 
 // PWA support for webpack builds only
 if (process.env.NEXT_TURBOPACK !== '1') {
-  const nextPWA = require('next-pwa')
+  const nextPWA = loadCommonJs('next-pwa')
   const withPWA = nextPWA({
     dest: 'public',
     register: true,

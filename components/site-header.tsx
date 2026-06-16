@@ -1,21 +1,23 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getSiteLanguage, setSiteLanguage } from '@/components/language-provider'
 
 const navLinks = [
   { href: '/properties?type=rent', label: 'Rent' },
   { href: '/properties?type=sale', label: 'Buy' },
+  { href: '/properties?type=lease', label: 'Lease' },
   { href: '/services', label: 'Services' },
 ]
 
 export default function SiteHeader() {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [open, setOpen] = useState(false)
-  const [currentType, setCurrentType] = useState<string | null>(null)
-  const [language, setLanguage] = useState<'en' | 'kn'>('en')
+  const currentType = searchParams.get('type')
+  const [language, setLanguage] = useState<'en' | 'kn'>(() => getSiteLanguage() as 'en' | 'kn')
   const close = () => setOpen(false)
   const hideStickyActions =
     pathname === '/find' ||
@@ -48,14 +50,6 @@ export default function SiteHeader() {
       window.removeEventListener('keydown', onKeyDown)
     }
   }, [open])
-
-  useEffect(() => {
-    setCurrentType(new URLSearchParams(window.location.search).get('type'))
-  })
-
-  useEffect(() => {
-    setLanguage(getSiteLanguage() as 'en' | 'kn')
-  }, [])
 
   function changeLanguage(lang: 'en' | 'kn') {
     setLanguage(lang)
@@ -522,7 +516,7 @@ export default function SiteHeader() {
                 key={href}
                 href={href}
                 className={`sh-nav-link ${isActive(href) ? 'sh-nav-link-active' : ''}`}
-                data-i18n={label === 'Rent' ? 'nav_rent' : label === 'Buy' ? 'nav_buy' : 'nav_services'}
+                data-i18n={label === 'Rent' ? 'nav_rent' : label === 'Buy' ? 'nav_buy' : label === 'Lease' ? 'nav_lease' : 'nav_services'}
               >
                 {label}
               </Link>
@@ -577,7 +571,7 @@ export default function SiteHeader() {
                 href={href}
                 onClick={close}
                 className={`sh-drawer-link ${isActive(href) ? 'sh-drawer-link-active' : ''}`}
-                data-i18n={label === 'Rent' ? 'nav_rent' : label === 'Buy' ? 'nav_buy' : 'nav_services'}
+                data-i18n={label === 'Rent' ? 'nav_rent' : label === 'Buy' ? 'nav_buy' : label === 'Lease' ? 'nav_lease' : 'nav_services'}
               >
                 {label}
                 <span className="sh-drawer-link-arrow" aria-hidden="true">&gt;</span>
