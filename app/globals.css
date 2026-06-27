@@ -1,7 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..950;1,9..40,300..950&display=swap');
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: Inter, "Segoe UI", Arial, sans-serif;
+  --font-sans: 'DM Sans', Inter, "Segoe UI", Arial, sans-serif;
 }
 
 :root {
@@ -1145,4 +1146,12 @@ tbody tr:hover {
 .btn-ghost:hover {
   border-color: #cbd5e1;
   background: #fafafa;
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
