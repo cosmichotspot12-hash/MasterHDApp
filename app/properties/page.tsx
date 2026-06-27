@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import PropertyCard, { PropertyCardStyles, type PropertyCardListing } from '@/components/property-card'
+
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210'
 import { isListingType, listingTypeActionLabel } from '@/lib/listing-types'
 import { getPublicListings } from '@/lib/listings-data'
 import FiltersForm from './FiltersForm'
@@ -156,7 +158,6 @@ export default async function PropertiesPage({
           min-height: 100vh;
           background: #FFF4E6;
           color: #111827;
-          font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
         }
 
         .properties-wrap {
@@ -297,14 +298,14 @@ export default async function PropertiesPage({
           width: 38px;
           border: 0;
           border-radius: 6px;
-          background: #1D9E75;
+          background: var(--brand);
           color: #fff;
           cursor: pointer;
           transition: background 0.12s;
         }
 
         .properties-search-btn:hover {
-          background: #168662;
+          background: var(--brand-dark);
         }
 
         @media (min-width: 760px) {
@@ -332,8 +333,8 @@ export default async function PropertiesPage({
 
         .properties-form input:focus,
         .properties-form select:focus {
-          border-color: #1D9E75;
-          box-shadow: 0 0 0 3px rgba(29,158,117,0.14);
+          border-color: var(--brand);
+          box-shadow: 0 0 0 3px rgba(201,95,44,0.14);
           outline: none;
         }
 
@@ -358,14 +359,14 @@ export default async function PropertiesPage({
         }
 
         .properties-btn {
-          border: 1px solid #1D9E75;
-          background: #1D9E75;
+          border: 1px solid var(--brand);
+          background: var(--brand);
           color: #fff;
         }
 
         .properties-btn:hover {
-          border-color: #168662;
-          background: #168662;
+          border-color: var(--brand-dark);
+          background: var(--brand-dark);
         }
 
         .properties-clear {
@@ -701,10 +702,21 @@ export default async function PropertiesPage({
             ) : (
               <div className="properties-empty">
                 <h2>No properties found</h2>
-                <p>Try clearing the filters or share your exact requirement and we will match it manually.</p>
-                <Link href="/find" className="properties-btn">
-                  Share my requirement
-                </Link>
+                <p>Try clearing the filters, or share your requirement and we will match it manually.</p>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  <Link href="/find" className="properties-btn">
+                    Share my requirement
+                  </Link>
+                  <a
+                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi, I need a property in Hubballi-Dharwad.')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="properties-btn"
+                    style={{ background: '#148040', borderColor: '#148040' }}
+                  >
+                    WhatsApp us
+                  </a>
+                </div>
               </div>
             )}
           </div>
