@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -9,6 +10,7 @@ const navLinks = [
   { href: '/properties?type=sale', label: 'Buy' },
   { href: '/properties?type=lease', label: 'Lease' },
   { href: '/services', label: 'Services' },
+  { href: '/about', label: 'About us' },
 ]
 
 export default function SiteHeader() {
@@ -54,11 +56,14 @@ export default function SiteHeader() {
       <header className="sh-root">
         <div className="sh-inner">
           <Link href="/" onClick={close} className="sh-brand" aria-label="Hubli Dharwad App home">
+            <div className="sh-brand-mark">
+              <Image src="/icons/icon-192.png" alt="" width={38} height={38} />
+            </div>
             <div className="sh-brand-copy">
               <span className="sh-brand-name">
                 Hubli<span>Dharwad</span><span className="sh-brand-dot">.app</span>
               </span>
-              <span className="sh-brand-sub" data-i18n="nav_verified_support">Verified properties, local support</span>
+              <span className="sh-brand-sub" data-i18n="nav_verified_support">Verified · Local · Trusted</span>
             </div>
           </Link>
 
