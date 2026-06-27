@@ -205,6 +205,20 @@ export function PropertyCardStyles() {
           color: #fff;
         }
 
+        .pc-featured {
+          display: inline-flex;
+          align-items: center;
+          min-height: 24px;
+          border-radius: 999px;
+          background: var(--brand);
+          color: #fff;
+          padding: 5px 9px;
+          font-size: 10.5px;
+          font-weight: 850;
+          line-height: 1;
+          box-shadow: 0 8px 18px rgba(24,18,14,0.16);
+        }
+
         .pc-bhk {
           position: absolute;
           z-index: 1;
@@ -290,9 +304,9 @@ export function PropertyCardStyles() {
           align-items: center;
           justify-content: center;
           min-height: 40px;
-          border: 1px solid #111827;
+          border: 1px solid var(--brand);
           border-radius: 8px;
-          background: #111827;
+          background: var(--brand);
           color: #fff;
           padding: 8px 12px;
           font-size: 13px;
@@ -302,8 +316,8 @@ export function PropertyCardStyles() {
         }
 
         .pc-visit-btn:hover {
-          border-color: #334155;
-          background: #334155;
+          border-color: var(--brand-dark);
+          background: var(--brand-dark);
           transform: translateY(-1px);
         }
 
@@ -391,6 +405,8 @@ export function PropertyCardStyles() {
             min-height: 36px;
             padding: 7px 10px;
             font-size: 12px;
+            border-color: var(--brand);
+            background: var(--brand);
           }
 
           .pc-closed-note {
@@ -445,6 +461,9 @@ export default function PropertyCard({ listing }: { listing: PropertyCardListing
           <span className={`pc-type pc-type-${isClosed ? 'closed' : typeClass}`} data-i18n={listingTypeI18nKey(listing.listing_type)}>
             {isClosed ? closedLabel : typeLabel}
           </span>
+          {listing.is_featured && !isClosed && (
+            <span className="pc-featured">Featured</span>
+          )}
         </div>
 
         {listing.bhk_count && <span className="pc-bhk">{listing.bhk_count} BHK</span>}
