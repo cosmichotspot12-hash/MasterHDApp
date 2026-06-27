@@ -1549,3 +1549,258 @@ tbody tr:hover {
     display: block;
   }
 }
+
+/* ── Site Footer ─────────────────────────────────────── */
+
+.sf-root {
+  border-top: 1px solid #EAE4DE;
+  background: #FFF4E6;
+  color: #7A6E68;
+}
+
+.sf-inner {
+  max-width: 1520px;
+  margin: 0 auto;
+  padding: 22px 20px 14px;
+}
+
+.sf-main {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(360px, 0.95fr) minmax(220px, auto);
+  gap: 22px;
+  align-items: start;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #EAE4DE;
+}
+
+.sf-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.sf-brand-mark {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid rgba(24,18,14,0.08);
+  border-radius: 9px;
+}
+
+.sf-brand-name {
+  display: block;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.sf-brand-name span {
+  color: #111827;
+}
+
+.sf-brand-sub {
+  display: block;
+  margin-top: 4px;
+  color: #7A6E68;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.sf-copy {
+  max-width: 430px;
+  margin: 10px 0 0;
+  color: #6B5F58;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.sf-link-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.sf-col-title {
+  margin: 0 0 8px;
+  color: #111827;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.sf-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sf-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  border: 1px solid #EFE6DC;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.58);
+  padding: 6px 10px;
+  color: #1F2937;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+
+.sf-link:hover {
+  border-color: #D8C9BA;
+  background: #FFF9F1;
+  color: #111827;
+}
+
+.sf-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  border: 1.5px solid #DCEBDD;
+  border-radius: 8px;
+  background: #fff;
+  padding: 8px 12px;
+  color: #148040;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: border-color 0.14s, background 0.14s;
+  white-space: nowrap;
+}
+
+.sf-action:hover {
+  border-color: #A9D5B1;
+  background: #F4FBF5;
+}
+
+.sf-contact {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.sf-contact-note {
+  max-width: 220px;
+  margin: 0;
+  color: #6B5F58;
+  font-size: 11.5px;
+  font-weight: 650;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.sf-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 10px;
+  color: #7A6E68;
+  font-size: 11.5px;
+}
+
+.sf-admin-link {
+  color: #B0A89F;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.sf-admin-link:hover {
+  color: #6B5F58;
+}
+
+@media (max-width: 860px) {
+  .sf-main {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .sf-link-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .sf-contact {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .sf-contact-note {
+    max-width: none;
+    text-align: left;
+  }
+}
+
+@media (max-width: 560px) {
+  .sf-inner {
+    padding: 16px 12px 12px;
+  }
+
+  .sf-main {
+    gap: 14px;
+    padding-bottom: 14px;
+  }
+
+  .sf-brand-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .sf-copy {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .sf-link-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .sf-nav {
+    gap: 6px;
+  }
+
+  .sf-link {
+    min-height: 30px;
+    background: rgba(255,255,255,0.7);
+    padding: 6px 9px;
+    font-size: 12px;
+  }
+
+  .sf-action {
+    width: auto;
+    min-height: 34px;
+    padding: 7px 11px;
+  }
+
+  .sf-contact {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sf-bottom {
+    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 11px;
+  }
+}
