@@ -57,7 +57,11 @@ export default function FindPage() {
     return (
       <div className="pf-success-page">
         <div className="pf-success-card">
-          <div className="pf-success-mark">OK</div>
+          <div className="pf-success-mark">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </div>
           <h2 data-i18n="success_requirement_title">Requirement Submitted</h2>
           <p data-i18n="success_requirement_copy">
             We will match your requirement with available properties and contact you within 24 hours.
@@ -106,6 +110,7 @@ export default function FindPage() {
                     <span data-i18n="form_phone">Phone Number</span> <span className="pf-required">*</span>
                   </label>
                   <input
+                    type="tel"
                     value={form.finder_phone}
                     onChange={e => set('finder_phone', e.target.value)}
                     required

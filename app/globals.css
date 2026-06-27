@@ -239,18 +239,19 @@ textarea.pf-input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #111827;
+  border: 1px solid var(--brand);
   border-radius: 8px;
-  background: #111827;
+  background: var(--brand);
   padding: .85rem 1rem;
   color: #fff;
   font-size: .95rem;
   font-weight: 950;
-  box-shadow: 0 14px 28px rgba(17, 24, 39, .16);
+  box-shadow: 0 14px 28px rgba(201, 95, 44, .22);
 }
 
 .pf-submit:hover {
-  background: #2c3441;
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
 }
 
 .pf-submit:disabled {
@@ -283,10 +284,8 @@ textarea.pf-input {
   place-items: center;
   margin: 0 auto 1rem;
   border-radius: 999px;
-  background: #111827;
+  background: var(--brand);
   color: #fff;
-  font-size: .8rem;
-  font-weight: 950;
 }
 
 .pf-success-card h2 {

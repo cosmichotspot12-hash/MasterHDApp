@@ -46,7 +46,11 @@ export default function ListPropertyForm() {
   if (success) {
     return (
       <div className="pf-success-card">
-        <div className="pf-success-mark">OK</div>
+        <div className="pf-success-mark">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </div>
         <h2 data-i18n="success_owner_title">Property Details Submitted</h2>
         <p data-i18n="success_owner_copy">
           Thank you. We will check matching demand and contact you within 24 hours.
@@ -94,6 +98,7 @@ export default function ListPropertyForm() {
                   <span data-i18n="form_phone">Phone Number</span> <span className="pf-required">*</span>
                 </label>
                 <input
+                  type="tel"
                   value={form.owner_phone}
                   onChange={(e) => set('owner_phone', e.target.value)}
                   required

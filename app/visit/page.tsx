@@ -53,7 +53,11 @@ function VisitForm() {
     return (
       <div className="pf-success-page">
         <div className="pf-success-card">
-          <div className="pf-success-mark">OK</div>
+          <div className="pf-success-mark">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </div>
           <h2 data-i18n="success_visit_title">Visit Request Submitted</h2>
           <p data-i18n="success_visit_copy">
           We will contact you within 24 hours to confirm your visit.
@@ -70,7 +74,15 @@ function VisitForm() {
     <form onSubmit={handleSubmit} className="pf-form">
       {title && (
         <div className="pf-note">
-          <p className="m-0">Requesting visit for: {title}</p>
+          <p className="m-0">
+            Requesting visit for: <strong>{title}</strong>
+          </p>
+          <Link href="/properties" className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-[#6b5f58] hover:text-[#111827]">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+            Browse all properties
+          </Link>
         </div>
       )}
 
@@ -95,6 +107,7 @@ function VisitForm() {
               <span data-i18n="form_phone">Phone Number</span> <span className="pf-required">*</span>
             </label>
             <input
+              type="tel"
               value={form.finder_phone}
               onChange={e => set('finder_phone', e.target.value)}
               required
