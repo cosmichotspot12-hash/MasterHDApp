@@ -140,6 +140,8 @@ export function PropertyCardStyles() {
         }
 
         .pc-photo img {
+          position: absolute;
+          inset: 0;
           display: block;
           width: 100%;
           height: 100%;
@@ -319,102 +321,98 @@ export function PropertyCardStyles() {
           font-weight: 900;
         }
 
+        /*
+         * Compact 2-up grid layout for phones. The card stays VERTICAL at every
+         * size (photo on top, body below) and the photo keeps a fixed
+         * aspect-ratio, so a tall source image can never stretch the card — every
+         * card in a row is the same height, like the admin grid.
+         */
         @media (max-width: 620px) {
-          .pc {
-            display: grid;
-            grid-template-columns: minmax(138px, 43%) minmax(0, 1fr);
-            grid-template-rows: minmax(0, 1fr) auto;
-            align-items: stretch;
-          }
-
-          .pc-link {
-            display: contents;
-          }
-
           .pc-photo {
-            grid-column: 1;
-            grid-row: 1 / 3;
-            min-height: 198px;
-            height: 100%;
-            aspect-ratio: auto;
-          }
-
-          .pc-photo img {
-            object-fit: cover;
-            object-position: center;
-          }
-
-          .pc-badge-row {
-            right: 10px;
-          }
-
-          .pc-bhk {
-            top: auto;
-            right: 8px;
-            bottom: 8px;
+            aspect-ratio: 16 / 11;
           }
 
           .pc-body {
-            grid-column: 2;
-            grid-row: 1;
-            padding: 12px;
-            gap: 8px;
+            gap: 6px;
+            padding: 10px 10px 8px;
+          }
+
+          .pc-locality {
+            font-size: 11px;
+          }
+
+          .pc-title {
+            font-size: 13px;
+            line-height: 1.28;
+          }
+
+          .pc-info-row {
+            gap: 4px;
+          }
+
+          .pc-info-row span {
+            padding: 3px 6px;
+            font-size: 10px;
+          }
+
+          .pc-price {
+            font-size: 16.5px;
+          }
+
+          .pc-price-unit {
+            font-size: 11px;
+          }
+
+          .pc-badge-row {
+            top: 8px;
+            left: 8px;
+            right: 8px;
+          }
+
+          .pc-type,
+          .pc-bhk {
+            min-height: 22px;
+            padding: 4px 7px;
+            font-size: 9.5px;
+          }
+
+          .pc-bhk {
+            top: 8px;
+            right: 8px;
+          }
+
+          .pc-footer {
+            padding: 0 10px 10px;
+          }
+
+          .pc-visit-btn {
+            width: 100%;
+            min-width: 0;
+            min-height: 36px;
+            padding: 7px 10px;
+            font-size: 12px;
+          }
+
+          .pc-closed-note {
+            width: 100%;
+            min-height: 34px;
+            font-size: 11px;
+          }
+        }
+
+        /* Very small phones: the homepage grid drops to 1 column, so the card can
+           breathe a little more again. */
+        @media (max-width: 359px) {
+          .pc-photo {
+            aspect-ratio: 16 / 10;
           }
 
           .pc-title {
             font-size: 14px;
           }
 
-          .pc-info-row {
-            gap: 5px;
-          }
-
-          .pc-info-row span {
-            padding: 4px 6px;
-            font-size: 11px;
-          }
-
           .pc-price {
-            margin-top: auto;
             font-size: 18px;
-          }
-
-          .pc-footer {
-            grid-column: 2;
-            grid-row: 2;
-            margin-top: 0;
-            padding: 0 12px 12px;
-          }
-
-          .pc-visit-btn {
-            min-height: 34px;
-            min-width: 122px;
-            padding: 7px 12px;
-            font-size: 12px;
-          }
-        }
-
-        @media (max-width: 390px) {
-          .pc {
-            grid-template-columns: 1fr;
-          }
-
-          .pc-link {
-            display: flex;
-          }
-
-          .pc-photo {
-            grid-column: auto;
-            grid-row: auto;
-            min-height: 0;
-            height: auto;
-            aspect-ratio: 16 / 10.8;
-          }
-
-          .pc-footer {
-            grid-column: auto;
-            grid-row: auto;
-            margin-top: 0;
           }
         }
       `}</style>

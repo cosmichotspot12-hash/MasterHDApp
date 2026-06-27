@@ -192,16 +192,6 @@ export default function SiteFooter() {
           font-size: 11.5px;
         }
 
-        .sf-admin {
-          color: #7A6E68;
-          font-weight: 650;
-          text-decoration: none;
-        }
-
-        .sf-admin:hover {
-          color: #111827;
-        }
-
         @media (max-width: 860px) {
           .sf-main {
             grid-template-columns: 1fr;
@@ -345,9 +335,6 @@ export default function SiteFooter() {
 
           <div className="sf-bottom">
             <span>&copy; {currentYear} <span data-i18n="footer_rights">HubliDharwad.app. All rights reserved.</span></span>
-            <Link href="/admin/login" className="sf-admin">
-              Admin login
-            </Link>
           </div>
         </div>
       </footer>
