@@ -176,19 +176,25 @@ export default async function PropertyDetailPage({
   return (
     <div className="page-shell pb-28 md:pb-12">
       <div className="site-container py-4 sm:py-6 lg:py-8">
+        <Link href="/properties" className="mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-[#6b5f58] hover:text-[#111827]">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          All properties
+        </Link>
         <div className="grid gap-4 grid-cols-1 md:gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-6">
           <main className="min-w-0 space-y-5">
             {listing.photos && listing.photos.length > 0 && (
               <section className="overflow-hidden rounded-lg border border-[#dedbd2] bg-white">
-                <div className="flex min-h-[260px] items-center justify-center bg-[#fbf1e4] sm:min-h-[420px] lg:min-h-[560px]">
+                <div className="aspect-[16/10] overflow-hidden bg-[#fbf1e4]">
                   <img
                     src={listing.photos[0]}
                     alt={listing.title}
-                    className="max-h-[72vh] w-full object-contain"
+                    className="h-full w-full object-cover"
                   />
                 </div>
                 {listing.photos.length > 1 && (
-                  <div className="flex gap-2 overflow-x-auto border-t border-[#dedbd2] bg-white p-2 sm:p-3">
+                  <div className="scrollbar-hide flex gap-2 overflow-x-auto border-t border-[#dedbd2] bg-white p-2 sm:p-3">
                     {listing.photos.slice(1).map((photo: string, i: number) => (
                       <img
                         key={i}
@@ -305,7 +311,7 @@ export default async function PropertyDetailPage({
                   <h2 className="mb-4 text-lg font-black text-[#20201d]">Amenities</h2>
                   <div className="flex flex-wrap gap-2">
                     {amenities.map((a) => (
-                      <span key={a} className="rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs font-bold text-green-700">
+                      <span key={a} className="rounded-full border border-[#e8d5c8] bg-[#fff4ec] px-3 py-1 text-xs font-bold text-[#9f4a22]">
                         {a}
                       </span>
                     ))}
