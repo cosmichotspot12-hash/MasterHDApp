@@ -66,7 +66,6 @@ export default function ServicesPage() {
         .svc-page {
           background: #FFF4E6;
           color: #111827;
-          font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
         }
 
         .svc-wrap {
@@ -134,14 +133,14 @@ export default function ServicesPage() {
         }
 
         .svc-btn {
-          border: 1px solid #1D9E75;
-          background: #1D9E75;
+          border: 1px solid var(--brand);
+          background: var(--brand);
           color: #fff;
         }
 
         .svc-btn:hover {
-          border-color: #168662;
-          background: #168662;
+          border-color: var(--brand-dark);
+          background: var(--brand-dark);
         }
 
         .svc-btn-light {
