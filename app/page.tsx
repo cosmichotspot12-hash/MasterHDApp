@@ -1065,6 +1065,13 @@ export default async function HomePage() {
             font-size: 11px;
           }
         }
+
+        /* Very small phones: a 2-up grid gets too cramped — fall back to 1 column */
+        @media (max-width: 359px) {
+          .hd-listings-grid {
+            grid-template-columns: 1fr;
+          }
+        }
       `}</style>
       <main className="min-h-screen bg-[#FFF4E6] text-slate-950">
 
@@ -1107,7 +1114,13 @@ export default async function HomePage() {
                       {demand.totalActive} active property requirements
                     </div>
                     <div className="hd-demand-sub">
-                      {demand.rentTotal} rent seekers &middot; {demand.saleTotal} buyers &middot; {demand.leaseTotal} lease seekers
+                      {[
+                        demand.rentTotal > 0 ? `${demand.rentTotal} rent seekers` : '',
+                        demand.saleTotal > 0 ? `${demand.saleTotal} buyers` : '',
+                        demand.leaseTotal > 0 ? `${demand.leaseTotal} lease seekers` : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' · ') || 'Verified seekers across Hubballi-Dharwad'}
                     </div>
                   </div>
                   <span className="hd-demand-action">List property</span>
@@ -1292,7 +1305,7 @@ export default async function HomePage() {
                 View all →
               </Link>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4 md:gap-4">
+            <div className="hd-listings-grid grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-4 md:gap-4">
               {previewListings.length > 0
                 ? previewListings.map((listing) => (
                     <PropertyCard key={listing.id} listing={listing} />

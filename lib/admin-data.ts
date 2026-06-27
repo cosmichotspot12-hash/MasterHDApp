@@ -53,3 +53,20 @@ export async function getAdminOwnerSubmissions() {
   if (error) throw error
   return (data || []) as OwnerSubmission[]
 }
+
+export type Deal = {
+  id: string
+  fee_earned: number
+  closed_date: string
+}
+
+export async function getAdminDeals() {
+  const { data, error } = await supabaseAdmin
+    .from('deals')
+    .select('*')
+    .order('closed_date', { ascending: false })
+
+  // The deals table is optional — treat any error as "no deals yet".
+  if (error) return [] as Deal[]
+  return (data || []) as Deal[]
+}
