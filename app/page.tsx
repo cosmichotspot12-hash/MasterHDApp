@@ -9,16 +9,11 @@ const HOME_PREVIEW_COUNT = 4
 export const dynamic = 'force-dynamic'
 
 async function getHomeData() {
-  const [previewListings, allListings, demand] = await Promise.all([
+  const [previewListings, demand] = await Promise.all([
     getPublicListings({ sort: 'recent', limit: HOME_PREVIEW_COUNT }),
-    getPublicListings({ sort: 'recent' }),
     getPublicDemandSummary(),
   ])
-  return {
-    previewListings,
-    totalListings: allListings.length || previewListings.length,
-    demand,
-  }
+  return { previewListings, demand }
 }
 
 function PreviewSkeleton() {
@@ -96,69 +91,16 @@ const LOCALITY_CHIPS = [
 ]
 
 export default async function HomePage() {
-  const { previewListings, totalListings, demand } = await getHomeData()
+  const { previewListings, demand } = await getHomeData()
 
   return (
     <>
       <PropertyCardStyles />
       <style>{`
-        @keyframes hd-float {
-          0%, 100% { transform: perspective(900px) rotateX(5deg) rotateY(-8deg) translateY(0px); }
-          50%       { transform: perspective(900px) rotateX(5deg) rotateY(-8deg) translateY(-16px); }
-        }
-        @keyframes hd-drift-green {
-          0%, 100% { transform: translate(0,0) scale(1); }
-          40%      { transform: translate(40px,-28px) scale(1.06); }
-          70%      { transform: translate(-20px,16px) scale(0.96); }
-        }
-        @keyframes hd-drift-indigo {
-          0%, 100% { transform: translate(0,0) scale(1); }
-          35%      { transform: translate(-28px,22px) scale(1.04); }
-          70%      { transform: translate(22px,-16px) scale(0.97); }
-        }
-        @keyframes hd-badge-a {
-          0%, 100% { transform: translateY(0); }
-          50%      { transform: translateY(-8px); }
-        }
-        @keyframes hd-badge-b {
-          0%, 100% { transform: translateY(0); }
-          50%      { transform: translateY(-10px); }
-        }
-        @keyframes hd-fade-up {
-          from { opacity: 0; transform: translateY(20px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
         @keyframes hd-live-pulse {
           0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(20,128,64,0.34); }
           55% { opacity: .72; transform: scale(.86); box-shadow: 0 0 0 7px rgba(20,128,64,0); }
         }
-        .hd-shine::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: 10;
-          pointer-events: none;
-          background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%);
-          opacity: 0;
-          transition: opacity 0.35s;
-        }
-        .hd-shine:hover::before { opacity: 1; }
-
-        @keyframes hd-chip-1 {
-          0%, 100% { transform: translateY(0px) rotate(-1deg); }
-          50%      { transform: translateY(-10px) rotate(1deg); }
-        }
-        @keyframes hd-chip-2 {
-          0%, 100% { transform: translateY(0px) rotate(1.5deg); }
-          40%      { transform: translateY(-8px) rotate(-0.8deg); }
-          75%      { transform: translateY(-3px) rotate(0.5deg); }
-        }
-        @keyframes hd-chip-3 {
-          0%, 100% { transform: translateY(0px) rotate(-0.5deg); }
-          35%      { transform: translateY(-12px) rotate(1.5deg); }
-          70%      { transform: translateY(-4px) rotate(-1deg); }
-        }
-
         .hd-home-section {
           padding-left: 20px;
           padding-right: 20px;
@@ -895,49 +837,6 @@ export default async function HomePage() {
 
         @media (max-width: 640px) {
           .hd-home-section { padding-left: 12px; padding-right: 12px; }
-          .hd-hero-section { padding: 14px 12px 12px; }
-          .hd-hero-shell { border-radius: 8px !important; box-shadow: none !important; }
-          .hd-hero-content { grid-template-columns: 1fr !important; padding: 22px 18px 24px !important; gap: 0 !important; min-height: 0 !important; }
-          .hd-hero-left { text-align: left; }
-          .hd-hero-kicker { width: fit-content; margin-bottom: 12px !important; }
-          .hd-hero-title { margin-bottom: 14px !important; font-size: 29px !important; line-height: 1.1 !important; }
-          .hd-hero-trust { margin-bottom: 18px !important; display: grid; gap: 8px; text-align: left; }
-          .hd-hero-trust li { font-size: 13px !important; }
-          .hd-hero-actions { display: grid !important; grid-template-columns: 1fr; gap: 8px !important; }
-          .hd-hero-actions a { width: 100%; border-radius: 8px !important; }
-          .hd-hero-owner { text-align: left; }
-          .hd-chips-col {
-            display: flex !important;
-            gap: 8px;
-            margin-top: 18px;
-            overflow-x: auto;
-            padding: 2px 2px 8px;
-            scrollbar-width: none;
-          }
-          .hd-chips-col::-webkit-scrollbar { display: none; }
-          .hd-locality-chip {
-            position: static !important;
-            flex: 0 0 auto;
-            animation: none !important;
-            transform: none !important;
-            box-shadow: none !important;
-          }
-          .hd-hero-right {
-            display: flex !important;
-            justify-content: stretch;
-            padding: 8px 0 0 !important;
-          }
-          .hd-hero-right > div { width: 100%; }
-          .hd-video-card {
-            width: 100% !important;
-            height: 168px !important;
-            aspect-ratio: 16 / 9 !important;
-            border-radius: 8px !important;
-            animation: none !important;
-            transform: none !important;
-            box-shadow: none !important;
-          }
-          .hd-badge-outside { display: none !important; }
           .hd-section-panel { padding: 12px; }
           .hd-section-head { align-items: stretch; flex-direction: column; gap: 12px; }
           .hd-section-title { font-size: 24px; }
@@ -1147,146 +1046,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="hidden" aria-label="Legacy hero">
-          <div className="mx-auto w-full max-w-[1520px]">
-            <div
-              className="hd-hero-shell relative overflow-hidden rounded-[20px] sm:rounded-[28px]"
-              style={{
-                background: 'linear-gradient(135deg, #ffffff 0%, #FFF9F4 55%, #FFF1DF 100%)',
-                boxShadow: '0 24px 64px rgba(58,46,40,0.1)',
-              }}
-            >
-              {/* Green orb */}
-              <div aria-hidden className="pointer-events-none absolute" style={{ width: '620px', height: '620px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(29,158,117,0.16) 0%, transparent 70%)', bottom: '-200px', left: '-80px', animation: 'hd-drift-green 14s ease-in-out infinite' }} />
-              {/* Indigo orb */}
-              <div aria-hidden className="pointer-events-none absolute" style={{ width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(79,70,229,0.1) 0%, transparent 70%)', top: '-120px', right: '25%', animation: 'hd-drift-indigo 18s ease-in-out infinite' }} />
-              {/* Dot texture */}
-              <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.025]" style={{ backgroundImage: 'radial-gradient(circle, #5a3a1a 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-
-              {/* Content — 3 column grid */}
-              <div
-                className="hd-hero-content relative z-10 items-stretch px-8 py-10 sm:px-12 sm:py-12"
-                style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1.4fr', gap: '0 24px', minHeight: '480px' }}
-              >
-
-                {/* Col 1 — Text */}
-                <div className="hd-hero-left flex flex-col justify-center">
-                  <p
-                    className="hd-hero-kicker mb-5 inline-flex items-center gap-1.5 rounded-full border border-[#C8B89A] bg-white/70 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#6B4A28] backdrop-blur-sm"
-                    style={{ animation: 'hd-fade-up 0.5s ease both', width: 'fit-content' }}
-                  >
-                    <svg width="9" height="11" viewBox="0 0 10 12" fill="none" aria-hidden>
-                      <path d="M5 0C2.24 0 0 2.24 0 5c0 3.75 5 7 5 7s5-3.25 5-7c0-2.76-2.24-5-5-5zm0 6.75A1.75 1.75 0 1 1 5 3.25a1.75 1.75 0 0 1 0 3.5z" fill="currentColor" />
-                    </svg>
-                    Hubballi · Dharwad
-                  </p>
-                  <h1
-                    className="hd-hero-title mb-6"
-                    style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 'clamp(34px, 3.6vw, 54px)', fontWeight: 700, lineHeight: 1.07, letterSpacing: '-0.02em', color: '#0A0F1E', animation: 'hd-fade-up 0.5s 0.1s ease both' }}
-                  >
-                    Every home visited<br />by us.{' '}
-                    <span style={{ color: '#1D9E75' }}>Before<br />you see it.</span>
-                  </h1>
-                  <ul className="hd-hero-trust mb-8 space-y-3" style={{ animation: 'hd-fade-up 0.5s 0.2s ease both' }}>
-                    {['We visit every property before listing', 'Video tour on every listing', 'No broker — direct contact with us'].map((item) => (
-                      <li key={item} className="flex items-center gap-3 text-[14px] font-medium text-slate-600">
-                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black text-white" style={{ background: '#1D9E75' }}>✓</span>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="hd-hero-actions flex flex-wrap items-center gap-3" style={{ animation: 'hd-fade-up 0.5s 0.3s ease both' }}>
-                    <Link href="/properties" className="inline-flex h-11 items-center justify-center rounded-full px-7 text-[14px] font-bold text-white no-underline transition hover:opacity-90 active:scale-[0.97]" style={{ background: '#1D9E75', boxShadow: '0 8px 28px rgba(29,158,117,0.32)' }}>
-                      Browse listings →
-                    </Link>
-                    <Link href="/find" className="text-[13px] font-semibold text-slate-500 no-underline underline-offset-2 hover:text-slate-800 hover:underline">
-                      Post requirement →
-                    </Link>
-                  </div>
-                  <p className="hd-hero-owner mt-3 text-[12px] text-slate-400" style={{ animation: 'hd-fade-up 0.5s 0.4s ease both' }}>
-                    Own a property?{' '}
-                    <Link href="/list" className="font-semibold text-slate-600 no-underline hover:underline">List it here →</Link>
-                  </p>
-                </div>
-
-                {/* Col 2 — Locality chip cloud */}
-                <div className="hd-chips-col relative">
-                  {LOCALITY_CHIPS.map((chip) => (
-                    <Link
-                      key={chip.name}
-                      href={`/properties?locality=${encodeURIComponent(chip.name)}`}
-                      className="hd-locality-chip absolute inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[12px] font-semibold no-underline backdrop-blur-sm transition-all hover:scale-110"
-                      style={{
-                        ...chip.pos,
-                        background: chip.city === 'Hubballi' ? 'rgba(228,246,238,0.9)' : 'rgba(237,235,255,0.9)',
-                        borderColor: chip.city === 'Hubballi' ? '#A8DCC6' : '#C4BFFF',
-                        color: chip.city === 'Hubballi' ? '#085041' : '#3730A3',
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.07)',
-                        animation: `hd-chip-${chip.anim} ${chip.dur} ease-in-out infinite ${chip.delay}`,
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: chip.city === 'Hubballi' ? '#1D9E75' : '#4F46E5' }} />
-                      {chip.name}
-                    </Link>
-                  ))}
-                </div>
-
-                {/* Col 3 — Phone mockup */}
-                <div className="hd-hero-right flex items-center justify-center py-6">
-                  <div style={{ position: 'relative' }}>
-                    {/* Glow behind phone */}
-                    <div aria-hidden style={{ position: 'absolute', inset: '-30px', borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(29,158,117,0.2) 0%, transparent 70%)', filter: 'blur(16px)', pointerEvents: 'none' }} />
-
-                    {/* Video card */}
-                    <div
-                      className="hd-video-card hd-shine"
-                      style={{
-                        position: 'relative',
-                        width: '260px',
-                        borderRadius: '12px',
-                        overflow: 'hidden',
-                        border: '1px solid rgba(255,255,255,0.8)',
-                        boxShadow: '0 2px 6px rgba(58,46,40,0.06), 0 12px 28px rgba(58,46,40,0.12), 0 30px 60px rgba(58,46,40,0.14)',
-                        animation: 'hd-float 5s ease-in-out infinite',
-                        aspectRatio: '9/16',
-                      }}
-                    >
-                      <video className="h-full w-full object-cover" src={HOME_VIDEO.src} poster="/images/home-hero-property.png" autoPlay muted loop playsInline preload="metadata" aria-label={HOME_VIDEO.label} style={{ display: 'block' }} />
-                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)', pointerEvents: 'none' }} />
-                      <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', alignItems: 'center', gap: '5px', borderRadius: '20px', padding: '5px 10px', fontSize: '9px', fontWeight: 700, color: '#fff', background: 'rgba(29,158,117,0.88)', backdropFilter: 'blur(8px)', animation: 'hd-badge-a 3.5s ease-in-out infinite' }}>
-                        <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#fff', display: 'inline-block' }} />
-                        Personally verified
-                      </div>
-                      <p style={{ position: 'absolute', bottom: '12px', left: '12px', right: '12px', fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.82)', lineHeight: 1.3, margin: 0 }}>Property walkthrough</p>
-                    </div>
-
-                    {/* Floating stat badge — 300+ */}
-                    <div
-                      className="hd-badge-outside"
-                      style={{ position: 'absolute', bottom: '-8px', right: '-48px', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '14px', padding: '10px 14px', background: 'rgba(255,255,255,0.94)', border: '1px solid rgba(220,210,200,0.7)', boxShadow: '0 8px 28px rgba(58,46,40,0.13)', backdropFilter: 'blur(12px)', animation: 'hd-badge-b 4.5s ease-in-out infinite' }}
-                    >
-                      <span style={{ fontSize: '22px', fontWeight: 900, lineHeight: 1, color: '#4F46E5' }}>300+</span>
-                      <span style={{ fontSize: '10px', fontWeight: 500, lineHeight: 1.4, color: '#64748b' }}>Active<br />seekers</span>
-                    </div>
-
-                    {/* Floating stat badge — listings */}
-                    {totalListings >= 10 && (
-                      <div
-                        className="hd-badge-outside"
-                        style={{ position: 'absolute', top: '8px', right: '-44px', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '14px', padding: '10px 14px', background: 'rgba(255,255,255,0.94)', border: '1px solid rgba(220,210,200,0.7)', boxShadow: '0 8px 28px rgba(58,46,40,0.13)', backdropFilter: 'blur(12px)', animation: 'hd-badge-b 4s ease-in-out infinite 1.2s' }}
-                      >
-                        <span style={{ fontSize: '22px', fontWeight: 900, lineHeight: 1, color: '#0A0F1E' }}>{totalListings}</span>
-                        <span style={{ fontSize: '10px', fontWeight: 500, lineHeight: 1.4, color: '#64748b' }}>Active<br />listings</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* ── LISTINGS GRID ─────────────────────────────────────────── */}
         <section className="hd-home-section pb-5 sm:pb-7" aria-label="Recent listings">
@@ -1380,133 +1139,6 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Header */}
-            <div className="hidden">
-              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[#1D9E75]">
-                How it works
-              </p>
-              <h2 className="text-[36px] font-black leading-[1.06] tracking-[-0.02em] text-slate-950 sm:text-[48px]">
-                Property the{' '}
-                <span className="text-slate-300">right</span>{' '}
-                way.<br />
-                <span className="text-[#1D9E75]">Finally.</span>
-              </h2>
-              <p className="mt-3 max-w-[460px] text-[16px] leading-relaxed text-slate-500">
-                Verified listings. Real visits. One person you can call. No brokers, no runaround.
-              </p>
-            </div>
-
-            {/* ── SEEKERS ── */}
-            <p className="hidden">
-              For property seekers
-            </p>
-
-            {/* Bento — desktop: left tall + right 2 stacked, mobile: single col */}
-            <div className="hidden">
-              {/* Card 1 tall */}
-              <div
-                className="cursor-default border-b border-[#E7DED5] bg-white p-7 transition-colors hover:bg-[#FAFAF9] sm:border-b-0 sm:p-9"
-                style={{ gridRow: '1 / 3' }}
-              >
-                <p className="mb-5 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                  Step 01 · You
-                </p>
-                <p className="text-[26px] font-black leading-[1.12] tracking-[-0.02em] text-slate-950 sm:text-[32px]">
-                  Browse{' '}
-                  <span className="text-[#1D9E75]">verified</span>{' '}
-                  listings —{' '}not guesses.
-                </p>
-                <p className="mt-5 text-[14px] leading-relaxed text-slate-500">
-                  Every flat on this platform has been physically visited by us before it went live. No stock photos. No ghost listings. No surprises.
-                </p>
-                <span
-                  className="mt-5 inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em]"
-                  style={{ background: '#E1F5EE', color: '#085041' }}
-                >
-                  You browse
-                </span>
-              </div>
-
-              {/* Card 2 */}
-              <div className="cursor-default border-b border-[#E7DED5] bg-white p-7 transition-colors hover:bg-[#FAFAF9] sm:border-l">
-                <p className="mb-4 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                  Step 02 · You
-                </p>
-                <p className="mb-2 text-[18px] font-black leading-[1.2] tracking-[-0.01em] text-slate-950">
-                  Watch the video tour from your phone.
-                </p>
-                <p className="text-[13px] leading-relaxed text-slate-500">
-                  We shoot a proper walkthrough of every property. See the rooms, the view, the building — before you leave home.
-                </p>
-                <span
-                  className="mt-4 inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em]"
-                  style={{ background: '#E1F5EE', color: '#085041' }}
-                >
-                  You decide
-                </span>
-              </div>
-
-              {/* Card 3 */}
-              <div className="cursor-default bg-white p-7 transition-colors hover:bg-[#FAFAF9] sm:border-l sm:border-t sm:border-[#E7DED5]">
-                <p className="mb-4 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                  Step 03 · Us
-                </p>
-                <p className="mb-2 text-[18px] font-black leading-[1.2] tracking-[-0.01em] text-slate-950">
-                  Tap &ldquo;Visit.&rdquo; We confirm within the hour.
-                </p>
-                <p className="text-[13px] leading-relaxed text-slate-500">
-                  We coordinate with the owner so you never have to make an awkward cold call to a stranger.
-                </p>
-                <span
-                  className="mt-4 inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em]"
-                  style={{ background: '#EEF2FF', color: '#3730A3' }}
-                >
-                  We coordinate
-                </span>
-              </div>
-            </div>
-
-            {/* Result card */}
-            <div className="hidden">
-              <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-                <div>
-                  <p className="mb-2 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                    The result · You
-                  </p>
-                  <p className="mb-1.5 text-[20px] font-black leading-[1.2] tracking-[-0.01em] text-slate-950">
-                    You walk in. It looks exactly like the video.
-                  </p>
-                  <p className="text-[13px] leading-relaxed text-slate-500">
-                    No surprises. No negotiating with strangers. Just you and a flat that works — in Vidyanagar, Navanagar, Gokul Road, wherever you need.
-                  </p>
-                </div>
-                <div className="shrink-0 sm:text-right">
-                  <p className="text-[48px] font-black leading-none tracking-[-0.03em] text-[#1D9E75]">
-                    300+
-                  </p>
-                  <p className="mt-0.5 text-[12px] text-slate-400">
-                    found their property<br />this way already
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Seeker CTAs */}
-            <div className="hidden">
-              <Link
-                href="/properties"
-                className="inline-flex h-11 items-center justify-center rounded-full bg-[#1D9E75] px-7 text-[14px] font-bold text-white no-underline transition hover:bg-[#168662] active:scale-[0.98]"
-                style={{ boxShadow: '0 6px 18px rgba(29,158,117,0.22)' }}
-              >
-                Browse listings →
-              </Link>
-              <Link
-                href="/find"
-                className="inline-flex h-11 items-center justify-center rounded-full border border-[#E2D5C8] bg-white px-7 text-[14px] font-bold text-slate-600 no-underline transition hover:bg-[#FFF4E6] active:scale-[0.98]"
-              >
-                Post my requirement
-              </Link>
-            </div>
 
             {/* ── OWNERS ── */}
             <div className="hd-owner-desk">
@@ -1553,101 +1185,6 @@ export default async function HomePage() {
                 ))}
               </div>
             </div>
-
-            <div className="hidden">
-
-            <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#D8D4FF] bg-[#EEF2FF] px-3 py-1.5 text-[12px] font-black uppercase tracking-[0.12em] text-[#3730A3]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#4F46E5]" />
-                  For property owners
-                </p>
-                <h3 className="text-[28px] font-black leading-[1.1] tracking-[-0.02em] text-slate-950 sm:text-[36px]">
-                  You tell us once.<br />
-                  We do everything else.
-                </h3>
-              </div>
-              <p className="max-w-[300px] text-[14px] leading-relaxed text-slate-500 sm:text-right">
-                From your first message to your first confirmed visit — here&apos;s exactly what we commit to.
-              </p>
-            </div>
-
-            {/* Commitment grid */}
-            <div className="mb-2 grid grid-cols-2 gap-3 md:grid-cols-4">
-              {OWNER_STEPS.map(({ num, title, desc, isPayoff }, i) => (
-                <div
-                  key={i}
-                  className={`relative overflow-hidden rounded-[18px] border p-5 sm:p-6 ${
-                    isPayoff
-                      ? 'border-[#C7C3FF] bg-gradient-to-br from-[#F5F4FF] to-[#EEF2FF]'
-                      : 'border-[#E2D5C8] bg-white'
-                  }`}
-                  style={{
-                    boxShadow: isPayoff
-                      ? '0 8px 28px rgba(79,70,229,0.1), inset 0 1px 0 rgba(255,255,255,0.8)'
-                      : '0 4px 16px rgba(58,46,40,0.05), inset 0 1px 0 rgba(255,255,255,0.9)',
-                  }}
-                >
-                  {/* top accent bar */}
-                  <div
-                    className="absolute left-0 right-0 top-0 h-[3px]"
-                    style={{ background: isPayoff ? '#4F46E5' : '#1D9E75' }}
-                  />
-                  {/* watermark number */}
-                  <span
-                    className="pointer-events-none absolute -right-2 -top-2 select-none text-[80px] font-black leading-none"
-                    style={{ color: isPayoff ? 'rgba(79,70,229,0.08)' : 'rgba(29,158,117,0.09)' }}
-                  >
-                    {num}
-                  </span>
-                  <div className="relative z-10 mt-1">
-                    <span
-                      className="mb-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em]"
-                      style={
-                        isPayoff
-                          ? { background: 'rgba(79,70,229,0.12)', color: '#4F46E5' }
-                          : { background: 'rgba(29,158,117,0.12)', color: '#085041' }
-                      }
-                    >
-                      Step {num}
-                    </span>
-                    <p className="mb-1.5 text-[14px] font-black leading-snug text-slate-950 sm:text-[15px]">
-                      {title}
-                    </p>
-                    <p className="text-[12px] leading-[1.7] text-slate-500">{desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Payoff band */}
-            <div
-              className="overflow-hidden rounded-[18px] border border-[#D8C9BA] bg-white px-7 py-7 sm:px-9"
-              style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 18px rgba(58,46,40,0.06)' }}
-            >
-              <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-                <div className="max-w-md">
-                  <p className="mb-2 text-[22px] font-black leading-[1.2] tracking-[-0.02em] text-slate-950 sm:text-[28px]">
-                    First enquiry arrives.<br />
-                    <span style={{ color: '#4F46E5' }}>You just show up.</span>
-                  </p>
-                  <p className="text-[14px] leading-relaxed text-slate-500">
-                    We screen every enquiry, coordinate all visits, and notify you when a serious buyer or tenant is ready to meet. You don&apos;t chase anyone.
-                  </p>
-                </div>
-                <Link
-                  href="/list"
-                  className="inline-flex h-11 shrink-0 items-center justify-center rounded-full px-7 text-[14px] font-bold text-white no-underline transition hover:opacity-90 active:scale-[0.98]"
-                  style={{
-                    background: '#4F46E5',
-                    boxShadow: '0 6px 18px rgba(79,70,229,0.22)',
-                  }}
-                >
-                  List my property →
-                </Link>
-              </div>
-            </div>
-            </div>
           </div>
         </section>
 
@@ -1670,7 +1207,13 @@ export default async function HomePage() {
 
               <div className="hd-social-band">
                 <div>
-                  <div className="hd-social-mark">IG</div>
+                  <div className="hd-social-mark" aria-label="Instagram">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <rect x="2" y="2" width="20" height="20" rx="5" stroke="#fff" strokeWidth="1.8"/>
+                      <circle cx="12" cy="12" r="4.5" stroke="#fff" strokeWidth="1.8"/>
+                      <circle cx="17.5" cy="6.5" r="1" fill="#fff"/>
+                    </svg>
+                  </div>
                   <h2 className="hd-band-title">Watch before you visit.</h2>
                   <p className="hd-band-copy">
                     Follow local walkthroughs, updates, and new property previews across Hubballi-Dharwad.
@@ -1689,100 +1232,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="hidden" aria-label="Post requirement">
-          <div className="mx-auto w-full max-w-[1520px]">
-            <div
-              className="relative overflow-hidden rounded-[20px] px-7 py-9 sm:px-12 sm:py-10"
-              style={{
-                background: 'linear-gradient(135deg, #3730A3 0%, #4F46E5 60%, #6366F1 100%)',
-                boxShadow: '0 16px 48px rgba(79,70,229,0.22)',
-              }}
-            >
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 opacity-[0.06]"
-                style={{
-                  backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)',
-                  backgroundSize: '20px 20px',
-                }}
-              />
-              <div className="relative z-10 flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
-                <div className="max-w-xl">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-indigo-200">
-                    Can&apos;t find what you need?
-                  </p>
-                  <h2 className="mt-2 text-[24px] font-black leading-tight text-white sm:text-[32px]">
-                    Tell us what you&apos;re looking for.<br />
-                    We&apos;ll find it for you.
-                  </h2>
-                  <p className="mt-2 text-[14px] leading-relaxed text-indigo-200">
-                    Share your requirement once — budget, location, type — and we&apos;ll match it against our listings and incoming properties. Join 300+ people who&apos;ve already shared their need.
-                  </p>
-                </div>
-                <Link
-                  href="/find"
-                  className="inline-flex shrink-0 items-center justify-center rounded-[12px] bg-white px-7 py-3 text-[14px] font-bold text-[#4F46E5] no-underline shadow-[0_8px_24px_rgba(0,0,0,0.15)] transition hover:bg-indigo-50 active:scale-[0.98]"
-                >
-                  Post my requirement →
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── INSTAGRAM ─────────────────────────────────────────────── */}
-        <section className="hidden" aria-label="Follow on Instagram">
-          <div className="mx-auto w-full max-w-[1520px]">
-            <div
-              className="overflow-hidden rounded-[20px] border border-[#E2D5C8] bg-white"
-              style={{ boxShadow: '0 4px 20px rgba(58,46,40,0.05)' }}
-            >
-              <div className="flex flex-col items-stretch sm:flex-row">
-
-                {/* Left — text */}
-                <div className="flex flex-col justify-center px-7 py-8 sm:px-10 sm:py-9 sm:flex-1">
-                  <div className="mb-3 flex items-center gap-2">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-                      <rect x="2" y="2" width="20" height="20" rx="5" stroke="url(#ig2)" strokeWidth="1.8"/>
-                      <circle cx="12" cy="12" r="4.5" stroke="url(#ig2)" strokeWidth="1.8"/>
-                      <circle cx="17.5" cy="6.5" r="1" fill="#C8541A"/>
-                      <defs>
-                        <linearGradient id="ig2" x1="2" y1="22" x2="22" y2="2" gradientUnits="userSpaceOnUse">
-                          <stop offset="0%" stopColor="#F9A825"/>
-                          <stop offset="50%" stopColor="#E91E8C"/>
-                          <stop offset="100%" stopColor="#9C27B0"/>
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                    <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Instagram</span>
-                  </div>
-                  <h2 className="mb-2 text-[22px] font-black tracking-tight text-slate-950 sm:text-[26px]">
-                    See properties before you visit.
-                  </h2>
-                  <p className="mb-5 text-[14px] leading-relaxed text-slate-500">
-                    We shoot video tours of every property we verify. Daily walkthroughs across Hubballi-Dharwad — see the flat before you take the auto.
-                  </p>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <a
-                      href="https://www.instagram.com/hublidharwad.app/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-10 items-center justify-center rounded-[10px] px-5 text-[13px] font-bold text-white no-underline transition hover:opacity-90 active:scale-[0.98]"
-                      style={{
-                        background: 'linear-gradient(135deg, #F9A825 0%, #E91E8C 50%, #9C27B0 100%)',
-                        boxShadow: '0 5px 16px rgba(233,30,140,0.22)',
-                      }}
-                    >
-                      Follow @hublidharwad.app
-                    </a>
-                  </div>
-                </div>
-
-
-              </div>
-            </div>
-          </div>
-        </section>
 
       </main>
     </>
