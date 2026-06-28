@@ -113,7 +113,7 @@ export default async function HomePage() {
           display: inline-flex;
           align-items: center;
           gap: 10px;
-          color: #C95F2C;
+          color: #8B4513;
           font-size: 11px;
           font-weight: 900;
           letter-spacing: 0.14em;
@@ -127,23 +127,26 @@ export default async function HomePage() {
           width: 22px;
           height: 1px;
           background: currentColor;
-          opacity: 0.45;
+          opacity: 0.5;
         }
         .hd-hero-title {
           margin: 14px 0 0;
           font-size: clamp(40px, 6vw, 68px);
-          line-height: 0.94;
-          letter-spacing: -0.045em;
+          line-height: 0.96;
+          letter-spacing: -0.04em;
         }
         .hd-title-top {
           display: block;
-          color: #B0A49C;
-          font-weight: 200;
+          color: #3D2E25;
+          font-weight: 400;
+          font-style: italic;
+          letter-spacing: -0.02em;
         }
         .hd-title-hl {
           display: block;
           color: #111827;
-          font-weight: 950;
+          font-weight: 800;
+          font-style: normal;
         }
         .hd-hero-tagline {
           margin: 18px auto 0;
