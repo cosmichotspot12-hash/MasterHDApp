@@ -115,7 +115,7 @@ export default async function HomePage() {
           gap: 10px;
           color: #C95F2C;
           font-size: 11px;
-          font-weight: 700;
+          font-weight: 900;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           margin-bottom: 0;
@@ -137,8 +137,8 @@ export default async function HomePage() {
         }
         .hd-title-top {
           display: block;
-          color: #6B5F58;
-          font-weight: 300;
+          color: #B0A49C;
+          font-weight: 200;
         }
         .hd-title-hl {
           display: block;
