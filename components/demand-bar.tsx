@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
 interface Props {
@@ -13,7 +12,7 @@ interface Props {
 function useCountUp(target: number, duration = 1800) {
   const [count, setCount] = useState(0)
   const triggered = useRef(false)
-  const elRef = useRef<HTMLAnchorElement>(null)
+  const elRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const node = elRef.current
@@ -53,21 +52,18 @@ export default function DemandBar({ totalActive, rentTotal, saleTotal, leaseTota
   ].filter(Boolean)
 
   return (
-    <Link
-      href="/list"
-      className="hd-demand-bar"
-      ref={elRef}
-      aria-label={`Live local demand — ${totalActive} active requirements. List your property.`}
-    >
+    <div className="hd-demand-bar" ref={elRef}>
       <span className="hd-demand-live">
         <span className="hd-demand-dot" aria-hidden />
-        Live local demand
+        Live demand
       </span>
+
+      <span className="hd-demand-sep" aria-hidden />
 
       <span className="hd-demand-count" aria-live="polite">
         {count}<span className="hd-demand-plus">+</span>
       </span>
-      <span className="hd-demand-label">active property requirements</span>
+      <span className="hd-demand-label">active requirements</span>
 
       {pills.length > 0 && (
         <div className="hd-demand-pills">
@@ -77,7 +73,6 @@ export default function DemandBar({ totalActive, rentTotal, saleTotal, leaseTota
         </div>
       )}
 
-      <span className="hd-demand-action">List property →</span>
-    </Link>
+    </div>
   )
 }

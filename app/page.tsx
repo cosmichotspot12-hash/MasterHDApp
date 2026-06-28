@@ -44,10 +44,6 @@ export const metadata: Metadata = {
   },
 }
 
-const LOCALITY_CHIPS = [
-  'Navanagar', 'Saptapur', 'Vidyanagar', 'Kalyan Nagar',
-  'Gokul Road', 'Shivaji Nagar', 'Deshpande Nagar', 'Keshwapur',
-]
 
 export default async function HomePage() {
   const { previewListings, demand } = await getHomeData()
@@ -114,12 +110,12 @@ export default async function HomePage() {
 
         /* ── hero ── */
         .hd-hero {
-          padding: 56px 20px 40px;
+          padding: 18px 16px 14px;
           text-align: center;
         }
         .hd-hero-inner {
           margin: 0 auto;
-          max-width: 860px;
+          max-width: 680px;
         }
         .hd-hero-badge {
           display: inline-flex;
@@ -162,10 +158,10 @@ export default async function HomePage() {
           flex-shrink: 0;
         }
         .hd-hero-title {
-          margin: 22px 0 0;
-          font-size: clamp(42px, 6.5vw, 92px);
+          margin: 8px 0 0;
+          font-size: clamp(28px, 4vw, 52px);
           font-weight: 950;
-          line-height: 0.96;
+          line-height: 0.97;
           letter-spacing: -0.03em;
         }
         .hd-title-top {
@@ -178,237 +174,106 @@ export default async function HomePage() {
           background-clip: text;
         }
         .hd-hero-tagline {
-          margin: 22px auto 0;
-          max-width: 520px;
+          margin: 6px auto 0;
+          max-width: 440px;
           color: #4A3728;
-          font-size: 17px;
+          font-size: 13px;
           font-weight: 700;
-          line-height: 1.55;
+          line-height: 1.5;
           letter-spacing: 0.005em;
         }
-        .hd-hero-actions {
+
+        /* ── demand bar ── */
+        /* ── demand strip ── */
+        .hd-demand-bar {
           display: flex;
           align-items: center;
           justify-content: center;
           flex-wrap: wrap;
-          gap: 10px;
-          margin-top: 28px;
-        }
-        .hd-hero-btn-primary {
-          min-height: 50px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border: none;
-          border-radius: 999px;
-          background: linear-gradient(135deg, #111827 0%, #C95F2C 100%);
-          padding: 13px 30px;
-          color: #fff;
-          font-size: 14px;
-          font-weight: 950;
+          gap: 6px 12px;
+          margin: 12px auto 0;
+          max-width: 560px;
           text-decoration: none;
-          box-shadow: 0 8px 28px rgba(201,95,44,0.38), 0 2px 8px rgba(17,24,39,0.20);
-          transition: box-shadow 0.2s, transform 0.15s;
-        }
-        .hd-hero-btn-primary:hover {
-          box-shadow: 0 12px 36px rgba(201,95,44,0.50), 0 4px 12px rgba(17,24,39,0.24);
-          transform: translateY(-1px);
-        }
-        .hd-hero-btn-ghost {
-          min-height: 50px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid rgba(201,95,44,0.28);
-          border-radius: 999px;
-          background: rgba(255,255,255,0.55);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          padding: 13px 30px;
-          color: #1C1917;
-          font-size: 14px;
-          font-weight: 950;
-          text-decoration: none;
-          box-shadow: 0 4px 16px rgba(201,95,44,0.10), inset 0 1px 0 rgba(255,255,255,0.8);
-          transition: border-color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.15s;
-        }
-        .hd-hero-btn-ghost:hover {
-          border-color: rgba(201,95,44,0.48);
-          background: rgba(255,255,255,0.80);
-          box-shadow: 0 6px 20px rgba(201,95,44,0.16), inset 0 1px 0 rgba(255,255,255,0.9);
-          transform: translateY(-1px);
-        }
-
-        /* ── demand bar ── */
-        /* ── demand bar ── */
-        .hd-demand-bar {
-          display: block;
-          margin: 32px auto 0;
-          max-width: 380px;
-          text-align: center;
-          border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 16px;
-          background:
-            radial-gradient(ellipse at 50% 0%, rgba(201,95,44,0.20) 0%, transparent 55%),
-            linear-gradient(160deg, #0F1623 0%, #1E0E06 100%);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          padding: 14px 18px 14px;
-          text-decoration: none;
-          color: #fff;
-          box-shadow:
-            0 0 0 1px rgba(255,255,255,0.04) inset,
-            0 16px 52px rgba(17,24,39,0.32),
-            0 0 80px rgba(201,95,44,0.07);
-          transition: box-shadow 0.25s, border-color 0.25s;
-        }
-        .hd-demand-bar:hover {
-          border-color: rgba(201,95,44,0.20);
-          box-shadow:
-            0 0 0 1px rgba(255,255,255,0.06) inset,
-            0 20px 60px rgba(17,24,39,0.40),
-            0 0 100px rgba(201,95,44,0.13);
+          color: inherit;
         }
         .hd-demand-live {
           display: inline-flex;
           align-items: center;
-          justify-content: center;
-          gap: 7px;
-          color: #F5A623;
-          font-size: 10px;
-          font-weight: 950;
-          letter-spacing: .09em;
-          text-transform: uppercase;
+          gap: 6px;
+          color: #9F4A22;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.03em;
         }
         .hd-demand-dot {
-          width: 7px;
-          height: 7px;
+          width: 6px;
+          height: 6px;
           flex: 0 0 auto;
           border-radius: 999px;
-          background: #F5A623;
-          box-shadow: 0 0 8px 3px rgba(245,166,35,0.55);
-          animation: hd-live-pulse 1.35s ease-in-out infinite;
+          background: #C95F2C;
+          animation: hd-live-pulse 1.5s ease-in-out infinite;
         }
         .hd-demand-count {
-          display: block;
-          margin-top: 8px;
-          color: #fff;
-          font-size: clamp(38px, 7vw, 52px);
+          color: #111827;
+          font-size: 15px;
           font-weight: 950;
-          line-height: 1;
-          letter-spacing: -0.04em;
+          letter-spacing: -0.02em;
         }
         .hd-demand-plus {
-          background: linear-gradient(135deg, #C95F2C 0%, #F5A623 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          font-size: 0.5em;
-          margin-left: 4px;
-          vertical-align: super;
+          color: #C95F2C;
+          font-size: 0.8em;
+          margin-left: 1px;
         }
         .hd-demand-label {
-          display: block;
-          margin-top: 8px;
-          color: rgba(255,255,255,0.42);
-          font-size: 14px;
+          color: #5B6472;
+          font-size: 12px;
           font-weight: 700;
-          line-height: 1.4;
-          letter-spacing: 0.01em;
+        }
+        .hd-demand-sep {
+          width: 3px;
+          height: 3px;
+          border-radius: 999px;
+          background: #C9B9A8;
+          flex-shrink: 0;
         }
         .hd-demand-pills {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 7px;
-          margin-top: 12px;
-          padding-top: 10px;
-          border-top: 1px solid rgba(255,255,255,0.07);
+          display: contents;
         }
         .hd-demand-pill {
           display: inline-flex;
           align-items: center;
-          gap: 6px;
-          border: 1px solid rgba(255,255,255,0.09);
-          border-radius: 999px;
-          background: rgba(255,255,255,0.05);
-          padding: 6px 14px;
-          color: rgba(255,255,255,0.60);
-          font-size: 11.5px;
-          font-weight: 800;
+          gap: 4px;
+          color: #5B6472;
+          font-size: 11px;
+          font-weight: 700;
         }
         .hd-demand-pill::before {
           content: '';
-          width: 5px;
-          height: 5px;
+          width: 4px;
+          height: 4px;
           border-radius: 999px;
-          background: #F5A623;
-          opacity: 0.75;
+          background: #C95F2C;
+          opacity: 0.6;
           flex-shrink: 0;
         }
         .hd-demand-action {
           display: inline-flex;
-          min-height: 36px;
           align-items: center;
-          justify-content: center;
           border-radius: 999px;
-          background: linear-gradient(135deg, #C95F2C 0%, #F5A623 100%);
-          padding: 8px 22px;
-          color: #fff;
-          font-size: 12px;
-          font-weight: 950;
+          border: 1px solid rgba(201,95,44,0.30);
+          background: rgba(201,95,44,0.06);
+          padding: 4px 12px;
+          color: #9F4A22;
+          font-size: 11px;
+          font-weight: 900;
           white-space: nowrap;
-          margin-top: 12px;
-          box-shadow: 0 4px 20px rgba(201,95,44,0.45);
-          transition: box-shadow 0.2s, transform 0.15s;
+          transition: background 0.15s, border-color 0.15s;
         }
         .hd-demand-action:hover {
-          box-shadow: 0 8px 28px rgba(201,95,44,0.55);
-          transform: translateY(-1px);
+          background: rgba(201,95,44,0.12);
+          border-color: rgba(201,95,44,0.50);
         }
 
-        /* ── locality chips ── */
-        .hd-chips-row {
-          display: flex;
-          gap: 8px;
-          justify-content: center;
-          flex-wrap: wrap;
-          margin: 22px auto 0;
-          max-width: 720px;
-        }
-        .hd-chip {
-          flex: 0 0 auto;
-          border: 1px solid rgba(17,24,39,0.10);
-          border-radius: 999px;
-          background: rgba(255,255,255,0.68);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
-          padding: 8px 16px;
-          color: #334155;
-          font-size: 12px;
-          font-weight: 800;
-          text-decoration: none;
-          box-shadow: 0 2px 8px rgba(17,24,39,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
-          transition: all 0.15s;
-        }
-        .hd-chip:nth-child(3n + 1) {
-          background: linear-gradient(135deg, #111827 0%, #1E3055 100%);
-          border-color: transparent;
-          color: #fff;
-          box-shadow: 0 4px 16px rgba(17,24,39,0.30);
-        }
-        .hd-chip:nth-child(3n + 2) {
-          background: linear-gradient(135deg, rgba(201,95,44,0.10) 0%, rgba(245,166,35,0.08) 100%);
-          border-color: rgba(201,95,44,0.24);
-          color: #9F4A22;
-        }
-        .hd-chip:hover {
-          border-color: rgba(201,95,44,0.36);
-          background: rgba(255,255,255,0.92);
-          color: #111827;
-          transform: translateY(-1px);
-          box-shadow: 0 6px 16px rgba(201,95,44,0.12), inset 0 1px 0 rgba(255,255,255,1);
-        }
 
         /* ── close / cta band ── */
         .hd-close-grid {
@@ -494,17 +359,15 @@ export default async function HomePage() {
         /* ── responsive ── */
         @media (max-width: 640px) {
           .hd-home-section { padding-left: 12px; padding-right: 12px; }
-          .hd-hero { padding: 40px 16px 28px; }
-          .hd-hero-title { font-size: 36px; letter-spacing: -0.02em; }
+          .hd-hero { padding: 14px 12px 10px; }
+          .hd-hero-title { font-size: 26px; letter-spacing: -0.02em; }
           .hd-title-hl { display: inline; }
-          .hd-hero-tagline { font-size: 15px; }
-          .hd-hero-actions { gap: 8px; }
-          .hd-hero-btn-primary,
-          .hd-hero-btn-ghost { min-height: 46px; padding: 11px 22px; font-size: 13px; }
-          .hd-demand-bar { max-width: 100%; border-radius: 14px; padding: 20px 18px; }
-          .hd-demand-count { font-size: 52px; }
-          .hd-demand-label { font-size: 13px; }
-          .hd-demand-action { min-height: 38px; padding: 9px 22px; font-size: 12px; }
+          .hd-hero-tagline { font-size: 12px; margin-top: 4px; }
+
+          .hd-demand-bar { gap: 4px 8px; }
+          .hd-demand-count { font-size: 13px; }
+          .hd-demand-label { font-size: 11px; }
+          .hd-demand-action { font-size: 10px; padding: 3px 9px; }
           .hd-chips-row { gap: 6px; }
           .hd-chip { padding: 7px 12px; font-size: 11px; }
           .hd-close-grid { grid-template-columns: 1fr; }
@@ -543,15 +406,6 @@ export default async function HomePage() {
               Your next property, verified before you visit.
             </p>
 
-            <div className="hd-hero-actions">
-              <Link href="/properties" className="hd-hero-btn-primary">
-                Browse properties
-              </Link>
-              <Link href="/find" className="hd-hero-btn-ghost">
-                Post requirement
-              </Link>
-            </div>
-
             <DemandBar
               totalActive={demand.totalActive}
               rentTotal={demand.rentTotal}
@@ -559,17 +413,6 @@ export default async function HomePage() {
               leaseTotal={demand.leaseTotal}
             />
 
-            <div className="hd-chips-row" aria-label="Popular localities">
-              {LOCALITY_CHIPS.map((name) => (
-                <Link
-                  key={name}
-                  href={`/properties?locality=${encodeURIComponent(name)}`}
-                  className="hd-chip"
-                >
-                  {name}
-                </Link>
-              ))}
-            </div>
           </div>
         </section>
 
@@ -577,14 +420,10 @@ export default async function HomePage() {
         {/* ── LISTINGS GRID ──────────────────────────────────────────── */}
         <section className="hd-home-section pb-5 sm:pb-7" aria-label="Recent listings">
           <div className="mx-auto w-full max-w-[1520px]">
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="hd-section-kicker">Recently verified</p>
-                <h2 className="hd-section-title">Fresh properties you can visit.</h2>
-                <p className="hd-section-copy">
-                  New rent and sale listings with photos, locality, price, and visit requests in one place.
-                </p>
-              </div>
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <h2 style={{ margin: 0, color: '#111827', fontSize: '18px', fontWeight: 950, letterSpacing: '-0.01em' }}>
+                Latest listings
+              </h2>
               <Link href="/properties" className="hd-section-btn">
                 View all →
               </Link>
