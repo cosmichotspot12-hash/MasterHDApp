@@ -9,7 +9,7 @@ interface Props {
   leaseTotal: number
 }
 
-function useCountUp(target: number, duration = 1800) {
+function useCountUp(target: number, duration = 1600) {
   const [count, setCount] = useState(0)
   const triggered = useRef(false)
   const elRef = useRef<HTMLDivElement>(null)
@@ -45,34 +45,28 @@ function useCountUp(target: number, duration = 1800) {
 export default function DemandBar({ totalActive, rentTotal, saleTotal, leaseTotal }: Props) {
   const { count, elRef } = useCountUp(totalActive)
 
-  const pills = [
-    rentTotal > 0 ? `${rentTotal} rent seekers` : '',
-    saleTotal > 0 ? `${saleTotal} buyers` : '',
-    leaseTotal > 0 ? `${leaseTotal} lease seekers` : '',
-  ].filter(Boolean)
+  const parts: string[] = []
+  if (rentTotal > 0) parts.push(`${rentTotal} renting`)
+  if (saleTotal > 0) parts.push(`${saleTotal} buying`)
+  if (leaseTotal > 0) parts.push(`${leaseTotal} leasing`)
 
   return (
     <div className="hd-demand-bar" ref={elRef}>
-      <span className="hd-demand-live">
-        <span className="hd-demand-dot" aria-hidden />
-        Live demand
-      </span>
-
-      <span className="hd-demand-sep" aria-hidden />
-
       <span className="hd-demand-count" aria-live="polite">
         {count}<span className="hd-demand-plus">+</span>
       </span>
-      <span className="hd-demand-label">active requirements</span>
-
-      {pills.length > 0 && (
-        <div className="hd-demand-pills">
-          {pills.map((p) => (
-            <span key={p} className="hd-demand-pill">{p}</span>
+      <span className="hd-demand-label">people actively looking</span>
+      {parts.length > 0 && (
+        <>
+          <span className="hd-demand-sep" aria-hidden>·</span>
+          {parts.map((p, i) => (
+            <span key={p}>
+              <span className="hd-demand-pill">{p}</span>
+              {i < parts.length - 1 && <span className="hd-demand-sep" aria-hidden> · </span>}
+            </span>
           ))}
-        </div>
+        </>
       )}
-
     </div>
   )
 }

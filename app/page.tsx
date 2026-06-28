@@ -52,14 +52,6 @@ export default async function HomePage() {
     <>
       <PropertyCardStyles />
       <style>{`
-        @keyframes hd-live-pulse {
-          0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(201,95,44,0.34); }
-          55% { opacity: .72; transform: scale(.86); box-shadow: 0 0 0 7px rgba(201,95,44,0); }
-        }
-        @keyframes hd-badge-glow {
-          0%, 100% { box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 8px 28px rgba(201,95,44,0.12); }
-          50%       { box-shadow: 0 0 0 1px rgba(255,255,255,0.10) inset, 0 8px 36px rgba(201,95,44,0.26); }
-        }
 
         /* ── shared ── */
         .hd-home-section {
@@ -110,168 +102,66 @@ export default async function HomePage() {
 
         /* ── hero ── */
         .hd-hero {
-          padding: 18px 16px 14px;
+          padding: 36px 16px 20px;
           text-align: center;
         }
         .hd-hero-inner {
           margin: 0 auto;
-          max-width: 680px;
-        }
-        .hd-hero-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          border: 1px solid rgba(201,95,44,0.28);
-          border-radius: 999px;
-          background: linear-gradient(135deg, rgba(17,24,39,0.94) 0%, rgba(45,24,16,0.94) 100%);
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-          padding: 7px 16px 7px 7px;
-          color: #F8E6D5;
-          font-size: 11px;
-          font-weight: 800;
-          letter-spacing: 0.04em;
-          animation: hd-badge-glow 3s ease-in-out infinite;
-        }
-        .hd-hero-badge-dot {
-          width: 6px;
-          height: 6px;
-          flex-shrink: 0;
-          border-radius: 999px;
-          background: #C95F2C;
-          box-shadow: 0 0 6px 2px rgba(201,95,44,0.55);
-          animation: hd-live-pulse 1.8s ease-in-out infinite;
-        }
-        .hd-hero-badge strong {
-          border-radius: 999px;
-          background: linear-gradient(135deg, #C95F2C 0%, #F5A623 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          font-weight: 950;
-          letter-spacing: -0.01em;
-        }
-        .hd-hero-badge-sep {
-          width: 1px;
-          height: 12px;
-          background: rgba(255,255,255,0.18);
-          flex-shrink: 0;
+          max-width: 640px;
         }
         .hd-hero-title {
-          margin: 8px 0 0;
-          font-size: clamp(28px, 4vw, 52px);
+          margin: 0;
+          font-size: clamp(32px, 5vw, 56px);
           font-weight: 950;
-          line-height: 0.97;
-          letter-spacing: -0.03em;
+          line-height: 1.0;
+          letter-spacing: -0.035em;
         }
         .hd-title-top {
           color: #1C1917;
         }
         .hd-title-hl {
-          background: linear-gradient(135deg, #C95F2C 0%, #7A3018 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          color: #B8501F;
         }
         .hd-hero-tagline {
-          margin: 6px auto 0;
-          max-width: 440px;
-          color: #4A3728;
-          font-size: 13px;
-          font-weight: 700;
-          line-height: 1.5;
-          letter-spacing: 0.005em;
+          margin: 10px auto 0;
+          max-width: 400px;
+          color: #7A6E68;
+          font-size: 14px;
+          font-weight: 500;
+          line-height: 1.6;
         }
 
         /* ── demand bar ── */
-        /* ── demand strip ── */
         .hd-demand-bar {
           display: flex;
           align-items: center;
           justify-content: center;
           flex-wrap: wrap;
-          gap: 6px 12px;
-          margin: 12px auto 0;
-          max-width: 560px;
-          text-decoration: none;
-          color: inherit;
-        }
-        .hd-demand-live {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          color: #9F4A22;
-          font-size: 11px;
-          font-weight: 800;
-          letter-spacing: 0.03em;
-        }
-        .hd-demand-dot {
-          width: 6px;
-          height: 6px;
-          flex: 0 0 auto;
-          border-radius: 999px;
-          background: #C95F2C;
-          animation: hd-live-pulse 1.5s ease-in-out infinite;
+          gap: 4px 10px;
+          margin: 16px auto 0;
         }
         .hd-demand-count {
           color: #111827;
           font-size: 15px;
-          font-weight: 950;
+          font-weight: 800;
           letter-spacing: -0.02em;
         }
         .hd-demand-plus {
-          color: #C95F2C;
-          font-size: 0.8em;
-          margin-left: 1px;
+          color: #B8501F;
         }
         .hd-demand-label {
-          color: #5B6472;
-          font-size: 12px;
-          font-weight: 700;
+          color: #7A6E68;
+          font-size: 13px;
+          font-weight: 500;
         }
         .hd-demand-sep {
-          width: 3px;
-          height: 3px;
-          border-radius: 999px;
-          background: #C9B9A8;
-          flex-shrink: 0;
-        }
-        .hd-demand-pills {
-          display: contents;
+          color: #D6CABC;
+          font-size: 13px;
         }
         .hd-demand-pill {
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          color: #5B6472;
-          font-size: 11px;
-          font-weight: 700;
-        }
-        .hd-demand-pill::before {
-          content: '';
-          width: 4px;
-          height: 4px;
-          border-radius: 999px;
-          background: #C95F2C;
-          opacity: 0.6;
-          flex-shrink: 0;
-        }
-        .hd-demand-action {
-          display: inline-flex;
-          align-items: center;
-          border-radius: 999px;
-          border: 1px solid rgba(201,95,44,0.30);
-          background: rgba(201,95,44,0.06);
-          padding: 4px 12px;
-          color: #9F4A22;
-          font-size: 11px;
-          font-weight: 900;
-          white-space: nowrap;
-          transition: background 0.15s, border-color 0.15s;
-        }
-        .hd-demand-action:hover {
-          background: rgba(201,95,44,0.12);
-          border-color: rgba(201,95,44,0.50);
+          color: #9B8F88;
+          font-size: 12px;
+          font-weight: 500;
         }
 
 
@@ -359,15 +249,13 @@ export default async function HomePage() {
         /* ── responsive ── */
         @media (max-width: 640px) {
           .hd-home-section { padding-left: 12px; padding-right: 12px; }
-          .hd-hero { padding: 14px 12px 10px; }
-          .hd-hero-title { font-size: 26px; letter-spacing: -0.02em; }
-          .hd-title-hl { display: inline; }
-          .hd-hero-tagline { font-size: 12px; margin-top: 4px; }
-
-          .hd-demand-bar { gap: 4px 8px; }
-          .hd-demand-count { font-size: 13px; }
-          .hd-demand-label { font-size: 11px; }
-          .hd-demand-action { font-size: 10px; padding: 3px 9px; }
+          .hd-hero { padding: 24px 12px 14px; }
+          .hd-hero-title { font-size: 30px; letter-spacing: -0.025em; }
+          .hd-hero-tagline { font-size: 13px; }
+          .hd-demand-bar { gap: 3px 8px; }
+          .hd-demand-count { font-size: 14px; }
+          .hd-demand-label { font-size: 12px; }
+          .hd-demand-pill { font-size: 11px; }
           .hd-chips-row { gap: 6px; }
           .hd-chip { padding: 7px 12px; font-size: 11px; }
           .hd-close-grid { grid-template-columns: 1fr; }
@@ -389,21 +277,13 @@ export default async function HomePage() {
         {/* ── HERO ───────────────────────────────────────────────────── */}
         <section className="hd-hero" aria-label="Hero">
           <div className="hd-hero-inner">
-            <span className="hd-hero-badge">
-              <span className="hd-hero-badge-dot" aria-hidden />
-              <strong>Hubballi-Dharwad</strong>
-              <span className="hd-hero-badge-sep" aria-hidden />
-              <span>verified local support</span>
-            </span>
-
             <h1 className="hd-hero-title">
-              <span className="hd-title-top">Hubballi-Dharwad&apos;s</span>
-              <br />
+              <span className="hd-title-top">Hubballi-Dharwad&apos;s<br /></span>
               <span className="hd-title-hl">property marketplace.</span>
             </h1>
 
             <p className="hd-hero-tagline">
-              Your next property, verified before you visit.
+              Every listing personally verified before you visit.
             </p>
 
             <DemandBar
@@ -412,7 +292,6 @@ export default async function HomePage() {
               saleTotal={demand.saleTotal}
               leaseTotal={demand.leaseTotal}
             />
-
           </div>
         </section>
 
