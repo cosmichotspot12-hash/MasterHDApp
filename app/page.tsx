@@ -134,50 +134,39 @@ export default async function HomePage() {
         /* ── demand stats ── */
         .hd-demand-bar {
           display: inline-flex;
-          align-items: stretch;
-          gap: 8px;
-          margin: 28px auto 0;
+          align-items: center;
+          gap: 10px;
+          margin: 18px auto 0;
         }
         .hd-demand-stat {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 7px;
-          padding: 18px 22px 16px;
-          background: #FFFFFF;
-          border: 1px solid #EDE5DC;
-          border-top: 3px solid #EDE5DC;
-          border-radius: 14px;
-          min-width: 108px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        .hd-demand-stat:first-child {
-          border-top-color: #C95F2C;
+          display: inline-flex;
+          align-items: baseline;
+          gap: 5px;
         }
         .hd-demand-count {
           color: #111827;
-          font-size: 32px;
-          font-weight: 900;
-          letter-spacing: -0.05em;
+          font-size: 17px;
+          font-weight: 800;
+          letter-spacing: -0.03em;
           line-height: 1;
         }
         .hd-demand-plus {
           color: #C95F2C;
-          font-size: 0.48em;
-          font-weight: 900;
-          vertical-align: super;
-          letter-spacing: 0;
+          font-size: 0.8em;
+          font-weight: 800;
         }
         .hd-demand-label {
-          color: #B0A89F;
-          font-size: 10.5px;
-          font-weight: 700;
-          letter-spacing: 0.07em;
-          text-transform: uppercase;
+          color: #9B8F88;
+          font-size: 12.5px;
+          font-weight: 500;
           white-space: nowrap;
         }
         .hd-demand-div {
-          display: none;
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+          background: #CEC4BB;
+          flex-shrink: 0;
         }
 
 
@@ -268,10 +257,9 @@ export default async function HomePage() {
           .hd-hero { padding: 36px 12px 20px; }
           .hd-hero-title { font-size: 34px; letter-spacing: -0.03em; }
           .hd-hero-tagline { font-size: 14px; margin-top: 12px; }
-          .hd-demand-bar { margin-top: 20px; gap: 6px; }
-          .hd-demand-stat { padding: 14px 16px 12px; min-width: 86px; border-radius: 11px; }
-          .hd-demand-count { font-size: 24px; }
-          .hd-demand-label { font-size: 9.5px; }
+          .hd-demand-bar { margin-top: 14px; gap: 7px; }
+          .hd-demand-count { font-size: 15px; }
+          .hd-demand-label { font-size: 11.5px; }
           .hd-chips-row { gap: 6px; }
           .hd-chip { padding: 7px 12px; font-size: 11px; }
           .hd-close-grid { grid-template-columns: 1fr; }

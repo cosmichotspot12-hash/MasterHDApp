@@ -46,9 +46,9 @@ export default function DemandBar({ totalActive, rentTotal, saleTotal, leaseTota
   const { count, elRef } = useCountUp(totalActive)
 
   const extras: { value: number; label: string }[] = []
-  if (rentTotal > 0) extras.push({ value: rentTotal, label: 'Renting' })
-  if (saleTotal > 0) extras.push({ value: saleTotal, label: 'Buying' })
-  if (leaseTotal > 0) extras.push({ value: leaseTotal, label: 'Leasing' })
+  if (rentTotal > 0) extras.push({ value: rentTotal, label: 'renting' })
+  if (saleTotal > 0) extras.push({ value: saleTotal, label: 'buying' })
+  if (leaseTotal > 0) extras.push({ value: leaseTotal, label: 'leasing' })
 
   return (
     <div className="hd-demand-bar" ref={elRef}>
@@ -56,17 +56,17 @@ export default function DemandBar({ totalActive, rentTotal, saleTotal, leaseTota
         <span className="hd-demand-count" aria-live="polite">
           {count}<span className="hd-demand-plus">+</span>
         </span>
-        <span className="hd-demand-label">Active now</span>
+        <span className="hd-demand-label">active now</span>
       </div>
 
       {extras.map(({ value, label }) => (
-        <>
-          <div key={label + '-div'} className="hd-demand-div" aria-hidden />
-          <div key={label} className="hd-demand-stat">
+        <div key={label} style={{ display: 'contents' }}>
+          <div className="hd-demand-div" aria-hidden />
+          <div className="hd-demand-stat">
             <span className="hd-demand-count">{value}</span>
             <span className="hd-demand-label">{label}</span>
           </div>
-        </>
+        </div>
       ))}
     </div>
   )
