@@ -102,19 +102,19 @@ export default async function HomePage() {
 
         /* ── hero ── */
         .hd-hero {
-          padding: 36px 16px 20px;
+          padding: 56px 16px 32px;
           text-align: center;
         }
         .hd-hero-inner {
           margin: 0 auto;
-          max-width: 640px;
+          max-width: 600px;
         }
         .hd-hero-title {
           margin: 0;
-          font-size: clamp(32px, 5vw, 56px);
+          font-size: clamp(36px, 5.5vw, 62px);
           font-weight: 950;
-          line-height: 1.0;
-          letter-spacing: -0.035em;
+          line-height: 0.96;
+          letter-spacing: -0.04em;
         }
         .hd-title-top {
           color: #1C1917;
@@ -123,63 +123,57 @@ export default async function HomePage() {
           color: #B8501F;
         }
         .hd-hero-tagline {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 7px;
-          margin: 12px auto 0;
-          color: #5C4F46;
-          font-size: 13.5px;
-          font-weight: 500;
-          line-height: 1.5;
-        }
-        .hd-tagline-check {
-          flex-shrink: 0;
-          width: 16px;
-          height: 16px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          background: rgba(184,80,31,0.10);
-          color: #B8501F;
+          margin: 16px auto 0;
+          color: #6B5F58;
+          font-size: 15px;
+          font-weight: 400;
+          line-height: 1.6;
+          letter-spacing: 0.01em;
         }
 
         /* ── demand stats ── */
         .hd-demand-bar {
           display: inline-flex;
-          align-items: center;
-          gap: 20px;
-          margin: 22px auto 0;
+          align-items: stretch;
+          margin: 32px auto 0;
+          border: 1px solid #E4DAD2;
+          border-radius: 16px;
+          background: rgba(255,255,255,0.60);
+          overflow: hidden;
         }
         .hd-demand-stat {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 3px;
+          gap: 5px;
+          padding: 18px 28px;
         }
         .hd-demand-count {
           color: #111827;
-          font-size: 22px;
+          font-size: 28px;
           font-weight: 900;
-          letter-spacing: -0.03em;
+          letter-spacing: -0.045em;
           line-height: 1;
         }
         .hd-demand-plus {
           color: #B8501F;
-          font-size: 0.72em;
+          font-size: 0.55em;
+          font-weight: 900;
+          vertical-align: super;
+          letter-spacing: 0;
         }
         .hd-demand-label {
-          color: #9B8F88;
-          font-size: 10.5px;
-          font-weight: 600;
-          letter-spacing: 0.06em;
+          color: #A89F98;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.10em;
           text-transform: uppercase;
+          white-space: nowrap;
         }
         .hd-demand-div {
           width: 1px;
-          height: 30px;
-          background: #DDD5CC;
+          background: #E4DAD2;
+          align-self: stretch;
           flex-shrink: 0;
         }
 
@@ -268,13 +262,13 @@ export default async function HomePage() {
         /* ── responsive ── */
         @media (max-width: 640px) {
           .hd-home-section { padding-left: 12px; padding-right: 12px; }
-          .hd-hero { padding: 24px 12px 16px; }
-          .hd-hero-title { font-size: 30px; letter-spacing: -0.025em; }
-          .hd-hero-tagline { font-size: 13px; }
-          .hd-demand-bar { gap: 14px; }
-          .hd-demand-count { font-size: 18px; }
-          .hd-demand-label { font-size: 10px; }
-          .hd-demand-div { height: 24px; }
+          .hd-hero { padding: 36px 12px 20px; }
+          .hd-hero-title { font-size: 34px; letter-spacing: -0.03em; }
+          .hd-hero-tagline { font-size: 14px; margin-top: 12px; }
+          .hd-demand-bar { margin-top: 22px; border-radius: 12px; }
+          .hd-demand-stat { padding: 14px 18px; gap: 4px; }
+          .hd-demand-count { font-size: 22px; }
+          .hd-demand-label { font-size: 9px; letter-spacing: 0.08em; }
           .hd-chips-row { gap: 6px; }
           .hd-chip { padding: 7px 12px; font-size: 11px; }
           .hd-close-grid { grid-template-columns: 1fr; }
@@ -302,11 +296,6 @@ export default async function HomePage() {
             </h1>
 
             <p className="hd-hero-tagline">
-              <span className="hd-tagline-check" aria-hidden>
-                <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="1.5,5.5 4,8 8.5,2" />
-                </svg>
-              </span>
               Every listing personally verified before you visit.
             </p>
 

@@ -60,13 +60,13 @@ export default function DemandBar({ totalActive, rentTotal, saleTotal, leaseTota
       </div>
 
       {extras.map(({ value, label }) => (
-        <span key={label}>
-          <span className="hd-demand-div" aria-hidden />
-          <div className="hd-demand-stat">
+        <>
+          <div key={label + '-div'} className="hd-demand-div" aria-hidden />
+          <div key={label} className="hd-demand-stat">
             <span className="hd-demand-count">{value}</span>
             <span className="hd-demand-label">{label}</span>
           </div>
-        </span>
+        </>
       ))}
     </div>
   )
