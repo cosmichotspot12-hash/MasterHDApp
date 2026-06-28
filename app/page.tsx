@@ -189,21 +189,6 @@ export default async function HomePage() {
           margin: 14px auto 0;
           font-family: var(--font-outfit), sans-serif;
         }
-        .hd-demand-live {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          color: #C95F2C;
-          font-size: 12px;
-          font-weight: 700;
-        }
-        .hd-demand-dot {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: currentColor;
-          flex-shrink: 0;
-        }
         .hd-demand-sep {
           color: #C9B9A8;
           font-size: 12px;
@@ -224,6 +209,10 @@ export default async function HomePage() {
           color: #7A6E68;
           font-size: 12px;
           font-weight: 500;
+        }
+        .hd-demand-pill strong {
+          color: #111827;
+          font-weight: 800;
         }
         .hd-demand-div { display: none; }
 

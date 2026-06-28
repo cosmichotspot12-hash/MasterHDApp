@@ -47,13 +47,6 @@ export default function DemandBar({ totalActive, rentTotal, saleTotal, leaseTota
 
   return (
     <div className="hd-demand-bar" ref={elRef}>
-      <span className="hd-demand-live">
-        <span className="hd-demand-dot" aria-hidden />
-        Live demand
-      </span>
-
-      <span className="hd-demand-sep" aria-hidden>·</span>
-
       <span className="hd-demand-count" aria-live="polite">
         {count}<span className="hd-demand-plus">+</span>
       </span>
@@ -62,19 +55,19 @@ export default function DemandBar({ totalActive, rentTotal, saleTotal, leaseTota
       {rentTotal > 0 && (
         <>
           <span className="hd-demand-sep" aria-hidden>·</span>
-          <span className="hd-demand-pill">{rentTotal} rent seekers</span>
+          <span className="hd-demand-pill"><strong>{rentTotal}</strong> rent seekers</span>
         </>
       )}
       {saleTotal > 0 && (
         <>
           <span className="hd-demand-sep" aria-hidden>·</span>
-          <span className="hd-demand-pill">{saleTotal} buyers</span>
+          <span className="hd-demand-pill"><strong>{saleTotal}</strong> buyers</span>
         </>
       )}
       {leaseTotal > 0 && (
         <>
           <span className="hd-demand-sep" aria-hidden>·</span>
-          <span className="hd-demand-pill">{leaseTotal} lease seekers</span>
+          <span className="hd-demand-pill"><strong>{leaseTotal}</strong> lease seekers</span>
         </>
       )}
     </div>
