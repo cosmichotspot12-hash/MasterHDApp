@@ -156,19 +156,19 @@ export default async function HomePage() {
         .hd-title-top {
           display: block;
           font-family: var(--font-outfit), sans-serif;
-          font-size: clamp(30px, 4.5vw, 52px);
-          font-weight: 900;
-          letter-spacing: -0.03em;
-          color: #111827;
+          font-size: clamp(36px, 5.5vw, 64px);
+          font-weight: 200;
+          letter-spacing: -0.02em;
+          color: #B0A49C;
         }
         .hd-title-hl {
           display: block;
-          font-family: var(--font-script), cursive;
-          font-size: clamp(44px, 6.5vw, 76px);
-          font-weight: 700;
-          letter-spacing: 0.01em;
-          line-height: 1.15;
-          color: #C95F2C;
+          font-family: var(--font-outfit), sans-serif;
+          font-size: clamp(40px, 6vw, 72px);
+          font-weight: 900;
+          letter-spacing: -0.04em;
+          line-height: 1.0;
+          color: #111827;
         }
         .hd-hero-tagline {
           margin: 10px auto 0;
@@ -340,8 +340,8 @@ export default async function HomePage() {
         <section className={`hd-hero ${dancingScript.variable} ${outfit.variable}`} aria-label="Hero">
           <div className="hd-hero-inner">
             <h1 className="hd-hero-title">
-              <span className="hd-title-top">Hubballi-Dharwad&apos;s</span>
-              <span className="hd-title-hl">property marketplace.</span>
+              <span className="hd-title-top">Find the right</span>
+              <span className="hd-title-hl">property.</span>
             </h1>
 
             <p className="hd-hero-tagline">
