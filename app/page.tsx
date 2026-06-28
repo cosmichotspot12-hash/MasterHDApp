@@ -320,13 +320,6 @@ export default async function HomePage() {
         {/* ── HERO ───────────────────────────────────────────────────── */}
         <section className="hd-hero" aria-label="Hero">
           <div className="hd-hero-inner">
-            <div className="hd-hero-eyebrow">
-              <span className="hd-hero-eyebrow-dot" aria-hidden />
-              Hubballi-Dharwad
-              <span className="hd-hero-eyebrow-sep" aria-hidden />
-              verified local support
-            </div>
-
             <h1 className="hd-hero-title">
               <span className="hd-title-top">Hubballi-Dharwad&apos;s</span>
               <span className="hd-title-hl">property marketplace.</span>
