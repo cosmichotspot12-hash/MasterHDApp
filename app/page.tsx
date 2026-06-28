@@ -1,9 +1,24 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Dancing_Script, Outfit } from 'next/font/google'
 import DemandBar from '@/components/demand-bar'
 import PropertyCard, { PropertyCardStyles } from '@/components/property-card'
 import { getPublicListings } from '@/lib/listings-data'
 import { getPublicDemandSummary } from '@/lib/public-demand'
+
+const dancingScript = Dancing_Script({
+  subsets: ['latin'],
+  weight: ['700'],
+  variable: '--font-script',
+  display: 'swap',
+})
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  weight: ['400', '500', '700', '900'],
+  variable: '--font-outfit',
+  display: 'swap',
+})
 
 const HOME_PREVIEW_COUNT = 4
 
@@ -136,29 +151,32 @@ export default async function HomePage() {
         }
         .hd-hero-title {
           margin: 12px 0 0;
-          font-size: clamp(32px, 5vw, 58px);
-          font-weight: 950;
           line-height: 1.0;
-          letter-spacing: -0.03em;
         }
         .hd-title-top {
           display: block;
+          font-family: var(--font-outfit), sans-serif;
+          font-size: clamp(30px, 4.5vw, 52px);
+          font-weight: 900;
+          letter-spacing: -0.03em;
           color: #111827;
-          font-style: normal;
-          font-weight: 950;
         }
         .hd-title-hl {
           display: block;
+          font-family: var(--font-script), cursive;
+          font-size: clamp(44px, 6.5vw, 76px);
+          font-weight: 700;
+          letter-spacing: 0.01em;
+          line-height: 1.15;
           color: #C95F2C;
-          font-style: normal;
-          font-weight: 950;
         }
         .hd-hero-tagline {
           margin: 10px auto 0;
+          font-family: var(--font-outfit), sans-serif;
           color: #5B6472;
           font-size: 14px;
-          font-weight: 500;
-          line-height: 1.55;
+          font-weight: 400;
+          line-height: 1.6;
         }
 
         /* ── demand bar ── */
@@ -169,6 +187,7 @@ export default async function HomePage() {
           flex-wrap: wrap;
           gap: 4px 10px;
           margin: 14px auto 0;
+          font-family: var(--font-outfit), sans-serif;
         }
         .hd-demand-live {
           display: inline-flex;
@@ -318,7 +337,7 @@ export default async function HomePage() {
       <main className="min-h-screen bg-[#FFF4E6] text-slate-950">
 
         {/* ── HERO ───────────────────────────────────────────────────── */}
-        <section className="hd-hero" aria-label="Hero">
+        <section className={`hd-hero ${dancingScript.variable} ${outfit.variable}`} aria-label="Hero">
           <div className="hd-hero-inner">
             <h1 className="hd-hero-title">
               <span className="hd-title-top">Hubballi-Dharwad&apos;s</span>
