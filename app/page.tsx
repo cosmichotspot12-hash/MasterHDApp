@@ -102,32 +102,56 @@ export default async function HomePage() {
 
         /* ── hero ── */
         .hd-hero {
-          padding: 56px 16px 32px;
+          padding: 60px 16px 36px;
           text-align: center;
         }
         .hd-hero-inner {
           margin: 0 auto;
-          max-width: 600px;
+          max-width: 560px;
+        }
+        .hd-hero-eyebrow {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          color: #C95F2C;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          margin-bottom: 0;
+        }
+        .hd-hero-eyebrow::before,
+        .hd-hero-eyebrow::after {
+          content: '';
+          display: block;
+          width: 22px;
+          height: 1px;
+          background: currentColor;
+          opacity: 0.45;
         }
         .hd-hero-title {
-          margin: 0;
-          font-size: clamp(36px, 5.5vw, 62px);
-          font-weight: 950;
-          line-height: 0.96;
-          letter-spacing: -0.04em;
+          margin: 14px 0 0;
+          font-size: clamp(40px, 6vw, 68px);
+          line-height: 0.94;
+          letter-spacing: -0.045em;
         }
         .hd-title-top {
-          color: #1C1917;
+          display: block;
+          color: #6B5F58;
+          font-weight: 300;
         }
         .hd-title-hl {
-          color: #B8501F;
+          display: block;
+          color: #111827;
+          font-weight: 950;
         }
         .hd-hero-tagline {
-          margin: 16px auto 0;
-          color: #6B5F58;
-          font-size: 15px;
+          margin: 18px auto 0;
+          max-width: 380px;
+          color: #9B8F88;
+          font-size: 14px;
           font-weight: 400;
-          line-height: 1.6;
+          line-height: 1.65;
           letter-spacing: 0.01em;
         }
 
@@ -135,39 +159,42 @@ export default async function HomePage() {
         .hd-demand-bar {
           display: inline-flex;
           align-items: center;
-          gap: 10px;
-          margin: 18px auto 0;
+          gap: 0;
+          margin: 32px auto 0;
+          padding-top: 20px;
+          border-top: 1px solid #E4DAD2;
         }
         .hd-demand-stat {
-          display: inline-flex;
-          align-items: baseline;
-          gap: 5px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          padding: 0 24px;
+          border-right: 1px solid #E4DAD2;
         }
+        .hd-demand-stat:first-child { padding-left: 0; }
+        .hd-demand-stat:last-child  { border-right: none; padding-right: 0; }
         .hd-demand-count {
           color: #111827;
-          font-size: 17px;
-          font-weight: 800;
-          letter-spacing: -0.03em;
+          font-size: 24px;
+          font-weight: 900;
+          letter-spacing: -0.04em;
           line-height: 1;
         }
         .hd-demand-plus {
           color: #C95F2C;
-          font-size: 0.8em;
-          font-weight: 800;
+          font-size: 0.65em;
+          font-weight: 900;
         }
         .hd-demand-label {
-          color: #9B8F88;
-          font-size: 12.5px;
-          font-weight: 500;
+          color: #B0A89F;
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
           white-space: nowrap;
         }
-        .hd-demand-div {
-          width: 4px;
-          height: 4px;
-          border-radius: 50%;
-          background: #CEC4BB;
-          flex-shrink: 0;
-        }
+        .hd-demand-div { display: none; }
 
 
         /* ── close / cta band ── */
@@ -254,12 +281,13 @@ export default async function HomePage() {
         /* ── responsive ── */
         @media (max-width: 640px) {
           .hd-home-section { padding-left: 12px; padding-right: 12px; }
-          .hd-hero { padding: 36px 12px 20px; }
-          .hd-hero-title { font-size: 34px; letter-spacing: -0.03em; }
-          .hd-hero-tagline { font-size: 14px; margin-top: 12px; }
-          .hd-demand-bar { margin-top: 14px; gap: 7px; }
-          .hd-demand-count { font-size: 15px; }
-          .hd-demand-label { font-size: 11.5px; }
+          .hd-hero { padding: 40px 12px 24px; }
+          .hd-hero-title { font-size: 38px; letter-spacing: -0.035em; margin-top: 10px; }
+          .hd-hero-tagline { font-size: 13.5px; margin-top: 14px; }
+          .hd-demand-bar { margin-top: 24px; padding-top: 16px; }
+          .hd-demand-stat { padding: 0 16px; }
+          .hd-demand-count { font-size: 20px; }
+          .hd-demand-label { font-size: 9px; }
           .hd-chips-row { gap: 6px; }
           .hd-chip { padding: 7px 12px; font-size: 11px; }
           .hd-close-grid { grid-template-columns: 1fr; }
@@ -281,13 +309,15 @@ export default async function HomePage() {
         {/* ── HERO ───────────────────────────────────────────────────── */}
         <section className="hd-hero" aria-label="Hero">
           <div className="hd-hero-inner">
+            <div className="hd-hero-eyebrow" aria-hidden>Hubballi-Dharwad</div>
+
             <h1 className="hd-hero-title">
-              <span className="hd-title-top">Hubballi-Dharwad&apos;s<br /></span>
-              <span className="hd-title-hl">property marketplace.</span>
+              <span className="hd-title-top">Find the right</span>
+              <span className="hd-title-hl">property.</span>
             </h1>
 
             <p className="hd-hero-tagline">
-              Every listing personally verified before you visit.
+              Every listing personally visited and verified before it goes live.
             </p>
 
             <DemandBar
