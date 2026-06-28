@@ -100,10 +100,20 @@ export default async function HomePage() {
           white-space: nowrap;
         }
 
+        @keyframes hd-chip-pulse {
+          0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(201,95,44,0.5); }
+          60%       { opacity: 0.7; transform: scale(0.82); box-shadow: 0 0 0 5px rgba(201,95,44,0); }
+        }
+
         /* ── hero ── */
         .hd-hero {
-          padding: 60px 16px 36px;
+          padding: 64px 16px 40px;
           text-align: center;
+          background:
+            radial-gradient(ellipse 85% 55% at 50% 10%,
+              rgba(79,70,229,0.07) 0%,
+              rgba(201,95,44,0.05) 50%,
+              transparent 72%);
         }
         .hd-hero-inner {
           margin: 0 auto;
@@ -112,28 +122,31 @@ export default async function HomePage() {
         .hd-hero-eyebrow {
           display: inline-flex;
           align-items: center;
-          gap: 10px;
-          color: #8B4513;
+          gap: 8px;
+          background: #111827;
+          border: 1px solid rgba(255,255,255,0.09);
+          border-radius: 999px;
+          padding: 5px 14px 5px 10px;
+          color: rgba(255,255,255,0.72);
           font-size: 11px;
-          font-weight: 900;
-          letter-spacing: 0.14em;
+          font-weight: 600;
+          letter-spacing: 0.10em;
           text-transform: uppercase;
-          margin-bottom: 0;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.18);
         }
-        .hd-hero-eyebrow::before,
-        .hd-hero-eyebrow::after {
-          content: '';
-          display: block;
-          width: 22px;
-          height: 1px;
-          background: currentColor;
-          opacity: 0.5;
+        .hd-hero-eyebrow-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #C95F2C;
+          flex-shrink: 0;
+          animation: hd-chip-pulse 2.2s ease-in-out infinite;
         }
         .hd-hero-title {
-          margin: 14px 0 0;
-          font-size: clamp(40px, 6vw, 68px);
-          line-height: 0.96;
-          letter-spacing: -0.04em;
+          margin: 20px 0 0;
+          font-size: clamp(42px, 6.5vw, 72px);
+          line-height: 0.94;
+          letter-spacing: -0.045em;
         }
         .hd-title-top {
           display: block;
@@ -141,21 +154,24 @@ export default async function HomePage() {
           font-weight: 400;
           font-style: italic;
           letter-spacing: -0.02em;
+          opacity: 0.75;
         }
         .hd-title-hl {
           display: block;
-          color: #111827;
-          font-weight: 800;
+          background: linear-gradient(135deg, #111827 0%, #4F46E5 52%, #C95F2C 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          font-weight: 900;
           font-style: normal;
         }
         .hd-hero-tagline {
           margin: 18px auto 0;
-          max-width: 380px;
-          color: #9B8F88;
+          max-width: 360px;
+          color: #8A7E78;
           font-size: 14px;
           font-weight: 400;
           line-height: 1.65;
-          letter-spacing: 0.01em;
         }
 
         /* ── demand stats ── */
@@ -179,14 +195,17 @@ export default async function HomePage() {
         .hd-demand-stat:last-child  { border-right: none; padding-right: 0; }
         .hd-demand-count {
           color: #111827;
-          font-size: 24px;
+          font-size: 26px;
           font-weight: 900;
-          letter-spacing: -0.04em;
+          letter-spacing: -0.045em;
           line-height: 1;
         }
         .hd-demand-plus {
-          color: #C95F2C;
-          font-size: 0.65em;
+          background: linear-gradient(135deg, #4F46E5, #C95F2C);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          font-size: 0.62em;
           font-weight: 900;
         }
         .hd-demand-label {
@@ -312,7 +331,10 @@ export default async function HomePage() {
         {/* ── HERO ───────────────────────────────────────────────────── */}
         <section className="hd-hero" aria-label="Hero">
           <div className="hd-hero-inner">
-            <div className="hd-hero-eyebrow" aria-hidden>Hubballi-Dharwad</div>
+            <div className="hd-hero-eyebrow">
+              <span className="hd-hero-eyebrow-dot" aria-hidden />
+              Hubballi-Dharwad
+            </div>
 
             <h1 className="hd-hero-title">
               <span className="hd-title-top">Find the right</span>
