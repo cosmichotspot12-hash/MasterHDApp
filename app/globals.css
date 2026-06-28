@@ -1221,11 +1221,12 @@ tbody tr:hover {
 }
 
 .sh-brand-name {
+  font-family: var(--font-outfit), sans-serif;
   color: #111827;
-  font-size: 22px;
-  font-weight: 950;
+  font-size: 20px;
+  font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   white-space: nowrap;
 }
 
@@ -1235,11 +1236,12 @@ tbody tr:hover {
 
 .sh-brand-sub {
   display: block;
+  font-family: var(--font-outfit), sans-serif;
   margin-top: 5px;
   color: #7A6E68;
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
   white-space: nowrap;
 }
