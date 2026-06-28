@@ -136,9 +136,9 @@ export default async function HomePage() {
           display: inline-flex;
           align-items: stretch;
           margin: 32px auto 0;
-          border: 1px solid #E4DAD2;
-          border-radius: 16px;
-          background: rgba(255,255,255,0.60);
+          border-radius: 18px;
+          background: #111827;
+          box-shadow: inset 0 1px 0 rgba(201,95,44,0.55), 0 8px 32px rgba(17,24,39,0.14);
           overflow: hidden;
         }
         .hd-demand-stat {
@@ -146,24 +146,24 @@ export default async function HomePage() {
           flex-direction: column;
           align-items: center;
           gap: 5px;
-          padding: 18px 28px;
+          padding: 20px 32px;
         }
         .hd-demand-count {
-          color: #111827;
-          font-size: 28px;
+          color: #FFFFFF;
+          font-size: 30px;
           font-weight: 900;
-          letter-spacing: -0.045em;
+          letter-spacing: -0.05em;
           line-height: 1;
         }
         .hd-demand-plus {
-          color: #B8501F;
-          font-size: 0.55em;
+          color: #E08050;
+          font-size: 0.52em;
           font-weight: 900;
           vertical-align: super;
           letter-spacing: 0;
         }
         .hd-demand-label {
-          color: #A89F98;
+          color: rgba(255,255,255,0.28);
           font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.10em;
@@ -172,7 +172,7 @@ export default async function HomePage() {
         }
         .hd-demand-div {
           width: 1px;
-          background: #E4DAD2;
+          background: rgba(255,255,255,0.07);
           align-self: stretch;
           flex-shrink: 0;
         }
@@ -265,9 +265,9 @@ export default async function HomePage() {
           .hd-hero { padding: 36px 12px 20px; }
           .hd-hero-title { font-size: 34px; letter-spacing: -0.03em; }
           .hd-hero-tagline { font-size: 14px; margin-top: 12px; }
-          .hd-demand-bar { margin-top: 22px; border-radius: 12px; }
-          .hd-demand-stat { padding: 14px 18px; gap: 4px; }
-          .hd-demand-count { font-size: 22px; }
+          .hd-demand-bar { margin-top: 22px; border-radius: 14px; }
+          .hd-demand-stat { padding: 16px 20px; gap: 4px; }
+          .hd-demand-count { font-size: 24px; }
           .hd-demand-label { font-size: 9px; letter-spacing: 0.08em; }
           .hd-chips-row { gap: 6px; }
           .hd-chip { padding: 7px 12px; font-size: 11px; }
