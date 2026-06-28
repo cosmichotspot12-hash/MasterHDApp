@@ -45,27 +45,38 @@ function useCountUp(target: number, duration = 1600) {
 export default function DemandBar({ totalActive, rentTotal, saleTotal, leaseTotal }: Props) {
   const { count, elRef } = useCountUp(totalActive)
 
-  const stats: { value: number | string; label: string }[] = [
-    { value: count, label: 'Active now' },
-  ]
-  if (rentTotal > 0) stats.push({ value: rentTotal, label: 'Renting' })
-  if (saleTotal > 0) stats.push({ value: saleTotal, label: 'Buying' })
-  if (leaseTotal > 0) stats.push({ value: leaseTotal, label: 'Leasing' })
-
   return (
     <div className="hd-demand-bar" ref={elRef}>
-      {stats.map(({ value, label }, i) => (
-        <div
-          key={label}
-          className="hd-demand-stat"
-          aria-live={i === 0 ? 'polite' : undefined}
-        >
-          <span className="hd-demand-count">
-            {value}{i === 0 && <span className="hd-demand-plus">+</span>}
-          </span>
-          <span className="hd-demand-label">{label}</span>
-        </div>
-      ))}
+      <span className="hd-demand-live">
+        <span className="hd-demand-dot" aria-hidden />
+        Live demand
+      </span>
+
+      <span className="hd-demand-sep" aria-hidden>·</span>
+
+      <span className="hd-demand-count" aria-live="polite">
+        {count}<span className="hd-demand-plus">+</span>
+      </span>
+      <span className="hd-demand-label">active requirements</span>
+
+      {rentTotal > 0 && (
+        <>
+          <span className="hd-demand-sep" aria-hidden>·</span>
+          <span className="hd-demand-pill">{rentTotal} rent seekers</span>
+        </>
+      )}
+      {saleTotal > 0 && (
+        <>
+          <span className="hd-demand-sep" aria-hidden>·</span>
+          <span className="hd-demand-pill">{saleTotal} buyers</span>
+        </>
+      )}
+      {leaseTotal > 0 && (
+        <>
+          <span className="hd-demand-sep" aria-hidden>·</span>
+          <span className="hd-demand-pill">{leaseTotal} lease seekers</span>
+        </>
+      )}
     </div>
   )
 }

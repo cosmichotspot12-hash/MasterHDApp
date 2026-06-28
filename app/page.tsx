@@ -100,121 +100,111 @@ export default async function HomePage() {
           white-space: nowrap;
         }
 
-        @keyframes hd-chip-pulse {
-          0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(201,95,44,0.5); }
-          60%       { opacity: 0.7; transform: scale(0.82); box-shadow: 0 0 0 5px rgba(201,95,44,0); }
-        }
-
         /* ── hero ── */
         .hd-hero {
-          padding: 64px 16px 40px;
+          padding: 48px 16px 28px;
           text-align: center;
-          background:
-            radial-gradient(ellipse 85% 55% at 50% 10%,
-              rgba(79,70,229,0.07) 0%,
-              rgba(201,95,44,0.05) 50%,
-              transparent 72%);
         }
         .hd-hero-inner {
           margin: 0 auto;
-          max-width: 560px;
+          max-width: 680px;
         }
         .hd-hero-eyebrow {
           display: inline-flex;
           align-items: center;
           gap: 8px;
           background: #111827;
-          border: 1px solid rgba(255,255,255,0.09);
           border-radius: 999px;
-          padding: 5px 14px 5px 10px;
-          color: rgba(255,255,255,0.72);
-          font-size: 11px;
+          padding: 6px 14px 6px 10px;
+          color: rgba(255,255,255,0.75);
+          font-size: 11.5px;
           font-weight: 600;
-          letter-spacing: 0.10em;
-          text-transform: uppercase;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+          letter-spacing: 0.02em;
         }
         .hd-hero-eyebrow-dot {
-          width: 6px;
-          height: 6px;
+          width: 7px;
+          height: 7px;
           border-radius: 50%;
           background: #C95F2C;
           flex-shrink: 0;
-          animation: hd-chip-pulse 2.2s ease-in-out infinite;
+        }
+        .hd-hero-eyebrow-sep {
+          width: 1px;
+          height: 13px;
+          background: rgba(255,255,255,0.18);
+          flex-shrink: 0;
         }
         .hd-hero-title {
-          margin: 20px 0 0;
-          font-size: clamp(42px, 6.5vw, 72px);
-          line-height: 0.94;
-          letter-spacing: -0.045em;
+          margin: 12px 0 0;
+          font-size: clamp(32px, 5vw, 58px);
+          font-weight: 950;
+          line-height: 1.0;
+          letter-spacing: -0.03em;
         }
         .hd-title-top {
           display: block;
-          color: #3D2E25;
-          font-weight: 400;
-          font-style: italic;
-          letter-spacing: -0.02em;
-          opacity: 0.75;
+          color: #111827;
+          font-style: normal;
+          font-weight: 950;
         }
         .hd-title-hl {
           display: block;
-          background: linear-gradient(135deg, #111827 0%, #4F46E5 52%, #C95F2C 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          font-weight: 900;
+          color: #C95F2C;
           font-style: normal;
+          font-weight: 950;
         }
         .hd-hero-tagline {
-          margin: 18px auto 0;
-          max-width: 360px;
-          color: #8A7E78;
+          margin: 10px auto 0;
+          color: #5B6472;
           font-size: 14px;
-          font-weight: 400;
-          line-height: 1.65;
+          font-weight: 500;
+          line-height: 1.55;
         }
 
-        /* ── demand stats ── */
+        /* ── demand bar ── */
         .hd-demand-bar {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 4px 10px;
+          margin: 14px auto 0;
+        }
+        .hd-demand-live {
           display: inline-flex;
           align-items: center;
-          gap: 0;
-          margin: 32px auto 0;
-          padding-top: 20px;
-          border-top: 1px solid #E4DAD2;
+          gap: 6px;
+          color: #C95F2C;
+          font-size: 12px;
+          font-weight: 700;
         }
-        .hd-demand-stat {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-          padding: 0 24px;
-          border-right: 1px solid #E4DAD2;
+        .hd-demand-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: currentColor;
+          flex-shrink: 0;
         }
-        .hd-demand-stat:first-child { padding-left: 0; }
-        .hd-demand-stat:last-child  { border-right: none; padding-right: 0; }
+        .hd-demand-sep {
+          color: #C9B9A8;
+          font-size: 12px;
+        }
         .hd-demand-count {
           color: #111827;
-          font-size: 26px;
-          font-weight: 900;
-          letter-spacing: -0.045em;
-          line-height: 1;
+          font-size: 14px;
+          font-weight: 800;
+          letter-spacing: -0.02em;
         }
-        .hd-demand-plus {
-          background: linear-gradient(135deg, #4F46E5, #C95F2C);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          font-size: 0.62em;
-          font-weight: 900;
-        }
+        .hd-demand-plus { color: #C95F2C; }
         .hd-demand-label {
-          color: #B0A89F;
-          font-size: 10px;
-          font-weight: 600;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          white-space: nowrap;
+          color: #5B6472;
+          font-size: 12px;
+          font-weight: 500;
+        }
+        .hd-demand-pill {
+          color: #7A6E68;
+          font-size: 12px;
+          font-weight: 500;
         }
         .hd-demand-div { display: none; }
 
@@ -303,13 +293,12 @@ export default async function HomePage() {
         /* ── responsive ── */
         @media (max-width: 640px) {
           .hd-home-section { padding-left: 12px; padding-right: 12px; }
-          .hd-hero { padding: 40px 12px 24px; }
-          .hd-hero-title { font-size: 38px; letter-spacing: -0.035em; margin-top: 10px; }
-          .hd-hero-tagline { font-size: 13.5px; margin-top: 14px; }
-          .hd-demand-bar { margin-top: 24px; padding-top: 16px; }
-          .hd-demand-stat { padding: 0 16px; }
-          .hd-demand-count { font-size: 20px; }
-          .hd-demand-label { font-size: 9px; }
+          .hd-hero { padding: 32px 12px 18px; }
+          .hd-hero-title { font-size: 28px; letter-spacing: -0.02em; }
+          .hd-hero-tagline { font-size: 13px; margin-top: 8px; }
+          .hd-demand-bar { gap: 3px 8px; }
+          .hd-demand-count { font-size: 13px; }
+          .hd-demand-label, .hd-demand-pill { font-size: 11px; }
           .hd-chips-row { gap: 6px; }
           .hd-chip { padding: 7px 12px; font-size: 11px; }
           .hd-close-grid { grid-template-columns: 1fr; }
@@ -334,15 +323,17 @@ export default async function HomePage() {
             <div className="hd-hero-eyebrow">
               <span className="hd-hero-eyebrow-dot" aria-hidden />
               Hubballi-Dharwad
+              <span className="hd-hero-eyebrow-sep" aria-hidden />
+              verified local support
             </div>
 
             <h1 className="hd-hero-title">
-              <span className="hd-title-top">Find the right</span>
-              <span className="hd-title-hl">property.</span>
+              <span className="hd-title-top">Hubballi-Dharwad&apos;s</span>
+              <span className="hd-title-hl">property marketplace.</span>
             </h1>
 
             <p className="hd-hero-tagline">
-              Every listing personally visited and verified before it goes live.
+              Your next property, verified before you visit.
             </p>
 
             <DemandBar
