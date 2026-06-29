@@ -58,6 +58,15 @@ export function hasRecurringPrice(value?: string | null) {
   return value === 'rent'
 }
 
+export function furnishingLabel(value?: string | null) {
+  if (!value) return ''
+  if (value === 'furnished') return 'Fully Furnished'
+  if (value === 'semi_furnished') return 'Semi-Furnished'
+  if (value === 'unfurnished') return 'Unfurnished'
+  if (value === 'na') return 'Not Applicable'
+  return value.replace(/_/g, ' ')
+}
+
 export function hasRentalPreferences(value?: string | null) {
   return value === 'rent' || value === 'lease'
 }

@@ -6,6 +6,7 @@ import StatusUpdater from '@/app/admin/owner-submissions/StatusUpdater'
 import SourceUpdater from '@/app/admin/owner-submissions/SourceUpdater'
 import DeleteButton from '@/app/admin/listings/DeleteButton'
 import {
+  furnishingLabel,
   hasRecurringPrice,
   listingTypeClosedLabel,
   listingTypeLabel,
@@ -229,7 +230,7 @@ function AdminPropertyCard({
         <h2 className="line-clamp-2 text-[13px] font-extrabold leading-tight text-slate-950">{listing.title}</h2>
         <div className="flex flex-wrap gap-1 text-[10px] font-semibold text-slate-600">
           <span className="max-w-full truncate rounded-full bg-orange-50 px-1.5 py-0.5">{formatLabel(listing.property_category)}</span>
-          {listing.furnishing && <span className="max-w-full truncate rounded-full bg-orange-50 px-1.5 py-0.5">{formatLabel(listing.furnishing)}</span>}
+          {listing.furnishing && <span className="max-w-full truncate rounded-full bg-orange-50 px-1.5 py-0.5">{furnishingLabel(listing.furnishing)}</span>}
         </div>
         <div className="mt-auto flex items-end justify-between gap-2">
           <p className="min-w-0 truncate text-sm font-black text-slate-950 sm:text-[15px]">{formatPrice(listing.price)}{recurringPrice && <span className="text-[10px] font-semibold text-slate-500">/mo</span>}</p>
@@ -435,7 +436,7 @@ export function PropertyWorkspace({
           <div className="mt-4 grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             <DetailItem label="Category" value={formatLabel(listing.property_category)} />
             <DetailItem label="BHK" value={listing.bhk_count ? listing.bhk_count + ' BHK' : 'Not set'} />
-            <DetailItem label="Furnishing" value={formatLabel(listing.furnishing)} />
+            <DetailItem label="Furnishing" value={furnishingLabel(listing.furnishing)} />
             <DetailItem label="YouTube" value={listing.youtube_url ? 'Available' : 'Not added'} />
           </div>
           <div className="mt-5">

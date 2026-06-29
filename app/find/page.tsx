@@ -208,7 +208,7 @@ export default function FindPage() {
                 <select value={form.furnishing_preference} onChange={e => set('furnishing_preference', e.target.value)}
                   className="pf-input">
                   <option value="any">Any</option>
-                  <option value="furnished">Furnished</option>
+                  <option value="furnished">Fully Furnished</option>
                   <option value="semi_furnished">Semi-Furnished</option>
                   <option value="unfurnished">Unfurnished</option>
                 </select>
