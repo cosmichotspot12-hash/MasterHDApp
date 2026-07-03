@@ -354,7 +354,7 @@ export default async function PropertyDetailPage({
               <div className="mt-5 grid gap-3">
                 <Link
                   href={'/visit?listing_id=' + listing.id + '&title=' + encodeURIComponent(listing.title)}
-                  className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#9f4a22] px-4 text-sm font-bold text-white hover:bg-[#c95f2c]"
+                  className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#4F46E5] px-4 text-sm font-bold text-white hover:bg-[#4338CA]"
                 >
                   <span data-i18n="action_request_visit">Request Visit</span>
                 </Link>
@@ -387,7 +387,7 @@ export default async function PropertyDetailPage({
       <div className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-3 gap-2 border-t border-[#dedbd2] bg-white/95 p-2 shadow-lg backdrop-blur lg:hidden">
         <Link
           href={'/visit?listing_id=' + listing.id + '&title=' + encodeURIComponent(listing.title)}
-          className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#9f4a22] px-2 text-center text-xs font-bold text-white"
+          className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#4F46E5] px-2 text-center text-xs font-bold text-white"
         >
           <span data-i18n="action_request_visit">Request Visit</span>
         </Link>

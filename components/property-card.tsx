@@ -304,9 +304,9 @@ export function PropertyCardStyles() {
           align-items: center;
           justify-content: center;
           min-height: 40px;
-          border: 1px solid var(--brand);
+          border: 1px solid #4F46E5;
           border-radius: 8px;
-          background: var(--brand);
+          background: #4F46E5;
           color: #fff;
           padding: 8px 12px;
           font-size: 13px;
@@ -316,8 +316,8 @@ export function PropertyCardStyles() {
         }
 
         .pc-visit-btn:hover {
-          border-color: var(--brand-dark);
-          background: var(--brand-dark);
+          border-color: #4338CA;
+          background: #4338CA;
           transform: translateY(-1px);
         }
 
@@ -405,8 +405,8 @@ export function PropertyCardStyles() {
             min-height: 36px;
             padding: 7px 10px;
             font-size: 12px;
-            border-color: var(--brand);
-            background: var(--brand);
+            border-color: #4F46E5;
+            background: #4F46E5;
           }
 
           .pc-closed-note {
