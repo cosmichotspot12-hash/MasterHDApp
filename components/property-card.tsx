@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import {
+  furnishingLabel,
   hasRecurringPrice,
   listingTypeClosedLabel,
   listingTypeI18nKey,
@@ -485,7 +486,7 @@ export default function PropertyCard({ listing }: { listing: PropertyCardListing
         <div className="pc-info-row">
           <span>{category}</span>
           {listing.bhk_count && <span>{listing.bhk_count} BHK</span>}
-          {listing.furnishing && <span>{listing.furnishing.replace('_', ' ')}</span>}
+          {listing.furnishing && <span>{furnishingLabel(listing.furnishing)}</span>}
         </div>
         <p className="pc-price">
           {formatPrice(listing)}

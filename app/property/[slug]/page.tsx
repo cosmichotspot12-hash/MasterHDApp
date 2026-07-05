@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPublicListingBySlug } from '@/lib/listings-data'
-import { hasRecurringPrice, listingTypeForI18nKey, listingTypeForLabel } from '@/lib/listing-types'
+import { furnishingLabel, hasRecurringPrice, listingTypeForI18nKey, listingTypeForLabel } from '@/lib/listing-types'
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ''
 
@@ -153,7 +153,7 @@ export default async function PropertyDetailPage({
     listing.property_category && { label: 'Type', value: listing.property_category.replace(/_/g, ' ') },
     listing.bhk_count && { label: 'BHK', value: listing.bhk_count + ' BHK' },
     listing.bathrooms && { label: 'Bathrooms', value: listing.bathrooms },
-    listing.furnishing && { label: 'Furnishing', value: listing.furnishing.replace(/_/g, ' ') },
+    listing.furnishing && { label: 'Furnishing', value: furnishingLabel(listing.furnishing) },
     listing.facing && { label: 'Facing', value: listing.facing },
     listing.water_supply && { label: 'Water Supply', value: listing.water_supply },
     listing.property_floor && {
