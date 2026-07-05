@@ -515,6 +515,39 @@ export default async function PropertiesPage({
           margin-top: 26px;
         }
 
+        .properties-more-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 7px;
+          min-height: 44px;
+          border: 1.5px solid var(--brand);
+          border-radius: 999px;
+          background: #fff;
+          padding: 10px 26px;
+          color: var(--brand);
+          font-size: 14px;
+          font-weight: 900;
+          text-decoration: none;
+          transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .properties-more-btn::after {
+          content: '';
+          width: 8px;
+          height: 8px;
+          border-right: 2px solid currentColor;
+          border-bottom: 2px solid currentColor;
+          transform: translateY(-1px) rotate(45deg);
+        }
+
+        .properties-more-btn:hover {
+          background: var(--brand);
+          color: #fff;
+          transform: translateY(-1px);
+          box-shadow: 0 8px 20px rgba(29,158,117,0.28);
+        }
+
         @media (max-width: 980px) {
           .properties-toolbar {
             grid-template-columns: minmax(210px, 0.8fr) minmax(0, 1.4fr);
@@ -692,9 +725,10 @@ export default async function PropertiesPage({
                   <div className="properties-more">
                     <Link
                       href={propertiesHref({ view, type, bhk, category, locality, page: page + 1 })}
-                      className="properties-clear"
+                      className="properties-more-btn"
+                      scroll={false}
                     >
-                      Show more properties
+                      Show more
                     </Link>
                   </div>
                 )}

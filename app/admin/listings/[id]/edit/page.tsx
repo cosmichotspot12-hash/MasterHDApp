@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { getErrorMessage } from '@/lib/api-errors'
+import { compressImage } from '@/lib/compress-image'
 import { hasRentalPreferences, hasRecurringPrice } from '@/lib/listing-types'
 import { supabase } from '@/lib/supabase'
 
@@ -146,13 +147,14 @@ export default function EditListingPage() {
     setError('')
 
     try {
-      // Upload new photos
+      // Compress + upload new photos
       const newPhotoUrls: string[] = []
       for (const photo of photos) {
-        const fileName = `${Date.now()}-${photo.name}`
+        const compressed = await compressImage(photo)
+        const fileName = `${Date.now()}-${compressed.name}`
         const { error: uploadError } = await supabase.storage
           .from('property-photos')
-          .upload(fileName, photo)
+          .upload(fileName, compressed)
         if (uploadError) throw uploadError
         const { data: urlData } = supabase.storage
           .from('property-photos')

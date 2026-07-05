@@ -171,50 +171,66 @@ export default async function HomePage() {
           color: #C95F2C;
         }
         .hd-hero-tagline {
-          margin: 10px auto 0;
+          margin: 12px auto 0;
+          max-width: 520px;
           font-family: var(--font-outfit), sans-serif;
           color: #5B6472;
-          font-size: 14px;
-          font-weight: 400;
-          line-height: 1.6;
+          font-size: 15px;
+          font-weight: 500;
+          line-height: 1.55;
         }
 
-        /* ── demand bar ── */
+        /* ── stat cards ── */
         .hd-demand-bar {
           display: flex;
-          align-items: center;
+          align-items: stretch;
           justify-content: center;
           flex-wrap: wrap;
-          gap: 4px 10px;
-          margin: 14px auto 0;
+          gap: 10px;
+          margin: 22px auto 0;
           font-family: var(--font-outfit), sans-serif;
         }
-        .hd-demand-sep {
-          color: #C9B9A8;
-          font-size: 12px;
+        .hd-stat {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-width: 118px;
+          border: 1px solid #EFE2D4;
+          border-radius: 14px;
+          background: rgba(255,255,255,0.7);
+          padding: 12px 18px;
+          box-shadow: 0 4px 14px rgba(58,46,40,0.05);
         }
-        .hd-demand-count {
+        .hd-stat-primary {
+          border-color: #F1CBB4;
+          background: linear-gradient(180deg, #FFF4EC 0%, #FFEFE3 100%);
+        }
+        .hd-stat-value {
+          display: inline-flex;
+          align-items: baseline;
           color: #111827;
-          font-size: 14px;
-          font-weight: 800;
-          letter-spacing: -0.02em;
+          font-size: 26px;
+          font-weight: 900;
+          line-height: 1;
+          letter-spacing: -0.03em;
+          font-variant-numeric: tabular-nums;
         }
-        .hd-demand-plus { color: #C95F2C; }
-        .hd-demand-label {
-          color: #5B6472;
-          font-size: 12px;
-          font-weight: 500;
+        .hd-stat-primary .hd-stat-value { color: #B24A1F; }
+        .hd-stat-plus {
+          margin-left: 1px;
+          color: #C95F2C;
+          font-size: 20px;
+          font-weight: 900;
         }
-        .hd-demand-pill {
-          color: #7A6E68;
-          font-size: 12px;
-          font-weight: 500;
+        .hd-stat-label {
+          margin-top: 5px;
+          color: #6B6259;
+          font-size: 11.5px;
+          font-weight: 600;
+          letter-spacing: 0.01em;
+          text-transform: uppercase;
         }
-        .hd-demand-pill strong {
-          color: #111827;
-          font-weight: 800;
-        }
-        .hd-demand-div { display: none; }
 
 
         /* ── close / cta band ── */
@@ -304,9 +320,11 @@ export default async function HomePage() {
           .hd-hero { padding: 32px 12px 18px; }
           .hd-hero-title { font-size: 28px; letter-spacing: -0.02em; }
           .hd-hero-tagline { font-size: 13px; margin-top: 8px; }
-          .hd-demand-bar { gap: 3px 8px; }
-          .hd-demand-count { font-size: 13px; }
-          .hd-demand-label, .hd-demand-pill { font-size: 11px; }
+          .hd-demand-bar { gap: 8px; margin-top: 18px; }
+          .hd-stat { min-width: 0; flex: 1 1 0; padding: 10px 8px; border-radius: 12px; }
+          .hd-stat-value { font-size: 21px; }
+          .hd-stat-plus { font-size: 16px; }
+          .hd-stat-label { font-size: 9.5px; margin-top: 4px; }
           .hd-chips-row { gap: 6px; }
           .hd-chip { padding: 7px 12px; font-size: 11px; }
           .hd-close-grid { grid-template-columns: 1fr; }
@@ -334,7 +352,7 @@ export default async function HomePage() {
             </h1>
 
             <p className="hd-hero-tagline">
-              Your next property, verified before you visit.
+              Every home personally visited and verified &mdash; so you skip the fakes and see only what&apos;s real.
             </p>
 
             <DemandBar

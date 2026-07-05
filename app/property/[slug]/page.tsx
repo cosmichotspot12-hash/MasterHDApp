@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPublicListingBySlug } from '@/lib/listings-data'
 import { hasRecurringPrice, listingTypeForI18nKey, listingTypeForLabel } from '@/lib/listing-types'
-
-/* eslint-disable @next/next/no-img-element */
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ''
 
@@ -182,24 +181,29 @@ export default async function PropertyDetailPage({
           </svg>
           All properties
         </Link>
-        <div className="grid gap-4 grid-cols-1 md:gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-6">
-          <main className="min-w-0 space-y-5">
+        <div className="grid gap-3 grid-cols-1 md:gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-6">
+          <main className="min-w-0 space-y-3 md:space-y-5">
             {listing.photos && listing.photos.length > 0 && (
               <section className="overflow-hidden rounded-lg border border-[#dedbd2] bg-white">
-                <div className="aspect-[16/10] overflow-hidden bg-[#fbf1e4]">
-                  <img
+                <div className="relative aspect-[16/10] overflow-hidden bg-[#fbf1e4]">
+                  <Image
                     src={listing.photos[0]}
                     alt={listing.title}
-                    className="h-full w-full object-cover"
+                    fill
+                    preload
+                    sizes="(max-width: 1024px) 100vw, 60vw"
+                    className="object-cover"
                   />
                 </div>
                 {listing.photos.length > 1 && (
                   <div className="scrollbar-hide flex gap-2 overflow-x-auto border-t border-[#dedbd2] bg-white p-2 sm:p-3">
                     {listing.photos.slice(1).map((photo: string, i: number) => (
-                      <img
+                      <Image
                         key={i}
                         src={photo}
                         alt={'Property photo ' + (i + 2)}
+                        width={224}
+                        height={160}
                         className="h-16 w-24 flex-shrink-0 rounded-md border border-[#dedbd2] object-cover sm:h-20 sm:w-28"
                       />
                     ))}
@@ -208,31 +212,29 @@ export default async function PropertyDetailPage({
               </section>
             )}
 
-            <section className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <section className="rounded-lg border border-[#dedbd2] bg-white p-3.5 sm:p-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <div className="min-w-0">
-                  <div className="mb-3 flex flex-wrap gap-2">
-                    <span className="rounded-full bg-[#fff0e2] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#9f4a22]" data-i18n={listingTypeForI18nKey(listing.listing_type)}>
+                  <div className="mb-2 flex flex-wrap gap-1.5 sm:mb-3 sm:gap-2">
+                    <span className="rounded-full bg-[#fff0e2] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-[#9f4a22] sm:px-3 sm:text-xs" data-i18n={listingTypeForI18nKey(listing.listing_type)}>
                       {listingTypeForLabel(listing.listing_type)}
                     </span>
                     {listing.negotiable && (
-                      <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-blue-700">
+                      <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-blue-700 sm:px-3 sm:text-xs">
                         Negotiable
                       </span>
                     )}
                   </div>
-                  <h1 className="text-2xl font-black leading-tight text-[#20201d] sm:text-3xl lg:text-4xl">
+                  <h1 className="text-xl font-black leading-tight text-[#20201d] sm:text-3xl lg:text-4xl">
                     {listing.title}
                   </h1>
-                  <p className="mt-2 text-sm font-medium text-gray-600 sm:text-base">
+                  <p className="mt-1.5 text-sm font-medium text-gray-600 sm:mt-2 sm:text-base">
                     {listing.locality}
                     {listing.city ? ', ' + listing.city : ''}
+                    {listing.landmark ? ' · Near ' + listing.landmark : ''}
                   </p>
-                  {listing.landmark && (
-                    <p className="mt-1 text-sm text-gray-500">Near {listing.landmark}</p>
-                  )}
                 </div>
-                <div className="shrink-0 rounded-lg bg-[#fff9f1] p-4 sm:min-w-48 sm:text-right">
+                <div className="flex shrink-0 items-baseline gap-2 border-t border-[#f0e6dc] pt-3 sm:min-w-48 sm:flex-col sm:items-end sm:gap-1 sm:rounded-lg sm:border-0 sm:bg-[#fff9f1] sm:p-4 sm:pt-4 sm:text-right">
                   <p className="text-2xl font-black text-[#9f4a22] sm:text-3xl">
                     {formatDisplayPrice(listing.listing_type, listing.price)}
                     {hasRecurringPrice(listing.listing_type) && (
@@ -240,7 +242,7 @@ export default async function PropertyDetailPage({
                     )}
                   </p>
                   {listing.listing_type === 'rent' && listing.deposit_amount && (
-                    <p className="mt-1 text-sm font-medium text-gray-600">
+                    <p className="text-sm font-medium text-gray-600">
                       Deposit: {formatINR(listing.deposit_amount)}
                     </p>
                   )}
@@ -250,13 +252,13 @@ export default async function PropertyDetailPage({
 
             <section className="grid gap-4 grid-cols-1 md:gap-5 xl:grid-cols-[.95fr_1.05fr]">
               {detailItems.length > 0 && (
-                <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
-                  <h2 className="mb-4 text-lg font-black text-[#20201d]">Property Details</h2>
-                  <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                <div className="rounded-lg border border-[#dedbd2] bg-white p-3.5 sm:p-6">
+                  <h2 className="mb-2.5 text-base font-black text-[#20201d] sm:mb-4 sm:text-lg">Property Details</h2>
+                  <div className="grid grid-cols-2 gap-2 text-sm sm:gap-3">
                     {detailItems.map((item) => (
-                      <div key={item.label} className="rounded-md bg-[#fffaf4] p-3">
-                        <p className="text-xs font-bold uppercase tracking-wide text-gray-400">{item.label}</p>
-                        <p className="mt-1 font-bold capitalize text-gray-800">{item.value}</p>
+                      <div key={item.label} className="rounded-md bg-[#fffaf4] p-2.5 sm:p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 sm:text-xs">{item.label}</p>
+                        <p className="mt-0.5 font-bold capitalize text-gray-800 sm:mt-1">{item.value}</p>
                       </div>
                     ))}
                   </div>
@@ -264,18 +266,18 @@ export default async function PropertyDetailPage({
               )}
 
               {listing.description && (
-                <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
-                  <h2 className="mb-3 text-lg font-black text-[#20201d]">Description</h2>
-                  <p className="text-sm leading-7 text-gray-700 sm:text-base">{listing.description}</p>
+                <div className="rounded-lg border border-[#dedbd2] bg-white p-3.5 sm:p-6">
+                  <h2 className="mb-2 text-base font-black text-[#20201d] sm:mb-3 sm:text-lg">Description</h2>
+                  <p className="text-sm leading-6 text-gray-700 sm:leading-7 sm:text-base">{listing.description}</p>
                 </div>
               )}
             </section>
 
             {videoEmbed && (
               <section className="rounded-lg border border-[#dedbd2] bg-white p-3 sm:p-4">
-                <div className="mb-3 flex items-center justify-between gap-3 px-1">
-                  <h2 className="text-lg font-black text-[#20201d]">Video Tour</h2>
-                  <span className="text-xs font-bold uppercase tracking-wide text-[#9f4a22]">Watch before visiting</span>
+                <div className="mb-2.5 flex items-center justify-between gap-3 px-1 sm:mb-3">
+                  <h2 className="text-base font-black text-[#20201d] sm:text-lg">Video Tour</h2>
+                  <span className="text-[11px] font-bold uppercase tracking-wide text-[#9f4a22] sm:text-xs">Watch before visiting</span>
                 </div>
                 <div className="overflow-hidden rounded-md bg-black">
                   <div className={videoEmbed.provider === 'instagram' ? 'relative min-h-[560px] sm:min-h-[680px]' : 'relative aspect-video'}>
@@ -291,15 +293,15 @@ export default async function PropertyDetailPage({
               </section>
             )}
 
-            <section className="grid gap-4 grid-cols-1 md:gap-5 lg:grid-cols-2">
+            <section className="grid gap-3 grid-cols-1 md:gap-5 lg:grid-cols-2">
               {(listing.listing_type === 'rent' || listing.listing_type === 'lease') && preferenceItems.length > 0 && (
-                <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
-                  <h2 className="mb-4 text-lg font-black text-[#20201d]">Preferences</h2>
-                  <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                <div className="rounded-lg border border-[#dedbd2] bg-white p-3.5 sm:p-6">
+                  <h2 className="mb-2.5 text-base font-black text-[#20201d] sm:mb-4 sm:text-lg">Preferences</h2>
+                  <div className="grid grid-cols-2 gap-2 text-sm sm:gap-3">
                     {preferenceItems.map((item) => (
-                      <div key={item.label} className="rounded-md bg-[#fffaf4] p-3">
-                        <p className="text-xs font-bold uppercase tracking-wide text-gray-400">{item.label}</p>
-                        <p className="mt-1 font-bold capitalize text-gray-800">{item.value}</p>
+                      <div key={item.label} className="rounded-md bg-[#fffaf4] p-2.5 sm:p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 sm:text-xs">{item.label}</p>
+                        <p className="mt-0.5 font-bold capitalize text-gray-800 sm:mt-1">{item.value}</p>
                       </div>
                     ))}
                   </div>
@@ -307,11 +309,11 @@ export default async function PropertyDetailPage({
               )}
 
               {amenities.length > 0 && (
-                <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
-                  <h2 className="mb-4 text-lg font-black text-[#20201d]">Amenities</h2>
-                  <div className="flex flex-wrap gap-2">
+                <div className="rounded-lg border border-[#dedbd2] bg-white p-3.5 sm:p-6">
+                  <h2 className="mb-2.5 text-base font-black text-[#20201d] sm:mb-4 sm:text-lg">Amenities</h2>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {amenities.map((a) => (
-                      <span key={a} className="rounded-full border border-[#e8d5c8] bg-[#fff4ec] px-3 py-1 text-xs font-bold text-[#9f4a22]">
+                      <span key={a} className="rounded-full border border-[#e8d5c8] bg-[#fff4ec] px-2.5 py-1 text-[11px] font-bold text-[#9f4a22] sm:px-3 sm:text-xs">
                         {a}
                       </span>
                     ))}
@@ -321,17 +323,17 @@ export default async function PropertyDetailPage({
             </section>
 
             {(listing.nearby_places || listing.google_maps_url) && (
-              <section className="grid gap-4 grid-cols-1 md:gap-5 lg:grid-cols-2">
+              <section className="grid gap-3 grid-cols-1 md:gap-5 lg:grid-cols-2">
                 {listing.nearby_places && (
-                  <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
-                    <h2 className="mb-3 text-lg font-black text-[#20201d]">Nearby Places</h2>
-                    <p className="text-sm leading-7 text-gray-700">{listing.nearby_places}</p>
+                  <div className="rounded-lg border border-[#dedbd2] bg-white p-3.5 sm:p-6">
+                    <h2 className="mb-2 text-base font-black text-[#20201d] sm:mb-3 sm:text-lg">Nearby Places</h2>
+                    <p className="text-sm leading-6 text-gray-700 sm:leading-7">{listing.nearby_places}</p>
                   </div>
                 )}
 
                 {listing.google_maps_url && (
-                  <div className="rounded-lg border border-[#dedbd2] bg-white p-4 sm:p-6">
-                    <h2 className="mb-3 text-lg font-black text-[#20201d]">Location</h2>
+                  <div className="rounded-lg border border-[#dedbd2] bg-white p-3.5 sm:p-6">
+                    <h2 className="mb-2 text-base font-black text-[#20201d] sm:mb-3 sm:text-lg">Location</h2>
                     <a
                       href={listing.google_maps_url}
                       target="_blank"
@@ -369,7 +371,7 @@ export default async function PropertyDetailPage({
                 </a>
 
                 <a
-                  href={'tel:' + WHATSAPP_NUMBER.replace('91', '')}
+                  href={'tel:+' + WHATSAPP_NUMBER}
                   className="inline-flex min-h-11 items-center justify-center rounded-md border border-[#dedbd2] bg-white px-4 text-sm font-bold text-[#20201d] hover:bg-[#fffaf4]"
                 >
                   <span data-i18n="label_call">Call Us</span>

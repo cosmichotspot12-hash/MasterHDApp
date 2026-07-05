@@ -9,10 +9,11 @@ interface Props {
   leaseTotal: number
 }
 
-function useCountUp(target: number, duration = 1600) {
-  const [count, setCount] = useState(0)
-  const triggered = useRef(false)
+/** Animate all provided numbers together once the bar scrolls into view. */
+function useCountUp(targets: number[], duration = 1600) {
+  const [progress, setProgress] = useState(0)
   const elRef = useRef<HTMLDivElement>(null)
+  const triggered = useRef(false)
 
   useEffect(() => {
     const node = elRef.current
@@ -25,8 +26,7 @@ function useCountUp(target: number, duration = 1600) {
           const start = performance.now()
           const tick = (now: number) => {
             const t = Math.min((now - start) / duration, 1)
-            const eased = 1 - Math.pow(1 - t, 3)
-            setCount(Math.round(eased * target))
+            setProgress(1 - Math.pow(1 - t, 3))
             if (t < 1) requestAnimationFrame(tick)
           }
           requestAnimationFrame(tick)
@@ -37,39 +37,36 @@ function useCountUp(target: number, duration = 1600) {
 
     observer.observe(node)
     return () => observer.disconnect()
-  }, [target, duration])
+  }, [duration])
 
-  return { count, elRef }
+  const values = targets.map((target) => Math.round(progress * target))
+  return { values, elRef }
 }
 
 export default function DemandBar({ totalActive, rentTotal, saleTotal, leaseTotal }: Props) {
-  const { count, elRef } = useCountUp(totalActive)
+  const stats = [
+    { value: totalActive, label: 'Active requirements', plus: true, highlight: true },
+    rentTotal > 0 ? { value: rentTotal, label: 'Rent seekers' } : null,
+    saleTotal > 0 ? { value: saleTotal, label: 'Buyers' } : null,
+    leaseTotal > 0 ? { value: leaseTotal, label: 'Lease seekers' } : null,
+  ].filter(Boolean) as { value: number; label: string; plus?: boolean; highlight?: boolean }[]
+
+  const { values, elRef } = useCountUp(stats.map((s) => s.value))
 
   return (
     <div className="hd-demand-bar" ref={elRef}>
-      <span className="hd-demand-count" aria-live="polite">
-        {count}<span className="hd-demand-plus">+</span>
-      </span>
-      <span className="hd-demand-label">active requirements</span>
-
-      {rentTotal > 0 && (
-        <>
-          <span className="hd-demand-sep" aria-hidden>·</span>
-          <span className="hd-demand-pill"><strong>{rentTotal}</strong> rent seekers</span>
-        </>
-      )}
-      {saleTotal > 0 && (
-        <>
-          <span className="hd-demand-sep" aria-hidden>·</span>
-          <span className="hd-demand-pill"><strong>{saleTotal}</strong> buyers</span>
-        </>
-      )}
-      {leaseTotal > 0 && (
-        <>
-          <span className="hd-demand-sep" aria-hidden>·</span>
-          <span className="hd-demand-pill"><strong>{leaseTotal}</strong> lease seekers</span>
-        </>
-      )}
+      {stats.map((stat, i) => (
+        <div
+          key={stat.label}
+          className={'hd-stat' + (stat.highlight ? ' hd-stat-primary' : '')}
+        >
+          <span className="hd-stat-value" aria-live={i === 0 ? 'polite' : undefined}>
+            {values[i]}
+            {stat.plus && <span className="hd-stat-plus">+</span>}
+          </span>
+          <span className="hd-stat-label">{stat.label}</span>
+        </div>
+      ))}
     </div>
   )
 }

@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import {
   hasRecurringPrice,
@@ -447,8 +448,12 @@ export default function PropertyCard({ listing }: { listing: PropertyCardListing
     <>
       <div className="pc-photo">
         {firstPhoto ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={firstPhoto} alt={listing.title} />
+          <Image
+            src={firstPhoto}
+            alt={listing.title}
+            fill
+            sizes="(max-width: 620px) 50vw, (max-width: 1280px) 33vw, 25vw"
+          />
         ) : (
           <div className="pc-photo-empty">
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true">
