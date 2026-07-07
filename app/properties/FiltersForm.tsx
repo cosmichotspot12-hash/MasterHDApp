@@ -33,7 +33,7 @@ function buildHref(state: FiltersState) {
 const TYPE_TABS: { value: PropertyType; label: string; i18n: string }[] = [
   { value: 'all', label: 'All', i18n: 'properties_all' },
   { value: 'rent', label: 'Rent', i18n: 'nav_rent' },
-  { value: 'sale', label: 'Buy', i18n: 'nav_buy' },
+  { value: 'sale', label: 'Sale', i18n: 'nav_buy' },
   { value: 'lease', label: 'Lease', i18n: 'nav_lease' },
 ]
 
