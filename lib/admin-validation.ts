@@ -1,6 +1,15 @@
 import { LISTING_TYPES } from '@/lib/listing-types'
+import { LOCALITIES } from '@/lib/localities'
 
 type Payload = Record<string, unknown>
+
+// Snap known localities onto their canonical spelling (case-insensitive) so
+// admin grouping/matching stays consistent; unknown localities kept as typed.
+const LOCALITY_BY_LOWER = new Map(LOCALITIES.map((l) => [l.toLowerCase(), l]))
+
+function canonicalLocality(text: string) {
+  return LOCALITY_BY_LOWER.get(text.toLowerCase()) ?? text
+}
 
 const LISTING_STATUSES = ['draft', 'active', 'rented_sold', 'inactive']
 const PROPERTY_CATEGORIES = ['apartment', 'independent_house', 'house_in_layout', 'commercial', 'plot']
@@ -121,6 +130,10 @@ export function sanitizeListingPayload(input: unknown, mode: 'create' | 'update'
       : []
   }
 
+  if (typeof listing.locality === 'string' && listing.locality) {
+    listing.locality = canonicalLocality(listing.locality)
+  }
+
   if (listing.listing_type) listing.listing_type = asChoice(listing.listing_type, LISTING_TYPES, 'listing_type')
   if (listing.status) listing.status = asChoice(listing.status, LISTING_STATUSES, 'status')
   if (listing.property_category) listing.property_category = asChoice(listing.property_category, PROPERTY_CATEGORIES, 'property_category')
@@ -140,7 +153,7 @@ export function sanitizeOwnerSubmissionPayload(input: unknown) {
     owner_name: requireText(body, 'owner_name', 80),
     owner_phone: requireText(body, 'owner_phone', 20),
     listing_type: asChoice(body.listing_type, LISTING_TYPES, 'listing_type'),
-    locality: requireText(body, 'locality', 100),
+    locality: canonicalLocality(requireText(body, 'locality', 100)),
     expected_price: asNumber(body.expected_price),
     source: 'source' in body ? asChoice(body.source, SOURCES, 'source') : 'manual',
     status: 'status' in body ? asChoice(body.status, OWNER_STATUSES, 'status') : 'new',

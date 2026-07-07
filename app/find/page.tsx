@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import LocalityCombobox from '@/components/locality-combobox'
 
 export default function FindPage() {
   const [loading, setLoading] = useState(false)
@@ -163,12 +164,10 @@ export default function FindPage() {
                 <label className="pf-label">
                   <span data-i18n="form_preferred_locality">Preferred Locality</span> <span className="pf-required">*</span>
                 </label>
-                <input
+                <LocalityCombobox
                   value={form.locality_preference}
-                  onChange={e => set('locality_preference', e.target.value)}
+                  onChange={v => set('locality_preference', v)}
                   required
-                  placeholder="e.g. Vidyanagar, Gokul Road"
-                  className="pf-input"
                 />
               </div>
               </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import LocalityCombobox from '@/components/locality-combobox'
 
 export default function ListPropertyForm() {
   const [loading, setLoading] = useState(false)
@@ -132,12 +133,10 @@ export default function ListPropertyForm() {
                 <label className="pf-label">
                   <span data-i18n="form_locality">Locality</span> <span className="pf-required">*</span>
                 </label>
-                <input
+                <LocalityCombobox
                   value={form.locality}
-                  onChange={(e) => set('locality', e.target.value)}
+                  onChange={(v) => set('locality', v)}
                   required
-                  placeholder="e.g. Vidyanagar, Gokul Road"
-                  className="pf-input"
                 />
               </div>
             </div>

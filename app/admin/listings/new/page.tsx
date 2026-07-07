@@ -7,6 +7,7 @@ import { getErrorMessage } from '@/lib/api-errors'
 import { compressImage } from '@/lib/compress-image'
 import { hasRentalPreferences, hasRecurringPrice } from '@/lib/listing-types'
 import { supabase } from '@/lib/supabase'
+import LocalityCombobox from '@/components/locality-combobox'
 
 const initialListingForm = {
   listing_type: 'rent',
@@ -216,7 +217,7 @@ export default function NewListingPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Locality <span className="text-red-500">*</span></label>
-              <input value={form.locality} onChange={e => set('locality', e.target.value)} required
+              <LocalityCombobox value={form.locality} onChange={v => set('locality', v)} required
                 placeholder="e.g. Vidyanagar"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
             </div>

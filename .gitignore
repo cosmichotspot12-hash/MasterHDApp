@@ -43,4 +43,5 @@ next-env.d.ts
 # Personal data - never commit
 Property Demand Data-350.csv
 requirements-import-preview.csv
+public/*.csv
 backups/

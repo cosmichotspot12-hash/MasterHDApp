@@ -1,7 +1,8 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useRef } from 'react'
+import { useState } from 'react'
+import LocalityCombobox from '@/components/locality-combobox'
 
 type PropertyType = 'all' | 'rent' | 'sale' | 'lease'
 type PropertyView = 'available' | 'closed'
@@ -38,18 +39,14 @@ const TYPE_TABS: { value: PropertyType; label: string; i18n: string }[] = [
 
 export default function FiltersForm({ initial }: { initial: FiltersState }) {
   const router = useRouter()
-  const localityRef = useRef<HTMLInputElement>(null)
+  const [locality, setLocality] = useState(initial.locality)
 
   const bhkDisabled = CATEGORIES_WITHOUT_BHK.has(initial.category)
-
-  function currentLocality() {
-    return (localityRef.current?.value ?? initial.locality).trim()
-  }
 
   // All navigation (tabs, selects, submit) preserves the locality text currently
   // typed in the box, even if it hasn't been "submitted" yet.
   function navigate(next: Partial<FiltersState>) {
-    router.push(buildHref({ ...initial, ...next, locality: currentLocality() }))
+    router.push(buildHref({ ...initial, ...next, locality: locality.trim() }))
   }
 
   function onSubmit(e: React.FormEvent) {
@@ -104,12 +101,11 @@ export default function FiltersForm({ initial }: { initial: FiltersState }) {
           <option value="plot">Plot</option>
         </select>
         <div className="properties-search-field">
-          <input
-            key={initial.locality}
-            ref={localityRef}
-            defaultValue={initial.locality}
+          <LocalityCombobox
+            value={locality}
+            onChange={setLocality}
             placeholder="Search locality"
-            aria-label="Search locality"
+            className=""
           />
           <button type="submit" className="properties-search-btn" aria-label="Search" title="Search">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

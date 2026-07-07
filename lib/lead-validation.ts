@@ -1,9 +1,20 @@
 import { LISTING_TYPES } from '@/lib/listing-types'
+import { LOCALITIES } from '@/lib/localities'
 
 type LeadPayload = Record<string, unknown>
 
 function asText(value: unknown, maxLength = 160) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : ''
+}
+
+// Case-insensitive lookup so free-typed casing/whitespace collapses onto the
+// canonical spelling. Keeps admin grouping/matching (which compares locality
+// strings) from fragmenting. Unknown localities are kept as typed (trimmed).
+const LOCALITY_BY_LOWER = new Map(LOCALITIES.map((l) => [l.toLowerCase(), l]))
+
+function normalizeLocality(value: unknown, maxLength = 120) {
+  const text = asText(value, maxLength)
+  return LOCALITY_BY_LOWER.get(text.toLowerCase()) ?? text
 }
 
 function asNumber(value: unknown) {
@@ -27,7 +38,7 @@ function normalizePhone(value: unknown) {
 export function validateOwnerSubmission(body: LeadPayload) {
   const owner_name = asText(body.owner_name, 80)
   const owner_phone = normalizePhone(body.owner_phone)
-  const locality = asText(body.locality, 100)
+  const locality = normalizeLocality(body.locality, 100)
 
   if (!owner_name || !owner_phone || !locality) {
     throw new Error('Please enter your name, 10-digit phone number, and locality.')
@@ -46,7 +57,7 @@ export function validateOwnerSubmission(body: LeadPayload) {
 export function validateRequirement(body: LeadPayload) {
   const finder_name = asText(body.finder_name, 80)
   const finder_phone = normalizePhone(body.finder_phone)
-  const locality_preference = asText(body.locality_preference, 120)
+  const locality_preference = normalizeLocality(body.locality_preference, 120)
   const budget_max = asNumber(body.budget_max)
 
   if (!finder_name || !finder_phone || !locality_preference || !budget_max) {
