@@ -13,7 +13,7 @@ export function listingTypeLabel(value?: string | null) {
 }
 
 export function listingTypeActionLabel(value?: string | null) {
-  if (value === 'sale') return 'Buy'
+  if (value === 'sale') return 'Sale'
   if (value === 'lease') return 'Lease'
   return 'Rent'
 }

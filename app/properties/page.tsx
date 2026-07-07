@@ -118,7 +118,7 @@ function propertiesHref(params: {
 
 function titleForType(type: PropertyType) {
   if (type === 'rent') return 'Properties for rent'
-  if (type === 'sale') return 'Properties to buy'
+  if (type === 'sale') return 'Properties for sale'
   if (type === 'lease') return 'Properties for lease'
   return 'All verified properties'
 }

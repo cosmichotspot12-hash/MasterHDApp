@@ -36,7 +36,7 @@ export default function SiteFooter() {
             <p className="sf-col-title">Property</p>
             <nav className="sf-nav" aria-label="Property links">
               <Link href="/properties?type=rent" className="sf-link">Rent</Link>
-              <Link href="/properties?type=sale" className="sf-link">Buy</Link>
+              <Link href="/properties?type=sale" className="sf-link">Sale</Link>
               <Link href="/properties?type=lease" className="sf-link">Lease</Link>
               <Link href="/properties" className="sf-link">Browse all</Link>
             </nav>
