@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPublicListingBySlug } from '@/lib/listings-data'
 import { furnishingLabel, hasRecurringPrice, listingTypeForI18nKey, listingTypeForLabel } from '@/lib/listing-types'
+import { APP_URL } from '@/lib/env'
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ''
 
@@ -16,13 +17,14 @@ export async function generateMetadata({
   const listing = await getListing(slug)
 
   if (!listing) {
-    return { title: 'Property Not Found | Hubli Dharwad App' }
+    return { title: 'Property Not Found | HubliDharwad.app' }
   }
 
   const price = formatDisplayPrice(listing.listing_type, listing.price)
+  const canonicalPath = '/property/' + listing.slug
 
   return {
-    title: listing.title + ' in ' + listing.locality + ' | Hubli Dharwad App',
+    title: listing.title + ' in ' + listing.locality + ' | HubliDharwad.app',
     description:
       'View ' +
       listing.title +
@@ -32,9 +34,11 @@ export async function generateMetadata({
       price +
       (hasRecurringPrice(listing.listing_type) ? '/month' : '') +
       '. Contact us for a visit.',
+    alternates: { canonical: canonicalPath },
     openGraph: {
-      title: listing.title + ' | Hubli Dharwad App',
+      title: listing.title + ' | HubliDharwad.app',
       description: listing.locality + ', Hubli-Dharwad - ' + price,
+      url: canonicalPath,
       images: listing.photos && listing.photos.length > 0 ? [listing.photos[0]] : [],
     },
   }
@@ -172,8 +176,35 @@ export default async function PropertyDetailPage({
     { label: 'Female Bachelors', value: listing.female_bachelors_allowed ? 'Allowed' : 'Not Allowed' },
   ].filter(Boolean) as { label: string; value: string }[]
 
+  const listingJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateListing',
+    name: listing.title,
+    url: APP_URL + '/property/' + listing.slug,
+    description:
+      listing.description ||
+      listing.title + ' in ' + listing.locality + ', Hubli-Dharwad, ' + listingTypeForLabel(listing.listing_type).toLowerCase() + '.',
+    image: listing.photos && listing.photos.length > 0 ? listing.photos : undefined,
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: listing.locality,
+      addressRegion: 'Karnataka',
+      addressCountry: 'IN',
+    },
+    offers: {
+      '@type': 'Offer',
+      price: listing.price,
+      priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
+    },
+  }
+
   return (
     <div className="page-shell pb-28 md:pb-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(listingJsonLd) }}
+      />
       <div className="site-container py-4 sm:py-6 lg:py-8">
         <Link href="/properties" className="mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-[#6b5f58] hover:text-[#111827]">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

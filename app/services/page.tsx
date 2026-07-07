@@ -48,8 +48,9 @@ const partners = [
 ]
 
 export const metadata: Metadata = {
-  title: 'Property Services in Hubli-Dharwad | Hubli Dharwad App',
+  title: 'Property Services in Hubli-Dharwad | HubliDharwad.app',
   description: 'Property listing support, rental agreements, visit coordination, tenant and buyer requirements, and partner listing support in Hubli-Dharwad.',
+  alternates: { canonical: '/services' },
 }
 
 function whatsappHref(message: string) {

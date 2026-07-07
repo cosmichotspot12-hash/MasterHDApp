@@ -21,10 +21,41 @@ type PropertySearchParams = {
   page?: string
 }
 
-export const metadata: Metadata = {
-  title: 'All Verified Properties in Hubli-Dharwad | Hubli Dharwad App',
-  description: 'Browse verified rental and sale properties in Hubli-Dharwad with filters for rent, buy, BHK, category, and locality.',
-  keywords: 'properties in hubli dharwad, rent properties hubli, buy properties hubli, verified properties hubli',
+const SEO_BY_TYPE: Record<PropertyType, { title: string; description: string }> = {
+  all: {
+    title: 'All Verified Properties in Hubli-Dharwad',
+    description: 'Browse verified rental, sale, and lease properties in Hubli-Dharwad with filters for BHK, category, and locality.',
+  },
+  rent: {
+    title: 'Flats & Houses for Rent in Hubli-Dharwad',
+    description: 'Browse verified flats, houses, and PGs for rent in Hubli-Dharwad. Personally verified with video tours and local support.',
+  },
+  sale: {
+    title: 'Properties for Sale in Hubli-Dharwad',
+    description: 'Browse verified flats, houses, and plots for sale in Hubli-Dharwad. Personally verified with video tours and local support.',
+  },
+  lease: {
+    title: 'Properties for Lease in Hubli-Dharwad',
+    description: 'Browse verified properties for lease in Hubli-Dharwad. Personally verified with video tours and local support.',
+  },
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<PropertySearchParams>
+}): Promise<Metadata> {
+  const params = await searchParams
+  const type = normalizeType(params.type)
+  const seo = SEO_BY_TYPE[type]
+
+  return {
+    title: seo.title + ' | HubliDharwad.app',
+    description: seo.description,
+    alternates: {
+      canonical: type === 'all' ? '/properties' : '/properties?type=' + type,
+    },
+  }
 }
 
 function normalizeType(type?: string): PropertyType {

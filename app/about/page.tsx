@@ -2,8 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'About Us – HubliDharwad.app',
+  title: 'About Us | HubliDharwad.app',
   description: 'We are a verified property platform built exclusively for Hubballi-Dharwad. Less chasing, more clarity — for seekers and owners alike.',
+  alternates: { canonical: '/about' },
 }
 
 const SEEKER_STEPS = [

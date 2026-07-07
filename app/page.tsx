@@ -5,6 +5,7 @@ import DemandBar from '@/components/demand-bar'
 import PropertyCard, { PropertyCardStyles } from '@/components/property-card'
 import { getPublicListings } from '@/lib/listings-data'
 import { getPublicDemandSummary } from '@/lib/public-demand'
+import { APP_URL } from '@/lib/env'
 
 const dancingScript = Dancing_Script({
   subsets: ['latin'],
@@ -46,16 +47,17 @@ function PreviewSkeleton() {
 }
 
 export const metadata: Metadata = {
-  title: 'MasterHD – Verified Properties in Hubballi-Dharwad',
+  title: 'HubliDharwad.app — Verified Properties in Hubballi-Dharwad',
   description: 'Find verified flats, houses and plots in Hubballi-Dharwad. Browse listings, post your requirement, or list your property — personally verified, locally trusted.',
-  keywords: 'properties in hubli, flats for rent in hubli, house for sale in dharwad, hubli dharwad real estate',
+  alternates: { canonical: '/' },
   openGraph: {
-    title: 'MasterHD – Verified Properties in Hubballi-Dharwad',
+    title: 'HubliDharwad.app — Verified Properties in Hubballi-Dharwad',
     description: 'Personally verified property listings for Hubballi-Dharwad.',
-    url: 'https://www.masterhdapp.in',
-    siteName: 'MasterHD',
+    url: '/',
+    siteName: 'HubliDharwad.app',
     locale: 'en_IN',
     type: 'website',
+    images: ['/images/home-hero-property.png'],
   },
 }
 
@@ -63,8 +65,26 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const { previewListings, demand } = await getHomeData()
 
+  const orgJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateAgent',
+    name: 'HubliDharwad.app',
+    url: APP_URL,
+    logo: APP_URL + '/icons/icon-512.png',
+    areaServed: {
+      '@type': 'City',
+      name: 'Hubballi-Dharwad',
+      address: { '@type': 'PostalAddress', addressRegion: 'Karnataka', addressCountry: 'IN' },
+    },
+    sameAs: ['https://www.instagram.com/hublidharwad.app'],
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+      />
       <PropertyCardStyles />
       <style>{`
 

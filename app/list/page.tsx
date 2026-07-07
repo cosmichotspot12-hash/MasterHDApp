@@ -4,8 +4,9 @@ import ListPropertyForm from './ListPropertyForm'
 import { getPublicDemandSummary, type PublicDemandLocality } from '@/lib/public-demand'
 
 export const metadata: Metadata = {
-  title: 'List Your Property | MasterHD',
+  title: 'List Your Property in Hubli-Dharwad | HubliDharwad.app',
   description: 'Show your property to real tenants, buyers, and lease seekers looking in Hubballi-Dharwad localities right now.',
+  alternates: { canonical: '/list' },
 }
 
 function DemandCard({ item }: { item: PublicDemandLocality }) {

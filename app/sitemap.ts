@@ -23,19 +23,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
-      url: APP_URL + '/rent',
+      url: APP_URL + '/properties',
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
-      url: APP_URL + '/sale',
+      url: APP_URL + '/properties?type=rent',
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
-      url: APP_URL + '/lease',
+      url: APP_URL + '/properties?type=sale',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: APP_URL + '/properties?type=lease',
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
@@ -48,6 +54,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: APP_URL + '/list',
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: APP_URL + '/about',
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: APP_URL + '/services',
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.5,

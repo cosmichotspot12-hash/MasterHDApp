@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import SiteChrome from "@/components/site-chrome";
+import { APP_URL } from "@/lib/env";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -12,9 +13,15 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Hubli Dharwad App — Verified Properties in Hubballi",
-  description: "Find verified flats, houses and plots in Hubballi. Matched with real local demand, video tours, and WhatsApp support.",
+  metadataBase: new URL(APP_URL),
+  title: "HubliDharwad.app — Verified Properties in Hubballi-Dharwad",
+  description: "Find verified flats, houses and plots in Hubballi-Dharwad. Matched with real local demand, video tours, and WhatsApp support.",
   manifest: '/manifest.json',
+  openGraph: {
+    siteName: "HubliDharwad.app",
+    locale: "en_IN",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
