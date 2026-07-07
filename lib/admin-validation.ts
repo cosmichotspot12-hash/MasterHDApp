@@ -50,7 +50,7 @@ const LISTING_TEXT_FIELDS = [
   'slug',
 ] as const
 
-const LISTING_NUMBER_FIELDS = ['price', 'deposit_amount', 'property_floor', 'total_floors'] as const
+const LISTING_NUMBER_FIELDS = ['price', 'deposit_amount', 'property_floor', 'total_floors', 'carpet_area', 'built_up_area', 'plot_area'] as const
 
 const LISTING_BOOLEAN_FIELDS = [
   'is_ground_floor',

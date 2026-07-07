@@ -20,6 +20,9 @@ const initialListingForm = {
   society_building_name: '',
   bhk_count: '',
   bathrooms: '',
+  carpet_area: '',
+  built_up_area: '',
+  plot_area: '',
   property_floor: '',
   total_floors: '',
   is_ground_floor: false,
@@ -149,6 +152,9 @@ export default function NewListingPage() {
         deposit_amount: form.deposit_amount ? parseInt(form.deposit_amount) : null,
         property_floor: form.property_floor ? parseInt(form.property_floor) : null,
         total_floors: form.total_floors ? parseInt(form.total_floors) : null,
+        carpet_area: form.carpet_area ? parseInt(form.carpet_area) : null,
+        built_up_area: form.built_up_area ? parseInt(form.built_up_area) : null,
+        plot_area: form.plot_area ? parseInt(form.plot_area) : null,
         date_listed: form.date_listed || null,
         follow_up_date: form.follow_up_date || null,
       }
@@ -275,6 +281,30 @@ export default function NewListingPage() {
                   <option value="2">2</option>
                   <option value="3+">3+</option>
                 </select>
+              </div>
+            )}
+            {!isPlot && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Carpet Area (sq ft)</label>
+                  <input type="number" value={form.carpet_area} onChange={e => set('carpet_area', e.target.value)}
+                    placeholder="e.g. 950"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Built-up Area (sq ft)</label>
+                  <input type="number" value={form.built_up_area} onChange={e => set('built_up_area', e.target.value)}
+                    placeholder="e.g. 1150"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                </div>
+              </>
+            )}
+            {(isPlot || form.property_category === 'independent_house' || form.property_category === 'house_in_layout') && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Plot Area (sq ft)</label>
+                <input type="number" value={form.plot_area} onChange={e => set('plot_area', e.target.value)}
+                  placeholder="e.g. 2400"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
               </div>
             )}
             {showFloor && (

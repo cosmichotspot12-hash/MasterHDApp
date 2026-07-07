@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPublicListingBySlug } from '@/lib/listings-data'
+import PropertyGallery from '@/components/property-gallery'
 import { furnishingLabel, hasRecurringPrice, listingTypeForI18nKey, listingTypeForLabel } from '@/lib/listing-types'
 import { APP_URL } from '@/lib/env'
 
@@ -157,6 +157,9 @@ export default async function PropertyDetailPage({
     listing.property_category && { label: 'Type', value: listing.property_category.replace(/_/g, ' ') },
     listing.bhk_count && { label: 'BHK', value: listing.bhk_count + ' BHK' },
     listing.bathrooms && { label: 'Bathrooms', value: listing.bathrooms },
+    listing.carpet_area && { label: 'Carpet Area', value: listing.carpet_area + ' sq ft' },
+    listing.built_up_area && { label: 'Built-up Area', value: listing.built_up_area + ' sq ft' },
+    listing.plot_area && { label: 'Plot Area', value: listing.plot_area + ' sq ft' },
     listing.furnishing && { label: 'Furnishing', value: furnishingLabel(listing.furnishing) },
     listing.facing && { label: 'Facing', value: listing.facing },
     listing.water_supply && { label: 'Water Supply', value: listing.water_supply },
@@ -215,32 +218,7 @@ export default async function PropertyDetailPage({
         <div className="grid gap-3 grid-cols-1 md:gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-6">
           <main className="min-w-0 space-y-3 md:space-y-5">
             {listing.photos && listing.photos.length > 0 && (
-              <section className="overflow-hidden rounded-lg border border-[#dedbd2] bg-white">
-                <div className="relative aspect-[16/10] overflow-hidden bg-[#fbf1e4]">
-                  <Image
-                    src={listing.photos[0]}
-                    alt={listing.title}
-                    fill
-                    preload
-                    sizes="(max-width: 1024px) 100vw, 60vw"
-                    className="object-cover"
-                  />
-                </div>
-                {listing.photos.length > 1 && (
-                  <div className="scrollbar-hide flex gap-2 overflow-x-auto border-t border-[#dedbd2] bg-white p-2 sm:p-3">
-                    {listing.photos.slice(1).map((photo: string, i: number) => (
-                      <Image
-                        key={i}
-                        src={photo}
-                        alt={'Property photo ' + (i + 2)}
-                        width={224}
-                        height={160}
-                        className="h-16 w-24 flex-shrink-0 rounded-md border border-[#dedbd2] object-cover sm:h-20 sm:w-28"
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
+              <PropertyGallery photos={listing.photos} title={listing.title} />
             )}
 
             <section className="rounded-lg border border-[#dedbd2] bg-white p-3.5 sm:p-6">
@@ -353,28 +331,12 @@ export default async function PropertyDetailPage({
               )}
             </section>
 
-            {(listing.nearby_places || listing.google_maps_url) && (
+            {listing.nearby_places && (
               <section className="grid gap-3 grid-cols-1 md:gap-5 lg:grid-cols-2">
-                {listing.nearby_places && (
-                  <div className="rounded-lg border border-[#dedbd2] bg-white p-3.5 sm:p-6">
-                    <h2 className="mb-2 text-base font-black text-[#20201d] sm:mb-3 sm:text-lg">Nearby Places</h2>
-                    <p className="text-sm leading-6 text-gray-700 sm:leading-7">{listing.nearby_places}</p>
-                  </div>
-                )}
-
-                {listing.google_maps_url && (
-                  <div className="rounded-lg border border-[#dedbd2] bg-white p-3.5 sm:p-6">
-                    <h2 className="mb-2 text-base font-black text-[#20201d] sm:mb-3 sm:text-lg">Location</h2>
-                    <a
-                      href={listing.google_maps_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#9f4a22] px-4 text-sm font-bold text-white hover:bg-[#c95f2c]"
-                    >
-                      View on Google Maps
-                    </a>
-                  </div>
-                )}
+                <div className="rounded-lg border border-[#dedbd2] bg-white p-3.5 sm:p-6">
+                  <h2 className="mb-2 text-base font-black text-[#20201d] sm:mb-3 sm:text-lg">Nearby Places</h2>
+                  <p className="text-sm leading-6 text-gray-700 sm:leading-7">{listing.nearby_places}</p>
+                </div>
               </section>
             )}
           </main>

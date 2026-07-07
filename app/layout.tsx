@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import SiteChrome from "@/components/site-chrome";
+import NumberInputGuard from "@/components/number-input-guard";
 import { APP_URL } from "@/lib/env";
 import "./globals.css";
 
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={outfit.variable}>
       <body>
+        <NumberInputGuard />
         <SiteChrome>{children}</SiteChrome>
         <Analytics />
       </body>

@@ -38,9 +38,11 @@ export type PublicListing = {
 export type PublicListingDetail = PublicListing & {
   city?: string | null
   landmark?: string | null
-  google_maps_url?: string | null
   society_building_name?: string | null
   bathrooms?: string | number | null
+  carpet_area?: number | null
+  built_up_area?: number | null
+  plot_area?: number | null
   property_floor?: string | number | null
   total_floors?: string | number | null
   is_ground_floor?: boolean | null
@@ -94,10 +96,12 @@ const LISTING_DETAIL_SELECT = [
   'city',
   'locality',
   'landmark',
-  'google_maps_url',
   'society_building_name',
   'bhk_count',
   'bathrooms',
+  'carpet_area',
+  'built_up_area',
+  'plot_area',
   'property_floor',
   'total_floors',
   'is_ground_floor',
