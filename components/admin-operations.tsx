@@ -890,6 +890,225 @@ export function RequirementsQueue({ requirements }: { requirements: Requirement[
   )
 }
 
+const seekerSortOptions = [
+  { value: 'newest', label: 'Newest first' },
+  { value: 'oldest', label: 'Oldest first' },
+  { value: 'urgency', label: 'Most urgent' },
+  { value: 'budget_high', label: 'Budget: high to low' },
+  { value: 'budget_low', label: 'Budget: low to high' },
+] as const
+
+const seekerDateRanges = [
+  { value: 'all', label: 'All time' },
+  { value: '1', label: 'Today' },
+  { value: '7', label: 'Last 7 days' },
+  { value: '30', label: 'Last 30 days' },
+] as const
+
+const SEEKERS_PER_PAGE = 25
+
+export function SeekerQueue({ requirements, activeListings = [], whatsappNumber }: { requirements: Requirement[]; activeListings?: AdminListing[]; whatsappNumber: string }) {
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('all')
+  const [type, setType] = useState('all')
+  const [bhk, setBhk] = useState('all')
+  const [locality, setLocality] = useState('all')
+  const [dateRange, setDateRange] = useState<string>('all')
+  const [sort, setSort] = useState<string>('newest')
+  const [page, setPage] = useState(1)
+
+  // Captured once on mount so date-range filtering stays pure across re-renders.
+  const [now] = useState(() => Date.now())
+
+  const bhkOptions = useMemo(() => {
+    return Array.from(new Set(requirements.map((item) => item.bhk_count).filter(Boolean))).sort((a, b) => a.localeCompare(b))
+  }, [requirements])
+
+  const localityOptions = useMemo(() => {
+    return Array.from(new Set(requirements.map((item) => item.locality_preference || 'Locality not set').filter(Boolean))).sort((a, b) => a.localeCompare(b))
+  }, [requirements])
+
+  const filtered = useMemo(() => {
+    const query = search.toLowerCase().trim()
+    const cutoff = dateRange === 'all' ? null : now - Number(dateRange) * 24 * 60 * 60 * 1000
+    const result = requirements.filter((item) => {
+      const itemLocality = item.locality_preference || 'Locality not set'
+      const matchesSearch = !query || [item.finder_name, item.finder_phone, item.locality_preference, item.bhk_count, item.listing_type].some((value) => value?.toLowerCase().includes(query))
+      const matchesStatus = status === 'all' || item.status === status
+      const matchesType = type === 'all' || item.listing_type === type
+      const matchesBhk = bhk === 'all' || item.bhk_count === bhk
+      const matchesLocality = locality === 'all' || itemLocality === locality
+      const matchesDate = !cutoff || new Date(item.created_at).getTime() >= cutoff
+      return matchesSearch && matchesStatus && matchesType && matchesBhk && matchesLocality && matchesDate
+    })
+
+    return result.sort((a, b) => {
+      switch (sort) {
+        case 'oldest':
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        case 'urgency':
+          return demandPriority(b) - demandPriority(a) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        case 'budget_high':
+          return (b.budget_max || 0) - (a.budget_max || 0)
+        case 'budget_low':
+          return (a.budget_max || 0) - (b.budget_max || 0)
+        case 'newest':
+        default:
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      }
+    })
+  }, [requirements, search, status, type, bhk, locality, dateRange, sort, now])
+
+  // Any filter change resets back to the first page.
+  const resetPage = () => setPage(1)
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / SEEKERS_PER_PAGE))
+  const currentPage = Math.min(page, totalPages)
+  const pageItems = filtered.slice((currentPage - 1) * SEEKERS_PER_PAGE, currentPage * SEEKERS_PER_PAGE)
+
+  const activeFilters = status !== 'all' || type !== 'all' || bhk !== 'all' || locality !== 'all' || dateRange !== 'all' || search.trim() !== ''
+
+  function clearFilters() {
+    setSearch('')
+    setStatus('all')
+    setType('all')
+    setBhk('all')
+    setLocality('all')
+    setDateRange('all')
+    setSort('newest')
+    resetPage()
+  }
+
+  return (
+    <div>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        {seekerDateRanges.map((range) => (
+          <button
+            key={range.value}
+            type="button"
+            onClick={() => { setDateRange(range.value); resetPage() }}
+            className={`rounded-full border px-3 py-1.5 text-xs font-bold ${dateRange === range.value ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}
+          >
+            {range.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="mb-5 grid gap-3 rounded-md border border-slate-200 bg-white p-3 lg:grid-cols-[1fr_auto_auto_auto_auto_auto]">
+        <input value={search} onChange={(event) => { setSearch(event.target.value); resetPage() }} placeholder="Search name, phone, locality, BHK" className="w-full px-3 py-2 text-sm" />
+        <select value={locality} onChange={(event) => { setLocality(event.target.value); resetPage() }} className="px-3 py-2 text-sm">
+          <option value="all">All localities</option>
+          {localityOptions.map((item) => <option key={item} value={item}>{item}</option>)}
+        </select>
+        <select value={status} onChange={(event) => { setStatus(event.target.value); resetPage() }} className="px-3 py-2 text-sm">
+          {requirementStatuses.map((item) => <option key={item} value={item}>{item === 'all' ? 'All status' : formatLabel(item)}</option>)}
+        </select>
+        <select value={type} onChange={(event) => { setType(event.target.value); resetPage() }} className="px-3 py-2 text-sm">
+          <option value="all">Rent, sale, and lease</option>
+          <option value="rent">Rent</option>
+          <option value="sale">Sale</option>
+          <option value="lease">Lease</option>
+        </select>
+        <select value={bhk} onChange={(event) => { setBhk(event.target.value); resetPage() }} className="px-3 py-2 text-sm">
+          <option value="all">All BHK</option>
+          {bhkOptions.map((item) => <option key={item} value={item}>{item} BHK</option>)}
+        </select>
+        <select value={sort} onChange={(event) => { setSort(event.target.value); resetPage() }} className="px-3 py-2 text-sm">
+          {seekerSortOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+        </select>
+      </div>
+
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+          {filtered.length} seeker{filtered.length === 1 ? '' : 's'}
+          {filtered.length > 0 && <span className="ml-1 text-slate-400">· showing {(currentPage - 1) * SEEKERS_PER_PAGE + 1}-{Math.min(currentPage * SEEKERS_PER_PAGE, filtered.length)}</span>}
+        </p>
+        {activeFilters && <button type="button" onClick={clearFilters} className="text-xs font-bold text-blue-600 hover:underline">Clear filters</button>}
+      </div>
+
+      {filtered.length === 0 ? <EmptyState text="No seekers match these filters." /> : (
+        <>
+          <div className="grid gap-3">
+            {pageItems.map((item) => {
+              const message = 'Hi ' + item.finder_name + ', we found a property matching your requirement. Let us know if you are interested.'
+              const budget = (item.budget_min ? formatPrice(item.budget_min) + ' - ' : '') + formatPrice(item.budget_max)
+              const matches = matchListingsForRequirement(item, activeListings)
+              return (
+                <div key={item.id} className="grid gap-0">
+                  <LeadCard
+                    title={item.finder_name}
+                    phone={item.finder_phone}
+                    status={item.status}
+                    submitted={item.created_at}
+                    details={[formatLabel(item.listing_type), item.locality_preference, item.bhk_count + ' BHK', budget, formatLabel(item.tenant_type), formatLabel(item.timeline)]}
+                    note={item.special_requirements || undefined}
+                    statusControl={<StatusUpdater id={item.id} currentStatus={item.status} type="reqs" options={requirementStatuses.filter((option) => option !== 'all')} />}
+                    actions={<><ActionLink href={waLink(whatsappNumber, message)} tone="green">WhatsApp</ActionLink><ActionLink href={'tel:' + item.finder_phone} tone="blue">Call</ActionLink></>}
+                  />
+                  <MatchingProperties requirement={item} matches={matches} />
+                </div>
+              )
+            })}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="mt-5 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="inline-flex min-h-9 items-center rounded-md border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <span className="text-sm font-bold text-slate-600">Page {currentPage} of {totalPages}</span>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="inline-flex min-h-9 items-center rounded-md border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+const requirementTabs = [
+  { value: 'queue', label: 'Daily queue' },
+  { value: 'insights', label: 'Demand insights' },
+  { value: 'localities', label: 'Browse localities' },
+] as const
+
+export function RequirementsTabs({ requirements, activeListings, whatsappNumber }: { requirements: Requirement[]; activeListings: AdminListing[]; whatsappNumber: string }) {
+  const [tab, setTab] = useState<string>('queue')
+
+  return (
+    <div>
+      <div className="mb-5 inline-flex flex-wrap gap-1 rounded-lg border border-slate-200 bg-white p-1">
+        {requirementTabs.map((item) => (
+          <button
+            key={item.value}
+            type="button"
+            onClick={() => setTab(item.value)}
+            className={`rounded-md px-4 py-2 text-sm font-bold ${tab === item.value ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'queue' && <SeekerQueue requirements={requirements} activeListings={activeListings} whatsappNumber={whatsappNumber} />}
+      {tab === 'insights' && <DemandIntelligence requirements={requirements} listings={activeListings} />}
+      {tab === 'localities' && <RequirementsQueue requirements={requirements} />}
+    </div>
+  )
+}
+
 type DemandLocalitySummary = {
   locality: string
   total: number
