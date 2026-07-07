@@ -38,6 +38,7 @@ export type AttentionProperty = {
 export type DashboardData = {
   ownerLeads: Lead[]
   visitGroups: VisitGroup[]
+  unavailableVisits: number
   seekerLeads: Lead[]
   todayVisits: TodayVisit[]
   totalListings: number
@@ -361,6 +362,21 @@ export default function AdminDashboard({ data }: { data: DashboardData }) {
           font-weight: 800;
         }
 
+        /* Stale visit notice */
+        .dao-stale {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 11px 16px;
+          background: #FFFBEB;
+          border-bottom: 1px solid #FDE68A;
+          font-size: 12.5px;
+          font-weight: 700;
+          color: #B45309;
+          text-decoration: none;
+        }
+        .dao-stale:hover { background: #FEF3C7; }
+
         /* Visit group header */
         .dao-group-hd {
           display: flex;
@@ -568,6 +584,11 @@ export default function AdminDashboard({ data }: { data: DashboardData }) {
             </button>
           </div>
 
+          {tab === 'visits' && data.unavailableVisits > 0 && (
+            <Link href="/admin/visit-requests" className="dao-stale">
+              ⚠️ {data.unavailableVisits} request{data.unavailableVisits === 1 ? '' : 's'} for properties no longer available — update those seekers
+            </Link>
+          )}
           {tab === 'visits' && (
             data.visitGroups.length === 0 ? (
               <div className="dao-empty">{ICON_CHECK}No new visit requests</div>

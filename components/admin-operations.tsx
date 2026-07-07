@@ -299,51 +299,206 @@ export function ListingsInventory({ listings, visits }: { listings: AdminListing
   )
 }
 
-export function VisitRequestsWorkspace({ listings, requests }: { listings: AdminListing[]; requests: VisitRequest[] }) {
-  const activeListings = listings.filter((listing) => listing.status === 'active')
+const pendingVisitStatuses = new Set(['new', 'contacted', 'visit_scheduled'])
+
+type VisitWorkspaceGroup = {
+  key: string
+  listing: AdminListing | null
+  title: string
+  available: boolean
+  requests: VisitRequest[]
+}
+
+function listingAvailabilityLabel(listing: AdminListing | null) {
+  if (!listing) return 'Removed'
+  if (listing.status === 'active') return 'Active'
+  if (listing.status === 'rented_sold') return listingTypeClosedLabel(listing.listing_type)
+  return formatLabel(listing.status)
+}
+
+function availabilityBadgeClass(listing: AdminListing | null) {
+  if (!listing) return 'bg-red-100 text-red-700 border-red-200'
+  return statusClass(listing.status)
+}
+
+function buildVisitWorkspaceGroups(requests: VisitRequest[], listingById: Map<string, AdminListing>): VisitWorkspaceGroup[] {
+  const map = new Map<string, VisitWorkspaceGroup>()
+  requests.forEach((request) => {
+    const listing = listingById.get(request.listing_id) || null
+    const key = listing ? listing.id : 'removed:' + (request.property_title || 'unknown')
+    let group = map.get(key)
+    if (!group) {
+      group = {
+        key,
+        listing,
+        title: listing?.title || request.property_title || 'Removed property',
+        available: listing?.status === 'active',
+        requests: [],
+      }
+      map.set(key, group)
+    }
+    group.requests.push(request)
+  })
+  return Array.from(map.values())
+}
+
+// Suggest replacements for a request whose property is gone: same deal type,
+// then prefer same locality and same BHK.
+function similarActiveListings(gone: AdminListing | null, listings: AdminListing[]) {
+  if (!gone) return []
+  const goneBhk = (gone.bhk_count || '').match(/\d/)?.[0] || ''
+  const goneLocality = gone.locality.toLowerCase().trim()
+  return listings
+    .filter((listing) => listing.status === 'active' && listing.id !== gone.id && listing.listing_type === gone.listing_type)
+    .map((listing) => {
+      const locality = listing.locality.toLowerCase().trim()
+      const localityMatch = Boolean(goneLocality && (locality.includes(goneLocality) || goneLocality.includes(locality)))
+      const bhk = (listing.bhk_count || '').match(/\d/)?.[0] || ''
+      const bhkMatch = Boolean(goneBhk && bhk && goneBhk === bhk)
+      return { listing, score: (localityMatch ? 2 : 0) + (bhkMatch ? 1 : 0) }
+    })
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score || Number(a.listing.price) - Number(b.listing.price))
+    .slice(0, 2)
+    .map((item) => item.listing)
+}
+
+function unavailableMessage(request: VisitRequest, group: VisitWorkspaceGroup, alternatives: AdminListing[], appUrl: string) {
+  const intro = `Hi ${request.finder_name}, this is HubliDharwad.app. About your visit request for "${group.title}" — that property is no longer available.`
+  if (alternatives.length === 0) {
+    return `${intro} We keep adding verified properties — tell me what you're looking for and I'll match you, or browse here: ${appUrl}/properties`
+  }
+  const options = alternatives
+    .map((listing) => `"${listing.title}" (${formatPrice(listing.price)}${hasRecurringPrice(listing.listing_type) ? '/mo' : ''})${listing.slug ? ' — ' + appUrl + '/property/' + listing.slug : ''}`)
+    .join(', or ')
+  return `${intro} But we have similar verified options: ${options}. Want to schedule a visit?`
+}
+
+export function VisitRequestsWorkspace({ listings, requests, appUrl }: { listings: AdminListing[]; requests: VisitRequest[]; appUrl: string }) {
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('all')
   const [type, setType] = useState('all')
-  const grouped = useMemo(() => groupVisits(requests), [requests])
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
 
-  const filteredListings = activeListings
-    .filter((listing) => {
-      const propertyRequests = grouped[listing.id] || []
-      if (propertyRequests.length === 0) return false
-      const query = search.toLowerCase().trim()
-      const matchesType = type === 'all' || listing.listing_type === type
-      const matchesStatus = status === 'all' || propertyRequests.some((request) => request.status === status)
-      const matchesSearch = !query || [listing.title, listing.locality].some((value) => value?.toLowerCase().includes(query)) ||
-        propertyRequests.some((request) => [request.finder_name, request.finder_phone, request.property_title].some((value) => value?.toLowerCase().includes(query)))
-      return matchesType && matchesStatus && matchesSearch
+  const listingById = useMemo(() => new Map(listings.map((listing) => [listing.id, listing] as const)), [listings])
+  const groups = useMemo(() => buildVisitWorkspaceGroups(requests, listingById), [requests, listingById])
+
+  // Pending requests pointing at a property that is closed, deactivated, or deleted.
+  const staleRequests = groups
+    .filter((group) => !group.available)
+    .flatMap((group) => group.requests.filter((request) => pendingVisitStatuses.has(request.status)).map((request) => ({ request, group })))
+    .sort((a, b) => new Date(b.request.created_at).getTime() - new Date(a.request.created_at).getTime())
+
+  const query = search.toLowerCase().trim()
+  const visibleGroups = groups
+    .map((group) => {
+      if (type !== 'all' && (!group.listing || group.listing.listing_type !== type)) return null
+      const groupText = [group.title, group.listing?.locality].filter(Boolean).join(' ').toLowerCase()
+      const groupMatchesSearch = !query || groupText.includes(query)
+      const matching = group.requests.filter((request) => {
+        if (status !== 'all' && request.status !== status) return false
+        if (groupMatchesSearch) return true
+        return [request.finder_name, request.finder_phone].some((value) => value?.toLowerCase().includes(query))
+      })
+      if (matching.length === 0) return null
+      const sorted = [...matching].sort((a, b) =>
+        Number(pendingVisitStatuses.has(b.status)) - Number(pendingVisitStatuses.has(a.status)) ||
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      return { ...group, requests: sorted }
     })
+    .filter((group): group is VisitWorkspaceGroup => Boolean(group))
     .sort((a, b) => {
-      const aNew = (grouped[a.id] || []).filter((request) => request.status === 'new').length
-      const bNew = (grouped[b.id] || []).filter((request) => request.status === 'new').length
-      if (bNew !== aNew) return bNew - aNew
-      return (grouped[b.id] || []).length - (grouped[a.id] || []).length
+      if (a.available !== b.available) return a.available ? -1 : 1
+      const newCount = (group: VisitWorkspaceGroup) => group.requests.filter((request) => request.status === 'new').length
+      return newCount(b) - newCount(a) || b.requests.length - a.requests.length
     })
 
   return (
     <div>
+      {staleRequests.length > 0 && (
+        <section className="mb-5 overflow-hidden rounded-lg border border-amber-300 bg-white">
+          <div className="border-b border-amber-200 bg-amber-50 px-4 py-3">
+            <h2 className="text-sm font-black text-amber-900">Property no longer available — update these seekers ({staleRequests.length})</h2>
+            <p className="mt-0.5 text-xs font-semibold text-amber-700">They asked to visit a property that has since been closed or removed. Send them a matching alternative.</p>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {staleRequests.map(({ request, group }) => {
+              const alternatives = similarActiveListings(group.listing, listings)
+              return (
+                <div key={request.id} className="flex flex-col gap-3 p-3 md:flex-row md:items-center md:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-bold text-slate-950">{request.finder_name}</span>
+                      <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${availabilityBadgeClass(group.listing)}`}>{listingAvailabilityLabel(group.listing)}</span>
+                      <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${statusClass(request.status)}`}>{formatLabel(request.status)}</span>
+                    </div>
+                    <p className="mt-0.5 truncate text-sm text-slate-600">{group.title}</p>
+                    <p className="mt-1 text-xs font-semibold text-slate-400">{request.finder_phone} · Submitted {formatDate(request.created_at)}</p>
+                    {alternatives.length > 0 && (
+                      <p className="mt-1 text-xs font-bold text-green-700">Alternative: {alternatives[0].title}{alternatives.length > 1 ? ` +${alternatives.length - 1} more` : ''}</p>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <StatusUpdater id={request.id} currentStatus={request.status} type="visit-req" options={visitStatuses.filter((item) => item !== 'all')} />
+                    <ActionLink href={waLinkTo(request.finder_phone, unavailableMessage(request, group, alternatives, appUrl))} tone="green">WhatsApp</ActionLink>
+                    <ActionLink href={'tel:' + request.finder_phone} tone="blue">Call</ActionLink>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
       <FilterBar search={search} onSearch={setSearch} status={status} onStatus={setStatus} statuses={visitStatuses} type={type} onType={setType} placeholder="Search property, locality, finder, phone" />
-      {filteredListings.length === 0 ? <EmptyState text="No active properties match these filters." /> : (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2.5 sm:grid-cols-[repeat(auto-fit,minmax(190px,1fr))] lg:gap-3">
-          {filteredListings.map((listing) => {
-            const propertyRequests = grouped[listing.id] || []
+
+      {visibleGroups.length === 0 ? <EmptyState text="No visit requests match these filters." /> : (
+        <div className="grid gap-3">
+          {visibleGroups.map((group) => {
+            const newCount = group.requests.filter((request) => request.status === 'new').length
+            const isOpen = openGroups[group.key] ?? newCount > 0
+            const photo = group.listing?.photos?.[0]
             return (
-              <AdminPropertyCard
-                key={listing.id}
-                listing={listing}
-                requestCount={propertyRequests.length}
-                newRequestCount={propertyRequests.filter((request) => request.status === 'new').length}
-                href={`/admin/listings/${listing.id}`}
-                actions={
-                  <Link href={`/admin/listings/${listing.id}`} className="inline-flex min-h-8 items-center justify-center rounded-md border border-slate-900 bg-slate-900 px-2 text-[11px] font-semibold text-white">
-                    Open workspace
-                  </Link>
-                }
-              />
+              <section key={group.key} className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+                <button
+                  type="button"
+                  onClick={() => setOpenGroups((state) => ({ ...state, [group.key]: !isOpen }))}
+                  className="flex w-full items-center gap-3 p-3 text-left hover:bg-slate-50/60"
+                >
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-orange-50">
+                    {photo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={photo} alt={group.title} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-[10px] font-semibold text-slate-400">No photo</div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="truncate text-sm font-extrabold text-slate-950">{group.title}</h2>
+                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${availabilityBadgeClass(group.listing)}`}>{listingAvailabilityLabel(group.listing)}</span>
+                    </div>
+                    <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">
+                      {[group.listing?.locality, group.listing ? formatPrice(group.listing.price) + (hasRecurringPrice(group.listing.listing_type) ? '/mo' : '') : ''].filter(Boolean).join(' · ') || 'Listing removed'}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {newCount > 0 && <span className="rounded-full bg-red-600 px-2 py-0.5 text-[11px] font-bold text-white">{newCount} new</span>}
+                    <span className="rounded-full border border-slate-200 px-2 py-0.5 text-[11px] font-bold text-slate-600">{group.requests.length} request{group.requests.length === 1 ? '' : 's'}</span>
+                    <span className="text-slate-400">{isOpen ? '▾' : '▸'}</span>
+                  </div>
+                </button>
+                {isOpen && (
+                  <div className="grid gap-2 border-t border-slate-100 p-3">
+                    {group.requests.map((request) => <VisitRequestCard key={request.id} request={request} />)}
+                    {group.listing && (
+                      <Link href={`/admin/listings/${group.listing.id}`} className="inline-flex min-h-9 items-center justify-center rounded-md border border-slate-900 bg-slate-900 px-3 text-xs font-semibold text-white">
+                        Open property workspace
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </section>
             )
           })}
         </div>
@@ -449,7 +604,7 @@ export function PropertyWorkspace({
       {tab === 'visits' && (
         <section className="grid gap-3">
           {visits.length === 0 ? <EmptyState text="No visit requests for this property yet." /> : visits.map((request) => (
-            <VisitRequestCard key={request.id} request={request} whatsappNumber={whatsappNumber} />
+            <VisitRequestCard key={request.id} request={request} />
           ))}
         </section>
       )}
@@ -631,7 +786,7 @@ function CloseDealButton({ listing, matches }: { listing: AdminListing; matches:
   )
 }
 
-function VisitRequestCard({ request, whatsappNumber }: { request: VisitRequest; whatsappNumber: string }) {
+function VisitRequestCard({ request }: { request: VisitRequest }) {
   const message = `Hi ${request.finder_name}, we received your visit request for ${request.property_title}. We will arrange a visit for you. What day and time works best?`
   return (
     <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
@@ -648,7 +803,7 @@ function VisitRequestCard({ request, whatsappNumber }: { request: VisitRequest; 
         </div>
         <div className="flex flex-wrap gap-2">
           <StatusUpdater id={request.id} currentStatus={request.status} type="visit-req" options={visitStatuses.filter((item) => item !== 'all')} />
-          <ActionLink href={waLink(whatsappNumber, message)} tone="green">WhatsApp</ActionLink>
+          <ActionLink href={waLinkTo(request.finder_phone, message)} tone="green">WhatsApp</ActionLink>
           <ActionLink href={'tel:' + request.finder_phone} tone="blue">Call</ActionLink>
         </div>
       </div>
@@ -1159,14 +1314,6 @@ function EmptyState({ text, compact = false }: { text: string; compact?: boolean
       {text}
     </div>
   )
-}
-
-function groupVisits(requests: VisitRequest[]) {
-  return requests.reduce<Record<string, VisitRequest[]>>((acc, request) => {
-    acc[request.listing_id] = acc[request.listing_id] || []
-    acc[request.listing_id].push(request)
-    return acc
-  }, {})
 }
 
 function countByListing(requests: VisitRequest[]) {

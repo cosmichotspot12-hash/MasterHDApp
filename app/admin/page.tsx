@@ -53,26 +53,39 @@ function buildOwnerLeads(owners: OwnerSubmission[]): Lead[] {
     .sort(byNewest)
 }
 
-function buildVisitGroups(visits: VisitRequest[]): VisitGroup[] {
-  const groups: Record<string, Lead[]> = {}
+// Groups new visit requests under their listing (by id, so title edits don't
+// split groups). Requests whose property is closed/removed are counted
+// separately so they surface as "update the seeker" work, not fresh leads.
+function buildVisitGroups(visits: VisitRequest[], listings: AdminListing[]): { groups: VisitGroup[]; unavailableCount: number } {
+  const listingById = new Map(listings.map((l) => [l.id, l]))
+  const groups: Record<string, { title: string; leads: Lead[] }> = {}
+  let unavailableCount = 0
   visits
     .filter((v) => v.status === 'new')
     .forEach((v) => {
-      const key = v.property_title || 'Property visit'
-      groups[key] = groups[key] || []
-      groups[key].push({
+      const listing = listingById.get(v.listing_id)
+      if (!listing || listing.status !== 'active') {
+        unavailableCount += 1
+        return
+      }
+      const title = listing.title || v.property_title || 'Property visit'
+      groups[listing.id] = groups[listing.id] || { title, leads: [] }
+      groups[listing.id].leads.push({
         id: 'v-' + v.id,
         name: v.finder_name,
         phone: v.finder_phone,
         detail: [v.preferred_day, v.preferred_time].filter(Boolean).join(' · '),
         href: '/admin/visit-requests',
-        whatsappText: `Hi ${v.finder_name}, this is ${BRAND}. Got your visit request${v.property_title ? ` for "${v.property_title}"` : ''}${v.preferred_day ? ` on ${v.preferred_day}` : ''}${v.preferred_time ? ` (${v.preferred_time})` : ''}. Let's confirm the time — when works for you?`,
+        whatsappText: `Hi ${v.finder_name}, this is ${BRAND}. Got your visit request${title ? ` for "${title}"` : ''}${v.preferred_day ? ` on ${v.preferred_day}` : ''}${v.preferred_time ? ` (${v.preferred_time})` : ''}. Let's confirm the time — when works for you?`,
         created_at: v.created_at,
       })
     })
-  return Object.entries(groups)
-    .map(([propertyTitle, leads]) => ({ propertyTitle, leads: leads.sort(byNewest) }))
-    .sort((a, b) => b.leads.length - a.leads.length)
+  return {
+    groups: Object.values(groups)
+      .map(({ title, leads }) => ({ propertyTitle: title, leads: leads.sort(byNewest) }))
+      .sort((a, b) => b.leads.length - a.leads.length),
+    unavailableCount,
+  }
 }
 
 function normalizeBhk(value?: string | null) {
@@ -124,6 +137,7 @@ async function getDashboardData(): Promise<DashboardData> {
   const empty: DashboardData = {
     ownerLeads: [],
     visitGroups: [],
+    unavailableVisits: 0,
     seekerLeads: [],
     todayVisits: [],
     totalListings: 0,
@@ -186,9 +200,12 @@ async function getDashboardData(): Promise<DashboardData> {
         preferred_time: v.preferred_time,
       }))
 
+    const { groups: visitGroups, unavailableCount } = buildVisitGroups(visitData, listingData)
+
     return {
       ownerLeads: buildOwnerLeads(ownerData),
-      visitGroups: buildVisitGroups(visitData),
+      visitGroups,
+      unavailableVisits: unavailableCount,
       seekerLeads: buildSeekerLeads(requirementData, listingData),
       todayVisits,
       totalListings: listingData.length,
