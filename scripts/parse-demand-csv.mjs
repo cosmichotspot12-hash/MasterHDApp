@@ -213,10 +213,26 @@ for (const r of rows.slice(1)) {
   if (leaseNote) extras.push('Lease/notes: ' + leaseNote)
   extras.push('[GF-import]')
 
+  // Decide rent | sale | lease. The budget-only guess (budget.listingType) mislabels
+  // lease seekers as sale because lease deposits in Hubli-Dharwad run into lakhs.
+  // Prefer the intent people actually typed in the lease columns:
+  //   explicit buy-words    -> sale
+  //   explicit lease/years  -> lease
+  //   sub-10-lakh "sale"    -> lease (a "sale" budget that small is really a lease deposit)
+  //   else                  -> the budget-based guess
+  const leaseText = leaseNote.toLowerCase()
+  const BUY_WORDS = /purchase|for sale|to buy|buying|\bbuy\b|documented/i
+  const LEASE_WORDS = /lease|\byears?\b|\byrs?\b|lakh|lack|lac\b/i
+  let listingType = budget.listingType
+  if (BUY_WORDS.test(leaseText)) listingType = 'sale'
+  else if (LEASE_WORDS.test(leaseText)) listingType = 'lease'
+  else if (listingType === 'sale' && budget.max != null && budget.max < 1000000) listingType = 'lease'
+  if (listingType === 'sale' && LEASE_WORDS.test(leaseText)) flags.push('sale kept despite lease words — review')
+
   const rec = {
     finder_name: get(idx.name) || 'Unknown',
     finder_phone: phone || get(idx.phone),
-    listing_type: budget.listingType,
+    listing_type: listingType,
     property_category: pt.category,
     bhk_count: pt.bhk,
     locality_preference: loc.locality,
@@ -254,6 +270,7 @@ fs.writeFileSync(OUTPUT, '﻿' + lines.join('\n'), 'utf8')
 // ---------- summary ----------
 const flagged = out.filter(r => r.REVIEW_FLAGS).length
 const sale = out.filter(r => r.listing_type === 'sale').length
+const lease = out.filter(r => r.listing_type === 'lease').length
 const tl = {}
 out.forEach(r => tl[r.timeline] = (tl[r.timeline] || 0) + 1)
 const locCount = {}
@@ -263,7 +280,7 @@ const topLoc = Object.entries(locCount).sort((a, b) => b[1] - a[1]).slice(0, 8)
 console.log('Input rows:', rows.length - 1)
 console.log('Output records (after dedupe):', out.length)
 console.log('Invalid phones:', noPhone)
-console.log('Inferred SALE seekers:', sale, '| RENT:', out.length - sale)
+console.log('Inferred SALE seekers:', sale, '| LEASE:', lease, '| RENT:', out.length - sale - lease)
 console.log('Timelines:', JSON.stringify(tl))
 console.log('Top localities:', JSON.stringify(topLoc))
 console.log('Rows with review flags:', flagged)
